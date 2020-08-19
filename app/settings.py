@@ -146,9 +146,9 @@ SESSION_COOKIE_AGE = (1209600 * 26) # (2 weeks * 26 = 52 weeks, in seconds)'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
-WSGI_APPLICATION = 'robocjk.wsgi.application'
+WSGI_APPLICATION = 'app.wsgi.application'
 
-ROOT_URLCONF = 'robocjk.urls'
+ROOT_URLCONF = 'app.urls'
 
 APPEND_SLASH = True
 

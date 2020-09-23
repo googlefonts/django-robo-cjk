@@ -87,14 +87,22 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
 
+    'debug_toolbar',
     'corsheaders',
-    'ckeditor',
-    'django_crontab',
-    'solo',
+
+    # 'ckeditor',
+    # 'django_crontab',
+    'django_json_widget',
+    # 'solo',
     # 'treenode',
 
     'robocjk',
 ]
+
+# if not DEBUG:
+#     INSTALLED_APPS += [
+#         'cachalot',
+#     ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
@@ -111,8 +119,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
-    'htmlmin.middleware.MarkRequestMiddleware',
+    # 'htmlmin.middleware.HtmlMinifyMiddleware',
+    # 'htmlmin.middleware.MarkRequestMiddleware',
     # 'maintenance_mode.middleware.MaintenanceModeMiddleware',
 ]
 
@@ -208,9 +216,18 @@ LANGUAGES = (
 MULTILANGUAGE = len(LANGUAGES) > 1
 
 TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_L10N = True
+USE_I18N = False
+USE_L10N = False
 USE_TZ = False
+
+
+DATE_FORMAT = 'Y/m/d'
+# DATETIME_FORMAT = 'Y/m/d H:i:s.u'
+DATETIME_FORMAT = 'Y/m/d H:i:s'
+
+
+# https://docs.djangoproject.com/en/3.1/ref/settings/#data-upload-max-memory-size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 4 # 10 MB
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -274,16 +291,88 @@ CACHES = {
     'cachalot': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
-    'solo': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#     'solo': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#     },
+}
+
+
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+
+# import logging
+# logger = logging.getLogger('app')
+# logger.debug('message')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(name)s [%(levelname)s]: %(message)s'
+        },
+        'verbose': {
+            'format': '%(asctime)s %(name)s %(module)s %(process)d %(thread)d [%(levelname)s]: %(message)s'
+        },
     },
+    'handlers': {
+        'debug_file': {
+            'level': 'DEBUG',
+            # 'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ENV_DIR + '/logs/django-debug.log',
+            'maxBytes': 1024 * 1024 * 1, # 1 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            # 'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ENV_DIR + '/logs/django-errors.log',
+            'maxBytes': 1024 * 1024 * 1, # 1 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['error_file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'app': {
+            'handlers': ['debug_file'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'robocjk': {
+            'handlers': ['debug_file'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+    }
 }
 
 
 # django-autoslug - https://pypi.python.org/pypi/django-autoslug
-from slugify import slugify
-AUTOSLUG_SLUGIFY_FUNCTION = slugify
-AUTOSLUG_MODELTRANSLATION_ENABLE = True
+# from slugify import slugify
+# AUTOSLUG_SLUGIFY_FUNCTION = slugify
+# AUTOSLUG_MODELTRANSLATION_ENABLE = True
 
 
 # django-cachalot - https://pypi.python.org/pypi/django-cachalot
@@ -297,27 +386,27 @@ CORS_ORIGIN_WHITELIST = (
 
 
 # django-ckeditor - https://pypi.python.org/pypi/django-ckeditor
-CKEDITOR_CONFIGS = {
-    'default': {
-        'removePlugins': 'elementspath',
-        'enterMode':2, #http://docs.ckeditor.com/#!/api/CKEDITOR-property-ENTER_BR
-        'skin': 'light',
-        'defaultLanguage': LANGUAGE_CODE,
-        'toolbar': 'Custom',
-        'toolbar_Custom': [
-            # ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'RemoveFormat', 'Source'],
-            ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'RemoveFormat', 'Source'],
-        ],
-        'width':624,
-        'height':190,
-        'tabSpaces':4,
-    }
-}
-CKEDITOR_CONFIGS['inline'] = CKEDITOR_CONFIGS['default'].copy()
-CKEDITOR_CONFIGS['inline'].update({
-    'width':400,
-    'height':100,
-})
+# CKEDITOR_CONFIGS = {
+#     'default': {
+#         'removePlugins': 'elementspath',
+#         'enterMode':2, #http://docs.ckeditor.com/#!/api/CKEDITOR-property-ENTER_BR
+#         'skin': 'light',
+#         'defaultLanguage': LANGUAGE_CODE,
+#         'toolbar': 'Custom',
+#         'toolbar_Custom': [
+#             # ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'RemoveFormat', 'Source'],
+#             ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'RemoveFormat', 'Source'],
+#         ],
+#         'width':624,
+#         'height':190,
+#         'tabSpaces':4,
+#     }
+# }
+# CKEDITOR_CONFIGS['inline'] = CKEDITOR_CONFIGS['default'].copy()
+# CKEDITOR_CONFIGS['inline'].update({
+#     'width':400,
+#     'height':100,
+# })
 
 
 # django-csp - https://django-csp.readthedocs.io/
@@ -332,7 +421,7 @@ CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", 'data:', 'blob:
 
 
 # django-debug-toolbar - https://pypi.python.org/pypi/django-debug-toolbar/
-DEBUG_TOOLBAR_SHOW = False
+DEBUG_TOOLBAR_SHOW = env('DEBUG_TOOLBAR_SHOW')
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG_TOOLBAR_SHOW and DEBUG,
 }
@@ -349,7 +438,6 @@ HASHIDS_OPTIONS = {
     'min_length': HASHIDS_MIN_LENGTH,
 }
 
-
 # django-crontab - https://github.com/kraiz/django-crontab
 # http://en.wikipedia.org/wiki/Cron#Format
 # http://www.openjs.com/scripts/jslibrary/demos/crontab.php
@@ -365,6 +453,6 @@ HASHIDS_OPTIONS = {
 
 
 # django-solo - https://github.com/lazybird/django-solo
-SOLO_CACHE = 'solo'
-SOLO_CACHE_TIMEOUT = 60 * 5  # 5 mins
-SOLO_CACHE_PREFIX = 'solo'
+# SOLO_CACHE = 'solo'
+# SOLO_CACHE_TIMEOUT = 60 * 5  # 5 mins
+# SOLO_CACHE_PREFIX = 'solo'

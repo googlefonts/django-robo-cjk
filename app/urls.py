@@ -18,7 +18,7 @@ Including another URLconf
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.static import serve
 
@@ -37,6 +37,7 @@ urlpatterns = [
 
     # redirect home to admin until the website pages will be ready
     re_path(r'^$', RedirectView.as_view(url='admin/'), name='home'),
+    re_path(r'^api/', include('robocjk.urls')),
 
     # media and static files with keycdn
     # https://www.keycdn.com/support/django-cdn-integration
@@ -49,3 +50,9 @@ urlpatterns = [
         'show_indexes': True,
     }),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

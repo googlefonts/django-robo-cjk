@@ -6,23 +6,26 @@ from django.http import JsonResponse
 class ApiResponse(JsonResponse):
 
     def __init__(self, data=None, status=None, error=None):
-        d = {
-            'data': data,
-            'status': status,
-            'error': error,
-        }
-        super(ApiResponse, self).__init__(d)
+        super(ApiResponse, self).__init__(
+            data={
+                'data': data,
+                'status': status,
+                'error': error,
+            },
+            status=status,
+            json_dumps_params={
+                'sort_keys':True,
+            })
+
+    def _format_error(self, prefix, message=''):
+        return '{} - {}'.format(prefix, message) if message else prefix
 
 
 class ApiResponseSuccess(ApiResponse):
 
     def __init__(self, data):
-        d = {
-            'data': data,
-            'status': 200,
-            'error': None,
-        }
-        super(ApiResponseSuccess, self).__init__(d)
+        super(ApiResponseSuccess, self).__init__(
+            data=data, status=200, error=None)
 
 
 class ApiResponseError(ApiResponse):
@@ -35,61 +38,48 @@ class ApiResponseError(ApiResponse):
 
     def __init__(self, status, error):
         super(ApiResponseError, self).__init__(
-            status=status, error=error)
+            data=None, status=status, error=error)
 
 
 class ApiResponseBadRequest(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseBadRequest, self).__init__(
-            status=400, error='Bad Request - {}'.format(error))
+            status=400, error=self._format_error('Bad Request', error))
 
 
 class ApiResponseUnauthorized(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseUnauthorized, self).__init__(
-            status=401, error='Unauthorized - {}'.format(error))
+            status=401, error=self._format_error('Unauthorized', error))
 
 
 class ApiResponseForbidden(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseForbidden, self).__init__(
-            status=403, error='Forbidden - {}'.format(error))
+            status=403, error=self._format_error('Forbidden', error))
 
 
 class ApiResponseNotFound(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseNotFound, self).__init__(
-            status=404, error='Not Found - {}'.format(error))
+            status=404, error=self._format_error('Not Found', error))
 
 
 class ApiResponseMethodNotAllowed(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseMethodNotAllowed, self).__init__(
-            status=405, error='Method Not Allowed - {}'.format(error))
+            status=405, error=self._format_error('Method Not Allowed', error))
 
 
 class ApiResponseInternalServerError(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseInternalServerError, self).__init__(
-            status=500, error='Internal Server Error - {}'.format(error))
-
-
-def get_object_response(data):
-    data = data or []
-    count = len(data)
-    if count == 0:
-        return ApiResponseNotFound()
-    elif count > 1:
-        return ApiResponseBadRequest()
-    return ApiResponseSuccess(data[0])
-
-
-def get_objects_list_response(data):
-    return ApiResponseSuccess(data)
+            status=500, error=self._format_error('Internal Server Error', error))
+        # TODO: log
 

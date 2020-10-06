@@ -37,7 +37,7 @@ urlpatterns = [
 
     # redirect home to admin until the website pages will be ready
     re_path(r'^$', RedirectView.as_view(url='admin/'), name='home'),
-    re_path(r'^api/', include('robocjk.urls')),
+    re_path(r'^api/', include('robocjk.api.urls')),
 
     # media and static files with keycdn
     # https://www.keycdn.com/support/django-cdn-integration

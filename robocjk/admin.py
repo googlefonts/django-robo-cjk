@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from admin_auto_filters.filters import AutocompleteFilter
+
 from copy import deepcopy
 
 from django.contrib import admin
@@ -9,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_json_widget.widgets import JSONEditorWidget
 
-from .models import (
+from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, )
 
@@ -106,11 +108,17 @@ class GlifAdmin(admin.ModelAdmin):
     show_full_result_count = False
 
 
+class GlifFilter(AutocompleteFilter):
+
+    title = _('Glif')
+    field_name = 'glif'
+
+
 class GlifLayerAdmin(admin.ModelAdmin):
 
-    list_display = ('glif', 'group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
-    list_display_links = ('name', )
-    list_filter = ('glif', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_display_links = ('group_name', )
+    list_filter = (GlifFilter, 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     fieldsets = (
@@ -123,6 +131,7 @@ class GlifLayerAdmin(admin.ModelAdmin):
         }),
     )
     save_on_top = True
+    show_full_result_count = False
 
 
 class GlifLayerInline(admin.TabularInline):

@@ -5,13 +5,14 @@
 from benedict import benedict
 from xml.etree import ElementTree
 
-from .debug import logger
-from .utils import username_to_filename
+from robocjk.debug import logger
+from robocjk.utils import username_to_filename
 
 
-class GlyphData(object):
+class GlifData(object):
 
     _error = None
+    _xml_string = None
     _xml = None
     _lib = None
     _name = ''
@@ -27,7 +28,7 @@ class GlyphData(object):
     _ok = False
 
     def __init__(self, *args):
-        super(GlyphData, self).__init__()
+        super(GlifData, self).__init__()
 
     def parse_file(self, fp):
         self._ok = False
@@ -47,16 +48,24 @@ class GlyphData(object):
         self._ok = False
         self._error = None
         try:
-            self._xml = ElementTree.fromstring(s)
+            self._xml_string = s
+            self._xml = ElementTree.fromstring(self._xml_string)
         except ElementTree.ParseError as xml_data_error:
             self._error = xml_data_error
             return
-        self._parse_data()
+        try:
+            self._parse_data()
+        except Exception as xml_parse_error:
+            self._error = xml_parse_error
+            return
         self._ok = True
 
     def _parse_data(self):
         # parse name and generate filename
         self._name = self._xml.get('name')
+        if not self._name:
+            raise ValueError('Invalid name, name cannot be "".'.format(self._name))
+
         self._filename = '{}.glif'.format(username_to_filename(self.name))
 
         # look for glyph unicode hex value
@@ -91,6 +100,10 @@ class GlyphData(object):
     @property
     def error(self):
         return self._error
+
+    @property
+    def xml_string(self):
+        return self._xml_string
 
     @property
     def xml(self):

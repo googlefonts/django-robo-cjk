@@ -16,7 +16,14 @@ from django.utils.encoding import force_str
 from fileutil import fileutil
 
 from . import io
-from .core import GlyphData
+from .api.serializers import (
+    serialize_atomic_element,
+    serialize_atomic_element_layer,
+    serialize_deep_component,
+    serialize_character_glyph,
+    serialize_character_glyph_layer,
+)
+from .core import GlifData
 from .debug import logger
 from .managers import (
     CharacterGlyphManager, CharacterGlyphLayerManager,
@@ -139,34 +146,49 @@ class LockableModel(models.Model):
         default=None,
         verbose_name=_('Locked at'))
 
-    def lock(self, user):
-        # TODO:
-        if not user:
-            # TODO: check user instance type
+    def _is_valid_user(self, user):
+        if not user or user.is_anonymous or not user.is_active:
             return False
-        if self.is_locked:
-            return False
-        if self.locked_by != None:
-            return False
+        return True
+
+    def _lock_by(self, user):
         self.is_locked = True
         self.locked_by = user
         self.locked_at = dt.datetime.now()
         self.save()
-        return True
 
-    def unlock(self, user):
-        # TODO:
-        if not user:
-            # TODO: check user instance type
-            return False
-        if not self.is_locked:
-            return False
-        if self.locked_by != user:
-            return False
+    def _unlock_by(self, user):
         self.is_locked = False
         self.locked_by = None
         self.locked_at = None
         self.save()
+
+    def lock_by(self, user):
+        if not self._is_valid_user(user):
+            return False
+        if not self.is_locked:
+            self._lock_by(user)
+            return True
+        return self.locked_by == user
+
+    def is_lockable_by(self, user):
+        if not self._is_valid_user(user):
+            return False
+        return self.locked_by_id == user.id if self.is_locked else True
+
+    def is_locked_by(self, user):
+        if not self._is_valid_user(user):
+            return False
+        return self.locked_by_id == user.id if self.is_locked else False
+
+    def unlock_by(self, user):
+        if not self._is_valid_user(user):
+            return False
+        if self.is_locked:
+            if self.locked_by_id == user.id:
+                self._unlock_by(user)
+                return True
+            return False
         return True
 
 
@@ -295,7 +317,7 @@ class GlifDataModel(models.Model):
 
     def _parse_data(self):
         if self.data:
-            gliph_data = GlyphData()
+            gliph_data = GlifData()
             gliph_data.parse_string(self.data)
             if gliph_data.ok:
                 return gliph_data
@@ -343,24 +365,6 @@ class GlifDataModel(models.Model):
         super(GlifDataModel, self).save(*args, **kwargs)
         self._update_components()
 
-    def to_dict(self, fields=None):
-        return {
-#             'is_locked': self.is_locked,
-#             'locked_by': self.locked_by,
-#             'locked_at': self.locked_at,
-#             'status': self.status,
-            # 'data': Base64Serializer().encode(self.data),
-            'name': self.name,
-            'unicode_hex': self.unicode_hex,
-#             'filename': self.filename,
-#             'components': self.components,
-#             'is_empty': self.is_empty,
-#             'has_variation_axis': self.has_variation_axis,
-#             'has_outlines': self.has_outlines,
-#             'has_components': self.has_components,
-#             'components': list(filter(None, self.components.split(','))) if self.components else [],
-        }
-
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
@@ -399,6 +403,9 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return '{}/characterGlyph/{}'.format(
             self.font.get_absolute_path(), self.filename)
 
+    def serialize(self, **kwargs):
+        return serialize_character_glyph(self, *kwargs)
+
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
         io.sync_character_glyph(instance)
@@ -418,7 +425,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
         app_label = 'robocjk'
         ordering = ['group_name']
         unique_together = [
-            ['group_name', 'name'],
+            ['glif_id', 'group_name', 'name'],
         ]
         verbose_name = _('Character Glyph Layer')
         verbose_name_plural = _('Character Glyph Layers')
@@ -439,6 +446,9 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
     def get_absolute_path(self):
         return '{}/characterGlyph/{}/{}'.format(
             self.glif.font.get_absolute_path(), self.group_name, self.filename)
+
+    def serialize(self, **kwargs):
+        return serialize_character_glyph_layer(self, **kwargs)
 
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
@@ -490,6 +500,9 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return '{}/deepComponent/{}'.format(
             self.font.get_absolute_path(), self.filename)
 
+    def serialize(self, **kwargs):
+        return serialize_deep_component(self, **kwargs)
+
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
         io.sync_deep_component(instance)
@@ -526,6 +539,9 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return '{}/atomicElement/{}'.format(
             self.font.get_absolute_path(), self.filename)
 
+    def serialize(self, **kwargs):
+        return serialize_atomic_element(self, **kwargs)
+
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
         io.sync_atomic_element(instance)
@@ -545,7 +561,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
         app_label = 'robocjk'
         ordering = ['group_name']
         unique_together = [
-            ['group_name', 'name'],
+            ['glif_id', 'group_name'],
         ]
         verbose_name = _('Atomic Element Layer')
         verbose_name_plural = _('Atomic Element Layers')
@@ -566,6 +582,9 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
     def get_absolute_path(self):
         return '{}/atomicElement/{}/{}'.format(
             self.glif.font.get_absolute_path(), self.group_name, self.filename)
+
+    def serialize(self, **kwargs):
+        return serialize_atomic_element_layer(self, **kwargs)
 
     @staticmethod
     def post_save_handler(instance, created, **kwargs):

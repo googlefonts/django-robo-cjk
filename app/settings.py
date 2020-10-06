@@ -53,6 +53,10 @@ ENV_DIR = os.path.dirname(BASE_DIR)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
+JWT_SECRET = env('JWT_SECRET')
+JWT_HEADER_KEY = 'HTTP_AUTHORIZATION'
+JWT_ALGORITHM = 'HS256'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
@@ -90,6 +94,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'corsheaders',
 
+    'admin_auto_filters',
     # 'ckeditor',
     # 'django_crontab',
     'django_json_widget',

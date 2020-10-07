@@ -1,5 +1,9 @@
 # django-robo-cjk
 
+`django-robo-cjk` is the server-side engine based on `python` and `django` that serves the [robo-cjk](https://github.com/BlackFoundryCom/black-robo-cjk) plugin.
+
+It's purpose is to centralize and speed-up the design/development of CJK typefaces providing a whole set of APIs to manage `.rcjk` projects. 
+
 ## API
 
 ### Globals

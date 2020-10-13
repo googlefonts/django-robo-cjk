@@ -58,6 +58,7 @@ It's purpose is to centralize and speed-up the design/development of CJK typefac
 
 - [**Atomic Element Layer**](#atomic-element-layer)
    - [Atomic Element Layer **Create**](#atomic-element-layer-create)
+   - [Atomic Element Layer **Rename**](#atomic-element-layer-rename)
    - [Atomic Element Layer **Update**](#atomic-element-layer-update)
    - [Atomic Element Layer **Delete**](#atomic-element-layer-delete)
 
@@ -81,6 +82,7 @@ It's purpose is to centralize and speed-up the design/development of CJK typefac
 
 - [**Character Glyph Layer**](#character-glyph-layer)
    - [Character Glyph Layer **Create**](#character-glyph-layer-create)
+   - [Character Glyph Layer **Rename**](#character-glyph-layer-rename)
    - [Character Glyph Layer **Update**](#character-glyph-layer-update)
    - [Character Glyph Layer **Delete**](#character-glyph-layer-delete)
 
@@ -554,6 +556,32 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ---
 
+#### Atomic Element Layer Rename
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/atomic-element/layer/rename/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `font_id` | `int` | yes |
+| `atomic_element_id` | `int` | yes `*` |
+| `atomic_element_name` | `string` | yes `*` |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
+| `new_group_name` | `string` | yes |
+
+- `*` the parent Atomic Element can be retrieved by `atomic_element_id` or by `chaatomic_element_nameracter_glyph_name`, **only one of these parameters is required**.
+- `**` the Atomic Element Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
+
+##### Response
+
+See [Character Glyph Get](#character-glyph-get) response.
+
+---
+
 #### Atomic Element Layer Update
 
 ##### Request
@@ -567,10 +595,12 @@ See [Atomic Element Get](#atomic-element-get) response.
 | `font_id` | `int` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
-| `group_name` | `string` | yes |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
 | `data` | `string` | yes |
 
 - `*` the parent Atomic Element can be retrieved by `atomic_element_id` or by `atomic_element_name`, **only one of these parameters is required**.
+- `**` the Atomic Element Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
 
 ##### Response
 
@@ -591,9 +621,11 @@ See [Atomic Element Get](#atomic-element-get) response.
 | `font_id` | `int` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
-| `group_name` | `string` | yes |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
 
 - `*` the parent Atomic Element can be retrieved by `atomic_element_id` or by `atomic_element_name`, **only one of these parameters is required**.
+- `**` the Atomic Element Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
 
 ##### Response
 
@@ -1156,6 +1188,32 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 ---
 
+#### Character Glyph Layer Rename
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/character-glyph/layer/rename/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `font_id` | `int` | yes |
+| `character_glyph_id` | `int` | yes `*` |
+| `character_glyph_name` | `string` | yes `*` |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
+| `new_group_name` | `string` | yes |
+
+- `*` the parent Character Glyph can be retrieved by `character_glyph_id` or by `character_glyph_name`, **only one of these parameters is required**.
+- `**` the Character Glyph Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
+
+##### Response
+
+See [Character Glyph Get](#character-glyph-get) response.
+
+---
+
 #### Character Glyph Layer Update
 
 ##### Request
@@ -1169,10 +1227,12 @@ See [Character Glyph Get](#character-glyph-get) response.
 | `font_id` | `int` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
-| `group_name` | `string` | yes |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
 | `data` | `string` | yes |
 
 - `*` the parent Character Glyph can be retrieved by `character_glyph_id` or by `character_glyph_name`, **only one of these parameters is required**.
+- `**` the Character Glyph Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
 
 ##### Response
 
@@ -1193,9 +1253,11 @@ See [Character Glyph Get](#character-glyph-get) response.
 | `font_id` | `int` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
-| `group_name` | `string` | yes |
+| `id` | `int` | yes `**` |
+| `group_name` | `string` | yes `**` |
 
 - `*` the parent Character Glyph can be retrieved by `character_glyph_id` or by `character_glyph_name`, **only one of these parameters is required**.
+- `**` the Character Glyph Layer can be retrieved by `id` or by `group_name`, **only one of these parameters is required**.
 
 ##### Response
 

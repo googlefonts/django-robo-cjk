@@ -18,7 +18,7 @@ class GlifData(object):
     _name = ''
     _filename = ''
     _unicode_hex = ''
-    _components_names = None
+    _components_names = []
     _components_str = ''
     _has_components = False
     _has_outlines = False
@@ -48,7 +48,7 @@ class GlifData(object):
         self._ok = False
         self._error = None
         try:
-            self._xml_string = s
+            self._xml_string = s.strip()
             self._xml = ElementTree.fromstring(self._xml_string)
         except ElementTree.ParseError as xml_data_error:
             self._error = xml_data_error
@@ -84,10 +84,13 @@ class GlifData(object):
 
             # parse components list
             components_list = self._lib.get('robocjk.deepComponents', [])
-            self._components_names = { item.get('name') for item in components_list}
-            if '' in self._components_names:
-                self._components_names.remove('')
-            self._components_str = ','.join({'{}'.format(item) for item in self._components_names})
+            components_names_set = { item.get('name') for item in components_list}
+            if '' in components_names_set:
+                components_names_set.remove('')
+            self._components_names = list(components_names_set)
+            self._components_names.sort(key=str.lower)
+            self._components_str = ','.join(self._components_names)
+            # self._components_str = ','.join({'{}'.format(item) for item in self._components_names})
 
             # update computed properties
             self._has_components = bool(components_list)

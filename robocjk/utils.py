@@ -9,17 +9,6 @@ def unicode_to_char(s):
     return chr(int('0x{}'.format(s.lstrip('0')).lower(), 16))
 
 
-# # test:
-# val_chr = '丒'
-# print(val_chr)
-#
-# val_uni = char_to_unicode(val_chr)
-# print(val_uni)
-#
-# val_chr = unicode_to_char(val_uni)
-# print(val_chr)
-
-
 illegal_characters = "\" * + / : < > ? [ \ ] | \0".split(" ")
 illegal_characters += [chr(i) for i in range(1, 32)]
 illegal_characters += [chr(0x7F)]

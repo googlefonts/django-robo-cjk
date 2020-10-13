@@ -15,17 +15,16 @@ from django.utils.encoding import force_str
 
 from fileutil import fileutil
 
-from . import io
-from .api.serializers import (
+from robocjk import io
+from robocjk.api.serializers import (
     serialize_atomic_element,
     serialize_atomic_element_layer,
     serialize_deep_component,
     serialize_character_glyph,
-    serialize_character_glyph_layer,
-)
-from .core import GlifData
-from .debug import logger
-from .managers import (
+    serialize_character_glyph_layer, )
+from robocjk.core import GlifData
+from robocjk.debug import logger
+from robocjk.managers import (
     CharacterGlyphManager, CharacterGlyphLayerManager,
     DeepComponentManager,
     AtomicElementManager, AtomicElementLayerManager, )

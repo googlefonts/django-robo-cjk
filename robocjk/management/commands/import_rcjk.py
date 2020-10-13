@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from robocjk.core import GlyphData
+from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, )
@@ -122,7 +122,7 @@ class Command(BaseCommand):
         return str(file.read(path), encoding)
 
     def _import_glif(self, cls, font, content, match):
-        data = GlyphData()
+        data = GlifData()
         data.parse_string(content)
         obj, created = cls.objects.update_or_create(
             font=font, name=data.name, defaults={ 'data':content })
@@ -130,7 +130,7 @@ class Command(BaseCommand):
             cls, data.name))
 
     def _import_glif_layer(self, glif_cls, cls, font, content, match):
-        data = GlyphData()
+        data = GlifData()
         data.parse_string(content)
         layer_name = match.groupdict()['layer_name']
         glif_obj = glif_cls.objects.get(font=font, name=data.name)

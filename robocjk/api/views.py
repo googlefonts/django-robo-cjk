@@ -3,7 +3,6 @@
 from django.contrib.auth import authenticate, login, logout
 
 from robocjk.api.auth import get_auth_token
-
 from robocjk.api.decorators import (
     api_view,
     require_params,
@@ -24,7 +23,6 @@ from robocjk.api.http import (
     ApiResponseSuccess, )
 
 from robocjk.core import GlifData
-
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer,
     DeepComponent, AtomicElement, AtomicElementLayer, Proof, )
@@ -164,6 +162,23 @@ def atomic_element_layer_create(request, font, atomic_element, data, glif, param
             'Atomic Element Layer with font_id=\'{}\', glif_id=\'{}\', ' \
             'glif__name=\'{}\' group_name=\'{}\' already exists.'.format(
                 font.id, atomic_element.id, atomic_element.name, group_name))
+    return ApiResponseSuccess(atomic_element.serialize())
+
+
+@api_view
+@require_user
+@require_atomic_element_layer()
+@require_params(new_group_name='str')
+def atomic_element_layer_rename(request, font, atomic_element, atomic_element_layer, *args, **kwargs):
+    params = kwargs['params']
+    new_group_name = params.get('new_group_name')
+    if AtomicElementLayer.objects.filter(glif_id=atomic_element.id, group_name__iexact=new_group_name).exclude(id=atomic_element_layer.id).exists():
+        return ApiResponseBadRequest(
+            'Atomic Element Layer with font_id=\'{}\', glif_id=\'{}\', glif__name=\'{}\', ' \
+            'group_name=\'{}\' already exists, please choose a different group name.'.format(
+                font.id, atomic_element.id, atomic_element.name, new_group_name))
+    atomic_element_layer.group_name = new_group_name
+    atomic_element_layer.save()
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -333,8 +348,26 @@ def character_glyph_layer_create(request, font, character_glyph, data, glif, *ar
     layer, layer_created = CharacterGlyphLayer.objects.get_or_create(**options)
     if not layer_created:
         return ApiResponseBadRequest(
-            'Character Glyph Layer with font_id=\'{}\', glif_id=\'{}\', glif__name=\'{}\', group_name=\'{}\' already exists.'.format(
+            'Character Glyph Layer with font_id=\'{}\', glif_id=\'{}\', glif__name=\'{}\', '
+            'group_name=\'{}\' already exists.'.format(
                 font.id, character_glyph.id, character_glyph.name, group_name))
+    return ApiResponseSuccess(character_glyph.serialize())
+
+
+@api_view
+@require_user
+@require_character_glyph_layer()
+@require_params(new_group_name='str')
+def character_glyph_layer_rename(request, font, character_glyph, character_glyph_layer, *args, **kwargs):
+    params = kwargs['params']
+    new_group_name = params.get('new_group_name')
+    if CharacterGlyphLayer.objects.filter(glif_id=character_glyph.id, group_name__iexact=new_group_name).exclude(id=character_glyph_layer.id).exists():
+        return ApiResponseBadRequest(
+            'Character Glyph Layer with font_id=\'{}\', glif_id=\'{}\', glif__name=\'{}\', ' \
+            'group_name=\'{}\' already exists, please choose a different group name.'.format(
+                font.id, character_glyph.id, character_glyph.name, new_group_name))
+    character_glyph_layer.group_name = new_group_name
+    character_glyph_layer.save()
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -343,7 +376,6 @@ def character_glyph_layer_create(request, font, character_glyph, data, glif, *ar
 @require_character_glyph_layer()
 @require_data
 def character_glyph_layer_update(request, character_glyph, character_glyph_layer, data, *args, **kwargs):
-    params = kwargs['params']
     character_glyph_layer.data = data
     character_glyph_layer.save()
     return ApiResponseSuccess(character_glyph.serialize())

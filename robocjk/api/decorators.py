@@ -12,6 +12,7 @@ from robocjk.api.auth import get_user_by_auth_token_in_header
 from robocjk.api.http import (
     ApiResponseBadRequest, ApiResponseUnauthorized, ApiResponseForbidden,
     ApiResponseNotFound, ApiResponseMethodNotAllowed, ApiResponseInternalServerError, )
+
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
@@ -201,7 +202,7 @@ def require_atomic_element_layer(**kwargs):
             filters.clean()
             if not filters:
                 return ApiResponseBadRequest(
-                    'Missing parameter \'{}id\' or \'{}name\'.'.format(prefix, prefix))
+                    'Missing parameter \'{}id\' or \'{}group_name\'.'.format(prefix, prefix))
             # retrieve atomic element layer object
             atomic_element = kwargs['atomic_element']
             obj_cls = AtomicElementLayer

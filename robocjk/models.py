@@ -17,6 +17,8 @@ from fileutil import fileutil
 
 from robocjk import io
 from robocjk.api.serializers import (
+    serialize_project,
+    serialize_font,
     serialize_atomic_element,
     serialize_atomic_element_layer,
     serialize_deep_component,
@@ -59,6 +61,9 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         return '/root/robocjk-projects/{}'.format(
             self.slug)
 
+    def serialize(self, **kwargs):
+        return serialize_project(self, *kwargs)
+
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
         # if created:
@@ -85,7 +90,9 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     project = models.ForeignKey(
         'robocjk.Project',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='fonts',
         verbose_name=_('Project'))
 
@@ -104,6 +111,9 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     def get_absolute_path(self):
         return '{}/{}.rcjk'.format(
             self.project.get_absolute_path(), self.slug)
+
+    def serialize(self, **kwargs):
+        return serialize_font(self, *kwargs)
 
     @staticmethod
     def post_save_handler(instance, created, **kwargs):
@@ -213,6 +223,14 @@ class StatusModel(models.Model):
         (STATUS_CHECKING_3, _('Checking 3'), ),
         (STATUS_DONE, _('Done'), ),
     )
+    STATUS_CHOICES_VALUES_LIST = [
+        STATUS_TODO,
+        STATUS_WIP,
+        STATUS_CHECKING_1,
+        STATUS_CHECKING_2,
+        STATUS_CHECKING_3,
+        STATUS_DONE,
+    ]
     STATUS_COLORS = {
         STATUS_TODO: '#E74C3C',
         STATUS_WIP: '#E67E22',
@@ -378,7 +396,8 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name='character_glyphs',
         verbose_name=_('Font'))
 
@@ -431,7 +450,9 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     glif = models.ForeignKey(
         'robocjk.CharacterGlyph',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='layers',
         verbose_name=_('Glif'))
 
@@ -475,7 +496,9 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='deep_components',
         verbose_name=_('Font'))
 
@@ -528,7 +551,9 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='atomic_elements',
         verbose_name=_('Font'))
 
@@ -567,7 +592,9 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     glif = models.ForeignKey(
         'robocjk.AtomicElement',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='layers',
         verbose_name=_('Glif'))
 

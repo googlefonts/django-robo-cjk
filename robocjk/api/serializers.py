@@ -17,6 +17,16 @@ def _serialize_object(obj, fields):
     return { field:getattr(obj, field, None) for field in fields }
 
 
+def serialize_project(obj, **kwargs):
+    data = _serialize_object(obj, ['uid', 'name', 'slug', 'repo_url'])
+    return data
+
+
+def serialize_font(obj, **kwargs):
+    data = _serialize_object(obj, ['uid', 'name', 'slug', 'fontlib'])
+    return data
+
+
 def _serialize_glif(obj):
     data = _serialize_object(obj, GLIF_FIELDS)
     data['locked_by_user'] = None

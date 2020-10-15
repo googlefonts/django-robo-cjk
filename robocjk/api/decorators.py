@@ -16,7 +16,7 @@ from robocjk.api.http import (
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
-    AtomicElement, AtomicElementLayer, Proof, )
+    AtomicElement, AtomicElementLayer, Proof, StatusModel, )
 
 
 def api_view(view_func):
@@ -26,7 +26,7 @@ def api_view(view_func):
     @csrf_exempt
     @require_http_methods(api_view_http_methods)
     def wrapper(request, *args, **kwargs):
-        params = benedict(request.POST.items())
+        params = benedict(request.POST.items(), keypath_separator='/')
         # params.update(request.POST.items())
         kwargs['params'] = params
         try:
@@ -75,18 +75,43 @@ def require_user(view_func):
     return wrapper
 
 
-def require_font(view_func):
+def require_project(view_func):
     @wraps(view_func)
-    @require_params(font_id='int')
+    @require_params(project_uid='str')
     def wrapper(request, *args, **kwargs):
         # build query filters
         params = kwargs['params']
-        font_id = params.get_int('font_id')
-        try:
-            font_obj = Font.objects.get(id=font_id)
-        except Font.DoesNotExist:
+        project_uid = params.get_uuid('project_uid')
+        if not project_uid:
             return ApiResponseBadRequest(
-                'Font object with \'font_id={}\' not found.'.format(font_id))
+                'Missing or invalid parameter \'{}project_uid\'.')
+        try:
+            project_obj = Project.objects.get(uid=project_uid)
+        except Project.DoesNotExist:
+            return ApiResponseNotFound(
+                'Project object with \'project_uid={}\' not found.'.format(project_uid))
+        # success
+        kwargs['project'] = project_obj
+        return view_func(request, *args, **kwargs)
+    wrapper.__dict__['require_project'] = True
+    return wrapper
+
+
+def require_font(view_func):
+    @wraps(view_func)
+    @require_params(font_uid='str')
+    def wrapper(request, *args, **kwargs):
+        # build query filters
+        params = kwargs['params']
+        font_uid = params.get_uuid('font_uid')
+        if not font_uid:
+            return ApiResponseBadRequest(
+                'Missing or invalid parameter \'{}font_uid\'.')
+        try:
+            font_obj = Font.objects.get(uid=font_uid)
+        except Font.DoesNotExist:
+            return ApiResponseNotFound(
+                'Font object with \'font_uid={}\' not found.'.format(font_uid))
         # success
         kwargs['font'] = font_obj
         return view_func(request, *args, **kwargs)
@@ -138,6 +163,23 @@ def require_data(view_func):
     return wrapper
 
 
+def require_status(view_func):
+    @wraps(view_func)
+    @require_params(status='str')
+    def wrapper(request, *args, **kwargs):
+        params = kwargs['params']
+        status_choices = StatusModel.STATUS_CHOICES_VALUES_LIST
+        status = params.get_str('status', choices=status_choices, default='')
+        if not status:
+            return ApiResponseBadRequest(
+                'Invalid parameter "status", status value must be "{}".'.format('" or "'.join(status_choices)))
+        # success
+        kwargs['status'] = status
+        return view_func(request, *args, **kwargs)
+    wrapper.__dict__['require_status'] = True
+    return wrapper
+
+
 def require_atomic_element(**kwargs):
     # read decorator options
     select_related = kwargs.get('select_related', ['locked_by']) or []
@@ -165,7 +207,7 @@ def require_atomic_element(**kwargs):
             try:
                 obj = obj_cls.objects.select_related(*select_related).prefetch_related(*prefetch_related).get(**filters)
             except obj_cls.DoesNotExist:
-                return ApiResponseBadRequest(
+                return ApiResponseNotFound(
                     'Atomic Element object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -209,7 +251,7 @@ def require_atomic_element_layer(**kwargs):
             try:
                 obj = atomic_element.layers.get(**filters)
             except obj_cls.DoesNotExist:
-                return ApiResponseBadRequest(
+                return ApiResponseNotFound(
                     'Atomic Element Layer object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -248,7 +290,7 @@ def require_deep_component(**kwargs):
             try:
                 obj = obj_cls.objects.select_related(*select_related).prefetch_related(*prefetch_related).get(**filters)
             except obj_cls.DoesNotExist:
-                return ApiResponseBadRequest(
+                return ApiResponseNotFound(
                     'Deep Component object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -296,7 +338,7 @@ def require_character_glyph(**kwargs):
             try:
                 obj = obj_cls.objects.select_related(*select_related).prefetch_related(*prefetch_related).get(**filters)
             except obj_cls.DoesNotExist:
-                return ApiResponseBadRequest(
+                return ApiResponseNotFound(
                     'Character Glyph object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -340,7 +382,7 @@ def require_character_glyph_layer(**kwargs):
             try:
                 obj = character_glyph.layers.get(**filters)
             except obj_cls.DoesNotExist:
-                return ApiResponseBadRequest(
+                return ApiResponseNotFound(
                     'Character Glyph Layer object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()

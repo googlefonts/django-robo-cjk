@@ -41,8 +41,7 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Font)
 class FontAdmin(admin.ModelAdmin):
 
-    list_display = ('project', 'name', 'slug', 'created_at', 'updated_at', )
-    list_display_links = ('name', )
+    list_display = ('name', 'slug', 'created_at', 'updated_at', )
     list_filter = ('project', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
@@ -89,7 +88,7 @@ class GlifAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', )
     list_display_links = ('name', )
-    list_filter = ('font__project', 'font', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status', )
+    list_filter = ('font__project', 'font', 'status', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
 

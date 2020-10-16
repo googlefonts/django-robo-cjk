@@ -329,6 +329,7 @@ See [Font Get](#font-get) response.
 |---|---|---|
 | `font_uid` | `str` | yes |
 | `status` | `string` | no |
+| `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -392,6 +393,7 @@ See [Font Get](#font-get) response.
 |---|---|---|
 | `font_uid` | `str` | yes |
 | `status` | `string` | no |
+| `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -513,6 +515,8 @@ See [Font Get](#font-get) response.
 ---
 
 #### Atomic Element Create
+
+The created Atomic Element is automatically locked by the current user.
 
 ##### Request
 
@@ -785,6 +789,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 |---|---|---|
 | `font_uid` | `str` | yes |
 | `status` | `string` | no |
+| `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -915,6 +920,8 @@ See [Atomic Element Get](#atomic-element-get) response.
 ---
 
 #### Deep Component Create
+
+The created Deep Component is automatically locked by the current user.
 
 ##### Request
 
@@ -1073,6 +1080,7 @@ See [Deep Component Get](#deep-component-get) response.
 |---|---|---|
 | `font_uid` | `str` | yes |
 | `status` | `string` | no |
+| `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -1191,6 +1199,8 @@ See [Deep Component Get](#deep-component-get) response.
 ---
 
 #### Character Glyph Create
+
+The created Character Glyph is automatically locked by the current user.
 
 ##### Request
 

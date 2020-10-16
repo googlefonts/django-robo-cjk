@@ -176,12 +176,17 @@ def atomic_element_get(request, atomic_element, *args, **kwargs):
 @require_user
 @require_font
 @require_data
-def atomic_element_create(request, font, data, glif, *args, **kwargs):
+def atomic_element_create(request, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
-    atomic_element, atomic_element_created = AtomicElement.objects.get_or_create(defaults={ 'data':data }, **filters)
-    if not atomic_element_created:
+    if AtomicElement.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
             'Atomic Element with font_id=\'{}\' and name=\'{}\' already exists.'.format(font.id, glif.name))
+    atomic_element = AtomicElement()
+    atomic_element.font_id = font.id
+    atomic_element.name = glif.name
+    atomic_element.data = data
+    atomic_element.lock_by(user)
+    atomic_element.save()
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -216,7 +221,7 @@ def atomic_element_delete(request, atomic_element, *args, **kwargs):
 @require_user
 @require_atomic_element()
 def atomic_element_lock(request, atomic_element, *args, **kwargs):
-    if atomic_element.lock_by(request.user):
+    if atomic_element.lock_by(request.user, save=True):
         return ApiResponseSuccess(atomic_element.serialize())
     return ApiResponseForbidden(
         'Atomic Element can\'t be locked, it has already been locked by another user.')
@@ -226,7 +231,7 @@ def atomic_element_lock(request, atomic_element, *args, **kwargs):
 @require_user
 @require_atomic_element()
 def atomic_element_unlock(request, atomic_element, *args, **kwargs):
-    if atomic_element.unlock_by(request.user):
+    if atomic_element.unlock_by(request.user, save=True):
         return ApiResponseSuccess(atomic_element.serialize())
     return ApiResponseForbidden(
         'Atomic Element can\'t be unlocked, it has been locked by another user.')
@@ -307,12 +312,17 @@ def deep_component_get(request, deep_component, *args, **kwargs):
 @require_user
 @require_font
 @require_data
-def deep_component_create(request, font, data, glif, *args, **kwargs):
+def deep_component_create(request, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
-    deep_component, deep_component_created = DeepComponent.objects.get_or_create(defaults={ 'data':data }, **filters)
-    if not deep_component_created:
+    if DeepComponent.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
             'Deep Component with font_id=\'{}\' and name=\'{}\' already exists.'.format(font.id, glif.name))
+    deep_component = DeepComponent()
+    deep_component.font_id = font.id
+    deep_component.name = glif.name
+    deep_component.data = data
+    deep_component.lock_by(user)
+    deep_component.save()
     return ApiResponseSuccess(deep_component.serialize())
 
 
@@ -347,7 +357,7 @@ def deep_component_delete(request, deep_component, *args, **kwargs):
 @require_user
 @require_deep_component()
 def deep_component_lock(request, deep_component, *args, **kwargs):
-    if deep_component.lock_by(request.user):
+    if deep_component.lock_by(request.user, save=True):
         return ApiResponseSuccess(deep_component.serialize())
     return ApiResponseForbidden(
         'Deep Component can\'t be locked, it has already been locked by another user.')
@@ -357,7 +367,7 @@ def deep_component_lock(request, deep_component, *args, **kwargs):
 @require_user
 @require_deep_component()
 def deep_component_unlock(request, deep_component, *args, **kwargs):
-    if deep_component.unlock_by(request.user):
+    if deep_component.unlock_by(request.user, save=True):
         return ApiResponseSuccess(deep_component.serialize())
     return ApiResponseForbidden(
         'Deep Component can\'t be unlocked, it has been locked by another user.')
@@ -382,12 +392,17 @@ def character_glyph_get(request, character_glyph, *args, **kwargs):
 @require_user
 @require_font
 @require_data
-def character_glyph_create(request, font, data, glif, *args, **kwargs):
+def character_glyph_create(request, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
-    character_glyph, character_glyph_created = CharacterGlyph.objects.get_or_create(defaults={ 'data':data }, **filters)
-    if not character_glyph_created:
+    if CharacterGlyph.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
             'Character Glyph with font_id=\'{}\' and name=\'{}\' already exists.'.format(font.id, glif.name))
+    character_glyph = CharacterGlyph()
+    character_glyph.font_id = font.id
+    character_glyph.name = glif.name
+    character_glyph.data = data
+    character_glyph.lock_by(user)
+    character_glyph.save()
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -423,7 +438,7 @@ def character_glyph_delete(request, character_glyph, *args, **kwargs):
 @require_user
 @require_character_glyph()
 def character_glyph_lock(request, character_glyph, *args, **kwargs):
-    if character_glyph.lock_by(request.user):
+    if character_glyph.lock_by(request.user, save=True):
         return ApiResponseSuccess(character_glyph.serialize())
     return ApiResponseForbidden(
         'Character Glyph can\'t be locked, it has already been locked by another user.')
@@ -433,7 +448,7 @@ def character_glyph_lock(request, character_glyph, *args, **kwargs):
 @require_user
 @require_character_glyph()
 def character_glyph_unlock(request, character_glyph, *args, **kwargs):
-    if character_glyph.unlock_by(request.user):
+    if character_glyph.unlock_by(request.user, save=True):
         return ApiResponseSuccess(character_glyph.serialize())
     return ApiResponseForbidden(
         'Character Glyph can\'t be unlocked, it has been locked by another user.')

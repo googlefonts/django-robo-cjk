@@ -82,13 +82,36 @@ class Client(object):
         return self._api_call('project_list')
 
 
+    def project_get(self, project_uid):
+        params = {
+            'project_uid': project_uid,
+        }
+        return self._api_call('project_get', params)
+
+
     def font_list(self):
         return self._api_call('font_list')
 
 
-    def glif_list(self, font_id, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
+    def font_get(self, font_uid):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+        }
+        return self._api_call('font_get', params)
+
+
+    def font_update(self, font_uid, fontlib):
+        params = {
+            'font_uid': font_uid,
+            'fontlib': json.dumps(fontlib) if isinstance(fontlib, dict) else fontlib,
+        }
+        return self._api_call('font_update', params)
+
+
+    def glif_list(self, font_uid, is_locked_by_current_user=None, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
+        params = {
+            'font_uid': font_uid,
+            'is_locked_by_current_user':, is_locked_by_current_user,
             'is_locked': is_locked,
             'is_empty': is_empty,
             'has_variation_axis': has_variation_axis,
@@ -99,9 +122,10 @@ class Client(object):
         return self._api_call('glif_list', params)
 
 
-    def atomic_element_list(self, font_id, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
+    def atomic_element_list(self, font_uid, is_locked_by_current_user=None, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'is_locked_by_current_user': is_locked_by_current_user,
             'is_locked': is_locked,
             'is_empty': is_empty,
             'has_variation_axis': has_variation_axis,
@@ -112,26 +136,26 @@ class Client(object):
         return self._api_call('atomic_element_list', params)
 
 
-    def atomic_element_get(self, font_id, atomic_element_id):
+    def atomic_element_get(self, font_uid, atomic_element_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(atomic_element_id),
             'name': self._if_str(atomic_element_id),
         }
         return self._api_call('atomic_element_get', params)
 
 
-    def atomic_element_create(self, font_id, atomic_element_data):
+    def atomic_element_create(self, font_uid, atomic_element_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'data': atomic_element_data,
         }
         return self._api_call('atomic_element_create', params)
 
 
-    def atomic_element_update(self, font_id, atomic_element_id, atomic_element_data):
+    def atomic_element_update(self, font_uid, atomic_element_id, atomic_element_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(atomic_element_id),
             'name': self._if_str(atomic_element_id),
             'data': atomic_element_data,
@@ -139,36 +163,46 @@ class Client(object):
         return self._api_call('atomic_element_update', params)
 
 
-    def atomic_element_delete(self, font_id, atomic_element_id):
+    def atomic_element_update_status(self, font_uid, atomic_element_id, atomic_element_status):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'id': self._if_int(atomic_element_id),
+            'name': self._if_str(atomic_element_id),
+            'status': atomic_element_status,
+        }
+        return self._api_call('atomic_element_update_status', params)
+
+
+    def atomic_element_delete(self, font_uid, atomic_element_id):
+        params = {
+            'font_uid': font_uid,
             'id': self._if_int(atomic_element_id),
             'name': self._if_str(atomic_element_id),
         }
         return self._api_call('atomic_element_delete', params)
 
 
-    def atomic_element_lock(self, font_id, atomic_element_id):
+    def atomic_element_lock(self, font_uid, atomic_element_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(atomic_element_id),
             'name': self._if_str(atomic_element_id),
         }
         return self._api_call('atomic_element_lock', params)
 
 
-    def atomic_element_unlock(self, font_id, atomic_element_id):
+    def atomic_element_unlock(self, font_uid, atomic_element_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(atomic_element_id),
             'name': self._if_str(atomic_element_id),
         }
         return self._api_call('atomic_element_unlock', params)
 
 
-    def atomic_element_layer_create(self, font_id, atomic_element_id, layer_name, layer_data):
+    def atomic_element_layer_create(self, font_uid, atomic_element_id, layer_name, layer_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'atomic_element_id': self._if_int(atomic_element_id),
             'atomic_element_name': self._if_str(atomic_element_id),
             'group_name': layer_name,
@@ -177,9 +211,9 @@ class Client(object):
         return self._api_call('atomic_element_layer_create', params)
 
 
-    def atomic_element_layer_rename(self, font_id, atomic_element_id, layer_id, layer_new_name):
+    def atomic_element_layer_rename(self, font_uid, atomic_element_id, layer_id, layer_new_name):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'atomic_element_id': self._if_int(atomic_element_id),
             'atomic_element_name': self._if_str(atomic_element_id),
             'id': self._if_int(layer_id),
@@ -189,9 +223,9 @@ class Client(object):
         return self._api_call('atomic_element_layer_rename', params)
 
 
-    def atomic_element_layer_update(self, font_id, atomic_element_id, layer_id, layer_data):
+    def atomic_element_layer_update(self, font_uid, atomic_element_id, layer_id, layer_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'atomic_element_id': self._if_int(atomic_element_id),
             'atomic_element_name': self._if_str(atomic_element_id),
             'id': self._if_int(layer_id),
@@ -201,9 +235,9 @@ class Client(object):
         return self._api_call('atomic_element_layer_update', params)
 
 
-    def atomic_element_layer_delete(self, font_id, atomic_element_id, layer_id):
+    def atomic_element_layer_delete(self, font_uid, atomic_element_id, layer_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'atomic_element_id': self._if_int(atomic_element_id),
             'atomic_element_name': self._if_str(atomic_element_id),
             'id': self._if_int(layer_id),
@@ -212,9 +246,10 @@ class Client(object):
         return self._api_call('atomic_element_layer_delete', params)
 
 
-    def deep_component_list(self, font_id, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
+    def deep_component_list(self, font_uid, is_locked_by_current_user=None, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'is_locked_by_current_user': is_locked_by_current_user,
             'is_locked': is_locked,
             'is_empty': is_empty,
             'has_variation_axis': has_variation_axis,
@@ -225,26 +260,26 @@ class Client(object):
         return self._api_call('deep_component_list', params)
 
 
-    def deep_component_get(self, font_id, deep_component_id):
+    def deep_component_get(self, font_uid, deep_component_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
         }
         return self._api_call('deep_component_get', params)
 
 
-    def deep_component_create(self, font_id, deep_component_data):
+    def deep_component_create(self, font_uid, deep_component_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'data': deep_component_data,
         }
         return self._api_call('deep_component_create', params)
 
 
-    def deep_component_update(self, font_id, deep_component_id, deep_component_data):
+    def deep_component_update(self, font_uid, deep_component_id, deep_component_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
             'data': deep_component_data,
@@ -252,36 +287,47 @@ class Client(object):
         return self._api_call('deep_component_update', params)
 
 
-    def deep_component_delete(self, font_id, deep_component_id):
+    def deep_component_update_status(self, font_uid, deep_component_id, deep_component_status):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'id': self._if_int(deep_component_id),
+            'name': self._if_str(deep_component_id),
+            'status': deep_component_status,
+        }
+        return self._api_call('deep_component_update_status', params)
+
+
+    def deep_component_delete(self, font_uid, deep_component_id):
+        params = {
+            'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
         }
         return self._api_call('deep_component_delete', params)
 
 
-    def deep_component_lock(self, font_id, deep_component_id):
+    def deep_component_lock(self, font_uid, deep_component_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
         }
         return self._api_call('deep_component_lock', params)
 
 
-    def deep_component_unlock(self, font_id, deep_component_id):
+    def deep_component_unlock(self, font_uid, deep_component_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
         }
         return self._api_call('deep_component_unlock', params)
 
 
-    def character_glyph_list(self, font_id, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
+    def character_glyph_list(self, font_uid, is_locked_by_current_user=None, is_locked=None, is_empty=None, has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'is_locked_by_current_user': is_locked_by_current_user,
             'is_locked': is_locked,
             'is_empty': is_empty,
             'has_variation_axis': has_variation_axis,
@@ -292,26 +338,26 @@ class Client(object):
         return self._api_call('character_glyph_list', params)
 
 
-    def character_glyph_get(self, font_id, character_glyph_id):
+    def character_glyph_get(self, font_uid, character_glyph_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(character_glyph_id),
             'name': self._if_str(character_glyph_id),
         }
         return self._api_call('character_glyph_get', params)
 
 
-    def character_glyph_create(self, font_id, data):
+    def character_glyph_create(self, font_uid, data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'data': character_glyph_data,
         }
         return self._api_call('character_glyph_create', params)
 
 
-    def character_glyph_update(self, font_id, character_glyph_id, character_glyph_data):
+    def character_glyph_update(self, font_uid, character_glyph_id, character_glyph_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(character_glyph_id),
             'name': self._if_str(character_glyph_id),
             'data': character_glyph_data,
@@ -319,36 +365,46 @@ class Client(object):
         return self._api_call('character_glyph_update', params)
 
 
-    def character_glyph_delete(self, font_id, character_glyph_id):
+    def character_glyph_update_status(self, font_uid, character_glyph_id, character_glyph_status):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
+            'id': self._if_int(character_glyph_id),
+            'name': self._if_str(character_glyph_id),
+            'status': character_glyph_status,
+        }
+        return self._api_call('character_glyph_update_status', params)
+
+
+    def character_glyph_delete(self, font_uid, character_glyph_id):
+        params = {
+            'font_uid': font_uid,
             'id': self._if_int(character_glyph_id),
             'name': self._if_str(character_glyph_id),
         }
         return self._api_call('character_glyph_delete', params)
 
 
-    def character_glyph_lock(self, font_id, character_glyph_id):
+    def character_glyph_lock(self, font_uid, character_glyph_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(character_glyph_id),
             'name': self._if_str(character_glyph_id),
         }
         return self._api_call('character_glyph_lock', params)
 
 
-    def character_glyph_unlock(self, font_id, character_glyph_id):
+    def character_glyph_unlock(self, font_uid, character_glyph_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'id': self._if_int(character_glyph_id),
             'name': self._if_str(character_glyph_id),
         }
         return self._api_call('character_glyph_unlock', params)
 
 
-    def character_glyph_layer_create(self, font_id, character_glyph_id, layer_name, layer_data):
+    def character_glyph_layer_create(self, font_uid, character_glyph_id, layer_name, layer_data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'character_glyph_id': self._if_int(character_glyph_id),
             'character_glyph_name': self._if_str(character_glyph_id),
             'group_name': layer_name,
@@ -357,9 +413,9 @@ class Client(object):
         return self._api_call('character_glyph_layer_create', params)
 
 
-    def character_glyph_layer_rename(self, font_id, character_glyph_id, layer_id, layer_new_name):
+    def character_glyph_layer_rename(self, font_uid, character_glyph_id, layer_id, layer_new_name):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'character_glyph_id': self._if_int(character_glyph_id),
             'character_glyph_name': self._if_str(character_glyph_id),
             'id': self._if_int(layer_id),
@@ -369,9 +425,9 @@ class Client(object):
         return self._api_call('character_glyph_layer_rename', params)
 
 
-    def character_glyph_layer_update(self, font_id, character_glyph_id, layer_id, data):
+    def character_glyph_layer_update(self, font_uid, character_glyph_id, layer_id, data):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'character_glyph_id': self._if_int(character_glyph_id),
             'character_glyph_name': self._if_str(character_glyph_id),
             'id': self._if_int(layer_id),
@@ -381,9 +437,9 @@ class Client(object):
         return self._api_call('character_glyph_layer_update', params)
 
 
-    def character_glyph_layer_delete(self, font_id, character_glyph_id, layer_id):
+    def character_glyph_layer_delete(self, font_uid, character_glyph_id, layer_id):
         params = {
-            'font_id': font_id,
+            'font_uid': font_uid,
             'character_glyph_id': self._if_int(character_glyph_id),
             'character_glyph_name': self._if_str(character_glyph_id),
             'id': self._if_int(layer_id),

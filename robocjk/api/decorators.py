@@ -124,11 +124,13 @@ def require_glif_filters(view_func):
     @require_font
     def wrapper(request, *args, **kwargs):
         # build query filters
+        user = kwargs['user']
         font = kwargs['font']
         params = kwargs['params']
         filters = benedict({
             'font_id': font.id,
             'status': params.get_str('status', None),
+            'locked_by_id': user.id if params.get_bool('is_locked_by_current_user', False) else None,
             'is_locked': params.get_bool('is_locked', None),
             'is_empty': params.get_bool('is_empty', None),
             'has_variation_axis': params.get_bool('has_variation_axis', None),
@@ -161,6 +163,32 @@ def require_data(view_func):
         return view_func(request, *args, **kwargs)
     wrapper.__dict__['require_data'] = True
     return wrapper
+
+
+# def require_data_or_name(view_func):
+#     @wraps(view_func)
+#     def wrapper(request, *args, **kwargs):
+#         params = kwargs['params']
+#         data = params.get_str('data')
+#         glif = None
+#         name = params.get_str('name')
+#         if (data and name) or (not data and not name):
+#             return ApiResponseBadRequest(
+#                 'Invalid parameter "data" / "name", data or name are required and are mutually exclusive.')
+#         if data:
+#             # parse and validate glif xml data
+#             glif = GlifData()
+#             glif.parse_string(data)
+#             if not glif.ok:
+#                 return ApiResponseBadRequest(
+#                     'Invalid parameter "data", data must be a valid .glif xml file - {}.'.format(str(glif.error)))
+#         # success
+#         kwargs['data'] = data
+#         kwargs['glif'] = glif
+#         # kwargs['name'] = name
+#         return view_func(request, *args, **kwargs)
+#     wrapper.__dict__['require_data'] = True
+#     return wrapper
 
 
 def require_status(view_func):

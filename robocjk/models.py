@@ -90,9 +90,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     project = models.ForeignKey(
         'robocjk.Project',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='fonts',
         verbose_name=_('Project'))
 
@@ -160,23 +158,16 @@ class LockableModel(models.Model):
             return False
         return True
 
-    def _lock_by(self, user):
-        self.is_locked = True
-        self.locked_by = user
-        self.locked_at = dt.datetime.now()
-        self.save()
-
-    def _unlock_by(self, user):
-        self.is_locked = False
-        self.locked_by = None
-        self.locked_at = None
-        self.save()
-
-    def lock_by(self, user):
+    def lock_by(self, user, save=False):
         if not self._is_valid_user(user):
             return False
         if not self.is_locked:
-            self._lock_by(user)
+            # do lock
+            self.is_locked = True
+            self.locked_by = user
+            self.locked_at = dt.datetime.now()
+            if save:
+                self.save()
             return True
         return self.locked_by == user
 
@@ -190,12 +181,17 @@ class LockableModel(models.Model):
             return False
         return self.locked_by_id == user.id if self.is_locked else False
 
-    def unlock_by(self, user):
+    def unlock_by(self, user, save=False):
         if not self._is_valid_user(user):
             return False
         if self.is_locked:
             if self.locked_by_id == user.id:
-                self._unlock_by(user)
+                # do unlock
+                self.is_locked = False
+                self.locked_by = None
+                self.locked_at = None
+                if save:
+                    self.save()
                 return True
             return False
         return True
@@ -396,8 +392,7 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
         related_name='character_glyphs',
         verbose_name=_('Font'))
 
@@ -450,9 +445,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     glif = models.ForeignKey(
         'robocjk.CharacterGlyph',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='layers',
         verbose_name=_('Glif'))
 
@@ -496,9 +489,7 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='deep_components',
         verbose_name=_('Font'))
 
@@ -551,9 +542,7 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     font = models.ForeignKey(
         'robocjk.Font',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='atomic_elements',
         verbose_name=_('Font'))
 
@@ -592,9 +581,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     glif = models.ForeignKey(
         'robocjk.AtomicElement',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='layers',
         verbose_name=_('Glif'))
 
@@ -642,9 +629,7 @@ class Proof(TimestampModel):
 
     user = models.ForeignKey(
         get_user_model(),
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name=_('User'))
 
     filetype = models.CharField(

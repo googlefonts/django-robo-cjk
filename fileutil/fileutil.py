@@ -23,31 +23,49 @@ import uuid
 
 
 def assert_dir(path):
+    """
+    Raise an OSError if the given path doesn't exist or it is not a directory.
+    """
     if not is_dir(path):
         raise OSError('Invalid directory path: {}'.format(path))
 
 
 def assert_exists(path):
+    """
+    Raise an OSError if the given path doesn't exist.
+    """
     if not exists(path):
         raise OSError('Invalid item path: {}'.format(path))
 
 
 def assert_file(path):
+    """
+    Raise an OSError if the given path doesn't exist or it is not a file.
+    """
     if not is_file(path):
         raise OSError('Invalid file path: {}'.format(path))
 
 
 def assert_not_dir(path):
+    """
+    Raise an OSError if the given path is an existing directory.
+    """
     if is_dir(path):
         raise OSError('Invalid path, directory already exists: {}'.format(path))
 
 
 def assert_not_file(path):
+    """
+    Raise an OSError if the given path is an existing file.
+    """
     if is_file(path):
         raise OSError('Invalid path, file already exists: {}'.format(path))
 
 
 def assert_not_exists(path):
+    """
+    Raise an OSError if the given path already exists.
+    """
     if exists(path):
         raise OSError('Invalid path, item already exists: {}'.format(path))
 
@@ -93,37 +111,23 @@ def create_file(path, overwrite=False, content=''):
 
 
 def delete_dir(path):
-    if is_dir(path):
-        shutil.rmtree(path, ignore_errors=True)
-        return True
-    return False
+    return remove_dir(path)
 
 
-def delete_dirs(paths):
-    for path in paths:
-        delete_dir(path)
+def delete_dirs(*paths):
+    remove_dirs(*paths)
 
 
 def delete_empty_dirs(path):
-    for root, dirs, files in os.walk(path, topdown=False):
-        for dir in dirs:
-            dirpath = os.path.join(root, dir)
-            if is_empty(dirpath):
-                # print(dirpath)
-                # delete_dir(dirpath)
-                os.rmdir(dirpath)
+    remove_empty_dirs(path)
 
 
 def delete_file(path):
-    if is_file(path):
-        os.remove(path)
-        return True
-    return False
+    return remove_file(path)
 
 
-def delete_files(paths):
-    for path in paths:
-        delete_file(path)
+def delete_files(*paths):
+    remove_files(*paths)
 
 
 def ensure_dirpath(path):
@@ -289,33 +293,67 @@ def read_file(path):
 #     pass
 
 
-# def rename_dir(path, name, overwrite=False):
-#     assert_dir(path)
-#     dirs = os.path.split(path)
-#     dirs[-1] = name
-#     dest = os.path.join(dirs)
-#     if not overwrite:
-#         assert_not_exists(dest)
-#     # TODO
-#     pass
-#
-#
-# def rename_file(path, name, overwrite=False):
-#     assert_file(path)
-#     dirpath, filename = split_filepath(path)
-#     dest = join_filepath(dirpath, name)
-#     if not overwrite:
-#         assert_not_exists(dest)
-#     # TODO
-#     pass
+def rename_dir(path, name, overwrite=False):
+    assert_dir(path)
+    comps = list(os.path.split(path))
+    comps[-1] = name
+    dest = os.path.join(*comps)
+    if not overwrite:
+        assert_not_exists(dest)
+    # shutil.move(path, dest)
+    os.rename(path, dest)
+
+
+def rename_file(path, name, overwrite=False):
+    assert_file(path)
+    dirpath, filename = split_filepath(path)
+    dest = join_filepath(dirpath, name)
+    if not overwrite:
+        assert_not_exists(dest)
+    # shutil.move(path, dest)
+    os.rename(path, dest)
 
 
 # def rename_file_extension(path, extension):
 #     basename, ext = split_filename(path)
 #     name = join_filename(basename, extension)
 #     rename_file(path, name)
-#
-#
+
+
+def remove_dir(path):
+    if is_dir(path):
+        shutil.rmtree(path, ignore_errors=True)
+        return True
+    return False
+
+
+def remove_dirs(*paths):
+    for path in paths:
+        remove_dir(path)
+
+
+def remove_empty_dirs(path):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in dirs:
+            dirpath = os.path.join(root, dir)
+            if is_empty(dirpath):
+                # print(dirpath)
+                # delete_dir(dirpath)
+                os.rmdir(dirpath)
+
+
+def remove_file(path):
+    if is_file(path):
+        os.remove(path)
+        return True
+    return False
+
+
+def remove_files(*paths):
+    for path in paths:
+        remove_file(path)
+
+
 # def search_files(path, prefix='', suffix='', traverse=False):
 #     assert_dir(path)
 #     # results = []

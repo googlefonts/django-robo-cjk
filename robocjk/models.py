@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from abstract_models import (
-    UIDModel, HashidModel, NameSlugModel, TimestampModel, )
+    UIDModel, HashidModel, NameSlugModel, TimestampModel,
+)
 
 from benedict import benedict
 from benedict.serializers import Base64Serializer
 
 from django.contrib.auth import get_user_model
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 from django.db import models
-from django.db.models.signals import (post_save, pre_delete, )
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
 from fileutil import fileutil
 
-from robocjk import io
 from robocjk.api.serializers import (
     serialize_project,
     serialize_font,
@@ -23,13 +22,26 @@ from robocjk.api.serializers import (
     serialize_atomic_element_layer,
     serialize_deep_component,
     serialize_character_glyph,
-    serialize_character_glyph_layer, )
+    serialize_character_glyph_layer,
+)
 from robocjk.core import GlifData
 from robocjk.debug import logger
+from robocjk.io.paths import (
+    get_project_path,
+    get_font_path,
+    get_character_glyph_path,
+    get_character_glyph_layer_path,
+    get_deep_component_path,
+    get_atomic_element_path,
+    get_atomic_element_layer_path,
+    get_proof_path,
+)
+from robocjk.io import settings as io_settings
 from robocjk.managers import (
     CharacterGlyphManager, CharacterGlyphLayerManager,
     DeepComponentManager,
-    AtomicElementManager, AtomicElementLayerManager, )
+    AtomicElementManager, AtomicElementLayerManager,
+)
 
 import datetime as dt
 import os
@@ -40,6 +52,9 @@ import os
 2. “deep components” contain only references to atomic elements, and do not contain outlines
 3. “character glyphs”, contain only references to deep components, not to atomic elements, and outlines
 """
+
+repo_ssh_url_validator = RegexValidator(io_settings.GIT_SSH_REPOSITORY_PATTERN,
+    _('Invalid repository URL - Expected .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
@@ -53,25 +68,58 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name_plural = _('Projects')
 
     repo_url = models.CharField(
+        unique=True,
         max_length=200,
+        validators=[repo_ssh_url_validator],
         verbose_name=_('Repo URL'),
-        help_text=_('The .git repository URL'))
+        help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
-    def get_absolute_path(self):
-        return '/root/robocjk-projects/{}'.format(
-            self.slug)
+    def num_fonts(self):
+        return self.fonts.count()
+
+    def path(self):
+        return get_project_path(self)
+
+    def save_by(self, user):
+        self.updated_by = user
+        self.save()
+
+    def save_to_file_system(self):
+        path = self.path()
+        fileutil.remove_dir(path)
+        fileutil.ensure_dirpath(path)
+        # init git repository if needed
+        git_repo_path = os.path.join(path, '.git')
+        if not fileutil.exists(git_repo_path):
+            cmds = [
+                'cd {}'.format(path),
+                'git init',
+                'git remote add origin {}'.format(self.repo_url),
+                'git pull origin master',
+            ]
+            cmd = ' && '.join(cmds)
+            os.system(cmd)
+        # save all project fonts to file.system
+        fonts_qs = self.fonts.prefetch_related(
+            'character_glyphs',
+            'character_glyphs__layers',
+            'deep_components',
+            'atomic_elements',
+            'atomic_elements__layers').filter(available=True)
+        for font in fonts_qs:
+            font.save_to_file_system()
+            cmds = [
+                'cd {}'.format(path),
+                'git add -A',
+                'git commit -m "{}"'.format(
+                    'Updated {}.'.format(font.name)),
+                'git push -u origin master',
+            ]
+            cmd = ' && '.join(cmds)
+            os.system(cmd)
 
     def serialize(self, **kwargs):
         return serialize_project(self, *kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        # if created:
-        io.sync_project(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_project(instance)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -94,6 +142,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         related_name='fonts',
         verbose_name=_('Project'))
 
+    available = models.BooleanField(
+        db_index=True,
+        default=True,
+        verbose_name=_('Available'))
+
     fontlib = models.JSONField(
         blank=True,
         null=True,
@@ -106,21 +159,41 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         default=dict,
         verbose_name=_('Glyphs Composition'))
 
-    def get_absolute_path(self):
-        return '{}/{}.rcjk'.format(
-            self.project.get_absolute_path(), self.slug)
+    def num_character_glyphs(self):
+        return self.character_glyphs.count()
+
+    def num_deep_components(self):
+        return self.deep_components.count()
+
+    def num_atomic_elements(self):
+        return self.atomic_elements.count()
+
+    def path(self):
+        return get_font_path(self)
+
+    def save_by(self, user):
+        self.updated_by = user
+        self.save()
+
+    def save_to_file_system(self):
+        path = self.path()
+        fileutil.ensure_dirpath(path)
+        # write fontlib.json file
+        fontlib_path = os.path.join(path, 'fontLib.json')
+        fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
+        fileutil.write_file(fontlib_path, fontlib_str)
+        # write all character-glyphs and relative layers
+        for character_glyph in self.character_glyphs.all():
+            character_glyph.save_to_file_system()
+        # write all deep-components
+        for deep_component in self.deep_components.all():
+            deep_component.save_to_file_system()
+        # write all atomic-elements and relative layers
+        for atomic_element in self.atomic_elements.all():
+            atomic_element.save_to_file_system()
 
     def serialize(self, **kwargs):
         return serialize_font(self, *kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        # if created:
-        io.sync_font(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_font(instance)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -145,6 +218,7 @@ class LockableModel(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+        related_name='+',
         verbose_name=_('Locked by'))
 
     locked_at = models.DateTimeField(
@@ -228,12 +302,12 @@ class StatusModel(models.Model):
         STATUS_DONE,
     ]
     STATUS_COLORS = {
-        STATUS_TODO: '#E74C3C',
-        STATUS_WIP: '#E67E22',
-        STATUS_CHECKING_1: '#F1C40F',
-        STATUS_CHECKING_2: '#F1C40F',
-        STATUS_CHECKING_3: '#F1C40F',
-        STATUS_DONE: '#2ECC71',
+        STATUS_TODO: '#999999', # grey
+        STATUS_WIP: '#e74c3c', # '#FF0000', # red
+        STATUS_CHECKING_1: '#e67e22', # '#FF8800', # orange
+        STATUS_CHECKING_2: '#f1c40f', # '#FFFF00', # yellow
+        STATUS_CHECKING_3: '#2980b9', # '#0088FF', # blue
+        STATUS_DONE: '#27ae60', # '#00FF88', # green
     }
     status = models.CharField(
         max_length=20,
@@ -255,6 +329,11 @@ class GlifDataModel(models.Model):
     """
     class Meta:
         abstract = True
+
+    def __init__(self, *args, **kwargs):
+        super(GlifDataModel, self).__init__(*args, **kwargs)
+        self.initial_data = self.data
+        self.initial_filename = self.filename
 
     data = models.TextField(
         verbose_name=_('Data'),
@@ -329,7 +408,8 @@ class GlifDataModel(models.Model):
         help_text=_('(autodetected from xml data)'))
 
     def _parse_data(self):
-        if self.data:
+        # if data and data is changed
+        if self.data and self.data != self.initial_data:
             gliph_data = GlifData()
             gliph_data.parse_string(self.data)
             if gliph_data.ok:
@@ -376,7 +456,16 @@ class GlifDataModel(models.Model):
     def save(self, *args, **kwargs):
         self._apply_data(self._parse_data())
         super(GlifDataModel, self).save(*args, **kwargs)
+        self.initial_filename = self.filename
         self._update_components()
+
+    def save_by(self, user):
+        self.updated_by = user
+        self.save()
+
+    def save_to_file_system(self):
+        # TODO: format xml data
+        fileutil.write_file(self.path(), self.data)
 
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
@@ -412,20 +501,16 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def components_set(self):
         return self.deep_components
 
-    def get_absolute_path(self):
-        return '{}/characterGlyph/{}'.format(
-            self.font.get_absolute_path(), self.filename)
+    def path(self):
+        return get_character_glyph_path(self)
+
+    def save_to_file_system(self):
+        super(CharacterGlyph, self).save_to_file_system()
+        for layer in self.layers.all():
+            layer.save_to_file_system()
 
     def serialize(self, **kwargs):
         return serialize_character_glyph(self, *kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        io.sync_character_glyph(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_character_glyph(instance)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -456,20 +541,11 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     objects = CharacterGlyphLayerManager()
 
-    def get_absolute_path(self):
-        return '{}/characterGlyph/{}/{}'.format(
-            self.glif.font.get_absolute_path(), self.group_name, self.filename)
+    def path(self):
+        return get_character_glyph_layer_path(self)
 
     def serialize(self, **kwargs):
         return serialize_character_glyph_layer(self, **kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        io.sync_character_glyph_layer(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_character_glyph_layer(instance)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -509,20 +585,11 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def components_set(self):
         return self.atomic_elements
 
-    def get_absolute_path(self):
-        return '{}/deepComponent/{}'.format(
-            self.font.get_absolute_path(), self.filename)
+    def path(self):
+        return get_deep_component_path(self)
 
     def serialize(self, **kwargs):
         return serialize_deep_component(self, **kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        io.sync_deep_component(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_deep_component(instance)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -548,20 +615,16 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     objects = AtomicElementManager()
 
-    def get_absolute_path(self):
-        return '{}/atomicElement/{}'.format(
-            self.font.get_absolute_path(), self.filename)
+    def path(self):
+        return get_atomic_element_path(self)
+
+    def save_to_file_system(self):
+        super(AtomicElement, self).save_to_file_system()
+        for layer in self.layers.all():
+            layer.save_to_file_system()
 
     def serialize(self, **kwargs):
         return serialize_atomic_element(self, **kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        io.sync_atomic_element(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_atomic_element(instance)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -592,20 +655,11 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     objects = AtomicElementLayerManager()
 
-    def get_absolute_path(self):
-        return '{}/atomicElement/{}/{}'.format(
-            self.glif.font.get_absolute_path(), self.group_name, self.filename)
+    def path(self):
+        return get_atomic_element_layer_path(self)
 
     def serialize(self, **kwargs):
         return serialize_atomic_element_layer(self, **kwargs)
-
-    @staticmethod
-    def post_save_handler(instance, created, **kwargs):
-        io.sync_atomic_element_layer(instance)
-
-    @staticmethod
-    def pre_delete_handler(instance, using, **kwargs):
-        io.delete_atomic_element_layer(instance)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -627,6 +681,12 @@ class Proof(TimestampModel):
         (FILETYPE_MP4, _('.mp4'), ),
     )
 
+    font = models.ForeignKey(
+        'robocjk.Font',
+        on_delete=models.CASCADE,
+        related_name='proofs',
+        verbose_name=_('Font'))
+
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
@@ -641,43 +701,15 @@ class Proof(TimestampModel):
         upload_to='proofs',
         validators=[FileExtensionValidator(
             allowed_extensions=('pdf', 'mp4', ))],
-        verbose_name=_('Proofs'))
+        verbose_name=_('File'))
 
-    # def get_absolute_path(self):
-    #     return 'Proofing/{}/{}'.format(
-    #         self.glif.font.get_absolute_path(), self.group_name, self.filepath)
-
-    # @staticmethod
-    # def post_save_handler(instance, created, **kwargs):
-    #     pass
-
-    # @staticmethod
-    # def pre_delete_handler(instance, using, **kwargs):
-    #     pass
+    def path(self):
+        return get_proof_path(self)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
             self.get_filetype_display(), self.file))
 
 
-post_save.connect(Font.post_save_handler, sender=Font)
-pre_delete.connect(Font.pre_delete_handler, sender=Font)
 
-post_save.connect(CharacterGlyph.post_save_handler, sender=CharacterGlyph)
-pre_delete.connect(CharacterGlyph.pre_delete_handler, sender=CharacterGlyph)
-
-post_save.connect(CharacterGlyphLayer.post_save_handler, sender=CharacterGlyphLayer)
-pre_delete.connect(CharacterGlyphLayer.pre_delete_handler, sender=CharacterGlyphLayer)
-
-post_save.connect(DeepComponent.post_save_handler, sender=DeepComponent)
-pre_delete.connect(DeepComponent.pre_delete_handler, sender=DeepComponent)
-
-post_save.connect(AtomicElement.post_save_handler, sender=AtomicElement)
-pre_delete.connect(AtomicElement.pre_delete_handler, sender=AtomicElement)
-
-post_save.connect(AtomicElementLayer.post_save_handler, sender=AtomicElementLayer)
-pre_delete.connect(AtomicElementLayer.pre_delete_handler, sender=AtomicElementLayer)
-
-# pre_delete.connect(Proof.pre_delete_handler, sender=Proof)
-# post_save.connect(Proof.post_save_handler, sender=Proof)
-
+from robocjk.signals import *

@@ -19,7 +19,7 @@ from robocjk.models import (
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'slug', 'repo_url', 'created_at', 'updated_at', )
+    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
     fieldsets = (
@@ -41,10 +41,19 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Font)
 class FontAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'slug', 'created_at', 'updated_at', )
-    list_filter = ('project', )
+    def info(self, font, *args, **kwargs):
+        html = 'Character Glyphs: <strong>{}</strong><br>'\
+               'Deep Components: <strong>{}</strong><br>'\
+               'Atomic Elements: <strong>{}</strong>'.format(
+                    font.num_character_glyphs(),
+                    font.num_deep_components(),
+                    font.num_atomic_elements())
+        return mark_safe(html)
+
+    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )
+    list_filter = ('project', 'available', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', )
     fieldsets = (
       ('Identifiers', {
           'classes': ('collapse',),
@@ -55,7 +64,7 @@ class FontAdmin(admin.ModelAdmin):
           'fields': ('created_at', 'updated_at', )
       }),
       (None, {
-          'fields': ('project', 'name', 'slug', 'fontlib', 'glyphs_composition', )
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', ) # 'glyphs_composition',
       }),
     )
     save_on_top = True
@@ -86,17 +95,17 @@ class GlifAdmin(admin.ModelAdmin):
     status_display.short_description = _('Status')
     status_display.allow_tags = True
 
-    list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', )
+    list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('name', )
-    list_filter = ('font__project', 'font', 'status', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
+    list_filter = ('font__project', 'font', 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
-    readonly_fields = ('created_at', 'updated_at', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
 
     def get_fieldsets(self, request, obj=None):
         return (
             ('Metadata', {
                 'classes': ('collapse', ),
-                'fields': ('created_at', 'updated_at', 'is_locked', 'locked_by', 'locked_at', )
+                'fields': ('created_at', 'updated_at', 'updated_by', 'is_locked', 'locked_by', 'locked_at', )
             }),
             (None, {
                 'fields': ('font', 'status', 'data', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
@@ -115,15 +124,15 @@ class GlifFilter(AutocompleteFilter):
 
 class GlifLayerAdmin(admin.ModelAdmin):
 
-    list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('group_name', )
-    list_filter = (GlifFilter, 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_filter = (GlifFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
-    readonly_fields = ('created_at', 'updated_at', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse', ),
-            'fields': ('created_at', 'updated_at', )
+            'fields': ('created_at', 'updated_at', 'updated_by', )
         }),
         (None, {
             'fields': ('glif', 'group_name', 'data', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
@@ -135,7 +144,7 @@ class GlifLayerAdmin(admin.ModelAdmin):
 
 class GlifLayerInline(admin.TabularInline):
 
-    fields = ('group_name', 'data', 'name', 'filename', )
+    fields = ('group_name', 'data', 'name', 'filename', 'created_at', 'updated_at', )
     readonly_fields = ('name', 'filename', )
     extra = 0
 
@@ -194,8 +203,8 @@ class AtomicElementLayerAdmin(GlifLayerAdmin):
 @admin.register(Proof)
 class ProofAdmin(admin.ModelAdmin):
 
-    list_display = ('user', 'file', 'filetype', 'created_at', 'updated_at', )
-    list_filter = ('user', 'filetype', )
+    list_display = ('file', 'filetype', 'created_at', 'updated_at', 'user', )
+    list_filter = ('font', 'user', 'filetype', )
     search_fields = ('file', 'filetype', )
     readonly_fields = ('created_at', 'updated_at', )
     fieldsets = (

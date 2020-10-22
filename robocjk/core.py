@@ -94,7 +94,8 @@ class GlifData(object):
 
             # update computed properties
             self._has_components = bool(components_list)
-            self._has_variation_axis = bool(self._lib.get('robocjk.glyphVariationGlyphs'))
+            self._has_variation_axis = bool(self._lib.get('robocjk.glyphVariationGlyphs')) or \
+                                       bool(self._lib.get('robocjk.variationGlyphs'))
 
         # update computed properties
         self._has_outlines = bool(self._xml.find('./outline'))

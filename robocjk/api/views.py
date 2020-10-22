@@ -16,14 +16,21 @@ from robocjk.api.decorators import (
     require_atomic_element_layer,
     require_deep_component,
     require_character_glyph,
-    require_character_glyph_layer, )
-
+    require_character_glyph_layer,
+)
 from robocjk.api.http import (
     ApiResponseBadRequest, ApiResponseUnauthorized,
     ApiResponseForbidden, ApiResponseNotFound,
     ApiResponseMethodNotAllowed, ApiResponseInternalServerError,
-    ApiResponseSuccess, )
-
+    ApiResponseSuccess,
+)
+from robocjk.api.serializers import (
+    PROJECT_FIELDS,
+    FONT_FIELDS,
+    ATOMIC_ELEMENT_ID_FIELDS,
+    DEEP_COMPONENT_ID_FIELDS,
+    CHARACTER_GLYPH_ID_FIELDS,
+)
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer,
@@ -56,7 +63,7 @@ def auth_refresh_token(request, *args, **kwargs):
 @api_view
 @require_user
 def project_list(request, params, *args, **kwargs):
-    data = list(Project.objects.values('uid', 'name', 'slug', 'repo_url'))
+    data = list(Project.objects.values(*PROJECT_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -108,7 +115,7 @@ def project_get(request, project, *args, **kwargs):
 @require_user
 @require_project
 def font_list(request, params, *args, **kwargs):
-    data = list(Font.objects.values('uid', 'name', 'slug', 'fontlib'))
+    data = list(Font.objects.values(*FONT_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -130,11 +137,11 @@ def font_get(request, font, *args, **kwargs):
 @require_user
 @require_font
 @require_params(fontlib='str')
-def font_update(request, params, font, *args, **kwargs):
+def font_update(request, user, params, font, *args, **kwargs):
     fontlib = params.get_dict('fontlib')
     if fontlib:
         font.fontlib = fontlib
-        font.save()
+        font.save_by(user)
     return ApiResponseSuccess(font.serialize())
 
 
@@ -150,9 +157,9 @@ def font_update(request, params, font, *args, **kwargs):
 @require_glif_filters
 def glif_list(request, glif_filters, *args, **kwargs):
     data = {
-        'atomic_elements': list(AtomicElement.objects.filter(**glif_filters).values('id', 'name')),
-        'deep_components': list(DeepComponent.objects.filter(**glif_filters).values('id', 'name')),
-        'character_glyphs': list(CharacterGlyph.objects.filter(**glif_filters).values('id', 'name', 'unicode_hex')),
+        'atomic_elements': list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)),
+        'deep_components': list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)),
+        'character_glyphs': list(CharacterGlyph.objects.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS)),
     }
     return ApiResponseSuccess(data)
 
@@ -161,7 +168,7 @@ def glif_list(request, glif_filters, *args, **kwargs):
 @require_user
 @require_glif_filters
 def atomic_element_list(request, glif_filters, *args, **kwargs):
-    data = list(AtomicElement.objects.filter(**glif_filters).values('id', 'name'))
+    data = list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -186,7 +193,7 @@ def atomic_element_create(request, user, font, data, glif, *args, **kwargs):
     atomic_element.name = glif.name
     atomic_element.data = data
     atomic_element.lock_by(user)
-    atomic_element.save()
+    atomic_element.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -194,9 +201,9 @@ def atomic_element_create(request, user, font, data, glif, *args, **kwargs):
 @require_user
 @require_atomic_element(check_locked=True)
 @require_data
-def atomic_element_update(request, atomic_element, data, glif, *args, **kwargs):
+def atomic_element_update(request, user, atomic_element, data, glif, *args, **kwargs):
     atomic_element.data = data
-    atomic_element.save()
+    atomic_element.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -204,9 +211,9 @@ def atomic_element_update(request, atomic_element, data, glif, *args, **kwargs):
 @require_user
 @require_atomic_element(check_locked=True)
 @require_status
-def atomic_element_update_status(request, atomic_element, status, *args, **kwargs):
+def atomic_element_update_status(request, user, atomic_element, status, *args, **kwargs):
     atomic_element.status = status
-    atomic_element.save()
+    atomic_element.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -242,13 +249,14 @@ def atomic_element_unlock(request, atomic_element, *args, **kwargs):
 @require_atomic_element(check_locked=True, prefix_params=True)
 @require_data
 @require_params(group_name='str')
-def atomic_element_layer_create(request, params, font, atomic_element, data, glif, *args, **kwargs):
+def atomic_element_layer_create(request, user, params, font, atomic_element, data, glif, *args, **kwargs):
     group_name = params.get('group_name')
     options = {
         'glif_id': atomic_element.id,
         'group_name': group_name,
         'defaults': {
             'data': data,
+            'updated_by': user,
         },
     }
     layer, layer_created = AtomicElementLayer.objects.get_or_create(**options)
@@ -264,7 +272,7 @@ def atomic_element_layer_create(request, params, font, atomic_element, data, gli
 @require_user
 @require_atomic_element_layer()
 @require_params(new_group_name='str')
-def atomic_element_layer_rename(request, params, font, atomic_element, atomic_element_layer, *args, **kwargs):
+def atomic_element_layer_rename(request, user, params, font, atomic_element, atomic_element_layer, *args, **kwargs):
     new_group_name = params.get('new_group_name')
     if AtomicElementLayer.objects.filter(glif_id=atomic_element.id, group_name__iexact=new_group_name).exclude(id=atomic_element_layer.id).exists():
         return ApiResponseBadRequest(
@@ -272,7 +280,7 @@ def atomic_element_layer_rename(request, params, font, atomic_element, atomic_el
             'group_name=\'{}\' already exists, please choose a different group name.'.format(
                 font.id, atomic_element.id, atomic_element.name, new_group_name))
     atomic_element_layer.group_name = new_group_name
-    atomic_element_layer.save()
+    atomic_element_layer.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -280,9 +288,9 @@ def atomic_element_layer_rename(request, params, font, atomic_element, atomic_el
 @require_user
 @require_atomic_element_layer()
 @require_data
-def atomic_element_layer_update(request, atomic_element, atomic_element_layer, data, *args, **kwargs):
+def atomic_element_layer_update(request, user, atomic_element, atomic_element_layer, data, *args, **kwargs):
     atomic_element_layer.data = data
-    atomic_element_layer.save()
+    atomic_element_layer.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize())
 
 
@@ -297,7 +305,7 @@ def atomic_element_layer_delete(request, atomic_element_layer, *args, **kwargs):
 @require_user
 @require_glif_filters
 def deep_component_list(request, glif_filters, *args, **kwargs):
-    data = list(DeepComponent.objects.filter(**glif_filters).values('id', 'name'))
+    data = list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -322,7 +330,7 @@ def deep_component_create(request, user, font, data, glif, *args, **kwargs):
     deep_component.name = glif.name
     deep_component.data = data
     deep_component.lock_by(user)
-    deep_component.save()
+    deep_component.save_by(user)
     return ApiResponseSuccess(deep_component.serialize())
 
 
@@ -330,9 +338,9 @@ def deep_component_create(request, user, font, data, glif, *args, **kwargs):
 @require_user
 @require_deep_component(check_locked=True)
 @require_data
-def deep_component_update(request, deep_component, data, glif, *args, **kwargs):
+def deep_component_update(request, user, deep_component, data, glif, *args, **kwargs):
     deep_component.data = data
-    deep_component.save()
+    deep_component.save_by(user)
     return ApiResponseSuccess(deep_component.serialize())
 
 
@@ -340,9 +348,9 @@ def deep_component_update(request, deep_component, data, glif, *args, **kwargs):
 @require_user
 @require_deep_component(check_locked=True)
 @require_status
-def deep_component_update_status(request, deep_component, status, *args, **kwargs):
+def deep_component_update_status(request, user, deep_component, status, *args, **kwargs):
     deep_component.status = status
-    deep_component.save()
+    deep_component.save_by(user)
     return ApiResponseSuccess(deep_component.serialize())
 
 
@@ -377,7 +385,7 @@ def deep_component_unlock(request, deep_component, *args, **kwargs):
 @require_user
 @require_glif_filters
 def character_glyph_list(request, glif_filters, *args, **kwargs):
-    data = list(CharacterGlyph.objects.filter(**glif_filters).values('id', 'name', 'unicode_hex'))
+    data = list(CharacterGlyph.objects.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -402,7 +410,7 @@ def character_glyph_create(request, user, font, data, glif, *args, **kwargs):
     character_glyph.name = glif.name
     character_glyph.data = data
     character_glyph.lock_by(user)
-    character_glyph.save()
+    character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -410,10 +418,10 @@ def character_glyph_create(request, user, font, data, glif, *args, **kwargs):
 @require_user
 @require_character_glyph(check_locked=True)
 @require_data
-def character_glyph_update(request, character_glyph, data, glif, *args, **kwargs):
+def character_glyph_update(request, user, character_glyph, data, glif, *args, **kwargs):
     # TODO: check lock
     character_glyph.data = data
-    character_glyph.save()
+    character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -421,9 +429,9 @@ def character_glyph_update(request, character_glyph, data, glif, *args, **kwargs
 @require_user
 @require_character_glyph(check_locked=True)
 @require_status
-def character_glyph_update_status(request, character_glyph, status, *args, **kwargs):
+def character_glyph_update_status(request, user, character_glyph, status, *args, **kwargs):
     character_glyph.status = status
-    character_glyph.save()
+    character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -459,13 +467,14 @@ def character_glyph_unlock(request, character_glyph, *args, **kwargs):
 @require_character_glyph(prefix_params=True)
 @require_data
 @require_params(group_name='str')
-def character_glyph_layer_create(request, params, font, character_glyph, data, glif, *args, **kwargs):
+def character_glyph_layer_create(request, user, params, font, character_glyph, data, glif, *args, **kwargs):
     group_name = params.get('group_name')
     options = {
         'glif_id': character_glyph.id,
         'group_name': group_name,
         'defaults': {
             'data': data,
+            'updated_by': user,
         },
     }
     layer, layer_created = CharacterGlyphLayer.objects.get_or_create(**options)
@@ -481,7 +490,7 @@ def character_glyph_layer_create(request, params, font, character_glyph, data, g
 @require_user
 @require_character_glyph_layer()
 @require_params(new_group_name='str')
-def character_glyph_layer_rename(request, params, font, character_glyph, character_glyph_layer, *args, **kwargs):
+def character_glyph_layer_rename(request, user, params, font, character_glyph, character_glyph_layer, *args, **kwargs):
     new_group_name = params.get('new_group_name')
     if CharacterGlyphLayer.objects.filter(glif_id=character_glyph.id, group_name__iexact=new_group_name).exclude(id=character_glyph_layer.id).exists():
         return ApiResponseBadRequest(
@@ -489,7 +498,7 @@ def character_glyph_layer_rename(request, params, font, character_glyph, charact
             'group_name=\'{}\' already exists, please choose a different group name.'.format(
                 font.id, character_glyph.id, character_glyph.name, new_group_name))
     character_glyph_layer.group_name = new_group_name
-    character_glyph_layer.save()
+    character_glyph_layer.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize())
 
 
@@ -497,9 +506,9 @@ def character_glyph_layer_rename(request, params, font, character_glyph, charact
 @require_user
 @require_character_glyph_layer()
 @require_data
-def character_glyph_layer_update(request, character_glyph, character_glyph_layer, data, *args, **kwargs):
+def character_glyph_layer_update(request, user, character_glyph, character_glyph_layer, data, *args, **kwargs):
     character_glyph_layer.data = data
-    character_glyph_layer.save()
+    character_glyph_layer.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize())
 
 

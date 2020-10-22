@@ -11,12 +11,14 @@ from functools import wraps
 from robocjk.api.auth import get_user_by_auth_token_in_header
 from robocjk.api.http import (
     ApiResponseBadRequest, ApiResponseUnauthorized, ApiResponseForbidden,
-    ApiResponseNotFound, ApiResponseMethodNotAllowed, ApiResponseInternalServerError, )
-
+    ApiResponseNotFound, ApiResponseMethodNotAllowed,
+    ApiResponseInternalServerError, ApiResponseServiceUnavailableError,
+)
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
-    AtomicElement, AtomicElementLayer, Proof, StatusModel, )
+    AtomicElement, AtomicElementLayer, Proof, StatusModel,
+)
 
 
 def api_view(view_func):
@@ -112,6 +114,9 @@ def require_font(view_func):
         except Font.DoesNotExist:
             return ApiResponseNotFound(
                 'Font object with \'font_uid={}\' not found.'.format(font_uid))
+        if not font_obj.available:
+            return ApiResponseServiceUnavailableError(
+                'Font object with \'font_uid={}\' is temporary not available due to some maintenance.')
         # success
         kwargs['font'] = font_obj
         return view_func(request, *args, **kwargs)

@@ -35,6 +35,8 @@ class ApiResponseError(ApiResponse):
     # 403 Forbidden - The request contained valid data and was understood by the server, but the server is refusing action
     # 404 Not Found - The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
     # 405 Method Not Allowed - A request method is not supported for the requested resource
+    # 500 Internal Server Error - A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.
+    # 503 Service Unavailable Error - The server cannot handle the request (because it is overloaded or down for maintenance). Generally, this is a temporary state.
 
     def __init__(self, status, error):
         super(ApiResponseError, self).__init__(
@@ -45,7 +47,8 @@ class ApiResponseBadRequest(ApiResponseError):
 
     def __init__(self, error=''):
         super(ApiResponseBadRequest, self).__init__(
-            status=400, error=self._format_error('Bad Request', error))
+            status=400, error=self._format_error(
+                'Bad Request', error))
 
 
 class ApiResponseUnauthorized(ApiResponseError):
@@ -81,5 +84,12 @@ class ApiResponseInternalServerError(ApiResponseError):
     def __init__(self, error=''):
         super(ApiResponseInternalServerError, self).__init__(
             status=500, error=self._format_error('Internal Server Error', error))
-        # TODO: log
+            # TODO: log
+
+
+class ApiResponseServiceUnavailableError(ApiResponseError):
+
+    def __init__(self, error=''):
+        super(ApiResponseServiceUnavailableError, self).__init__(
+            status=503, error=self._format_error('Service Unavailable Error', error))
 

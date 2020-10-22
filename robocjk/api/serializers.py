@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
 
+PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url']
+
+FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib']
+
+ATOMIC_ELEMENT_ID_FIELDS = ['id', 'name']
+DEEP_COMPONENT_ID_FIELDS = ['id', 'name']
+CHARACTER_GLYPH_ID_FIELDS = ['id', 'name', 'unicode_hex']
+
 GLIF_FIELDS = [
     'id', 'data', 'name', 'filename', 'unicode_hex',
     'is_locked', 'locked_by_id', 'locked_at', 'status',
@@ -18,12 +26,12 @@ def _serialize_object(obj, fields):
 
 
 def serialize_project(obj, **kwargs):
-    data = _serialize_object(obj, ['uid', 'name', 'slug', 'repo_url'])
+    data = _serialize_object(obj, PROJECT_FIELDS)
     return data
 
 
 def serialize_font(obj, **kwargs):
-    data = _serialize_object(obj, ['uid', 'name', 'slug', 'fontlib'])
+    data = _serialize_object(obj, FONT_FIELDS)
     return data
 
 
@@ -52,7 +60,7 @@ def serialize_atomic_element(obj, **kwargs):
     data['type'] = 'Atomic Element'
     data['type_code'] = 'AE'
     data['made_of'] = []
-    data['used_by'] = list(obj.deep_components.values(*['id', 'name']))
+    data['used_by'] = list(obj.deep_components.values(*DEEP_COMPONENT_ID_FIELDS))
     data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
     return data
 
@@ -66,7 +74,7 @@ def serialize_deep_component(obj, **kwargs):
     data['type'] = 'Deep Component'
     data['type_code'] = 'DC'
     data['made_of'] = list(obj.atomic_elements.values(*GLIF_FIELDS))
-    data['used_by'] = list(obj.character_glyphs.values(*['id', 'name', 'unicode_hex']))
+    data['used_by'] = list(obj.character_glyphs.values(*CHARACTER_GLYPH_ID_FIELDS))
     data['layers'] = []
     return data
 

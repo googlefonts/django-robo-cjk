@@ -6,7 +6,9 @@ from django.test import TestCase
 from robocjk.api.http import (
     ApiResponseSuccess, ApiResponseError,
     ApiResponseBadRequest, ApiResponseUnauthorized, ApiResponseForbidden,
-    ApiResponseNotFound, ApiResponseMethodNotAllowed, ApiResponseInternalServerError, )
+    ApiResponseNotFound, ApiResponseMethodNotAllowed,
+    ApiResponseInternalServerError, ApiResponseServiceUnavailableError,
+)
 
 import json
 
@@ -88,3 +90,12 @@ class HttpTestCase(TestCase):
         self.assertEqual(d['error'], 'Internal Server Error - {}'.format(m))
         self.assertEqual(d['data'], None)
 
+    def test_service_unavailable_error_response(self):
+        m = 'Error message description'
+        r = ApiResponseServiceUnavailableError(m)
+        self.assertTrue(isinstance(r, JsonResponse))
+        self.assertEqual(r.status_code, 503)
+        d = json.loads(r.content)
+        self.assertEqual(d['status'], r.status_code)
+        self.assertEqual(d['error'], 'Service Unavailable Error - {}'.format(m))
+        self.assertEqual(d['data'], None)

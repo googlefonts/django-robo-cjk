@@ -14,6 +14,11 @@ class NameSlugModel(models.Model):
     name = models.CharField(verbose_name=_('Name'), max_length=50)
     slug = models.SlugField(verbose_name=_('Slug'), max_length=50, unique=True, null=True, blank=True, editable=False)
 
+    def __init__(self, *args, **kwargs):
+        super(NameSlugModel, self).__init__(*args, **kwargs)
+        self.initial_name = self.name
+        self.initial_slug = self.slug
+
     def _update_slug(self):
         slug_base = slugify(self.name)
         slug_n = 1
@@ -26,6 +31,8 @@ class NameSlugModel(models.Model):
     def save(self, *args, **kwargs):
         self._update_slug()
         super(NameSlugModel, self).save(*args, **kwargs)
+        self.initial_name = self.name
+        self.initial_slug = self.slug
 
 
 class TitleSlugModel(models.Model):
@@ -35,6 +42,11 @@ class TitleSlugModel(models.Model):
 
     title = models.CharField(verbose_name=_('Name'), max_length=150)
     slug = models.SlugField(verbose_name=_('Slug'), max_length=150, unique=True, null=True, blank=True, editable=False)
+
+    def __init__(self, *args, **kwargs):
+        super(TitleSlugModel, self).__init__(*args, **kwargs)
+        self.initial_title = self.title
+        self.initial_slug = self.slug
 
     def _update_slug(self):
         slug_base = slugify(self.name)
@@ -48,4 +60,6 @@ class TitleSlugModel(models.Model):
     def save(self, *args, **kwargs):
         self._update_slug()
         super(TitleSlugModel, self).save(*args, **kwargs)
+        self.initial_title = self.title
+        self.initial_slug = self.slug
 

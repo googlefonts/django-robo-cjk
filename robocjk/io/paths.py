@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from fileutil import fileutil
-
 from robocjk.io import settings as io_settings
 
+import fsutil
 import os
 
 
@@ -66,4 +65,4 @@ def get_proof_path(instance):
     return os.path.join(
         get_font_path(instance.font),
         'Proofing',
-        fileutil.get_filename(self.file.path))
+        fsutil.get_filename(self.file.path))

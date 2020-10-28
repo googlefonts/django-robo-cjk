@@ -13,8 +13,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
-from fileutil import fileutil
-
 from robocjk.api.serializers import (
     serialize_project,
     serialize_font,
@@ -44,6 +42,7 @@ from robocjk.managers import (
 )
 
 import datetime as dt
+import fsutil
 import os
 
 
@@ -86,11 +85,11 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def save_to_file_system(self):
         path = self.path()
-        fileutil.remove_dir(path)
-        fileutil.ensure_dirpath(path)
+        fsutil.remove_dir(path)
+        fsutil.make_dirs(path)
         # init git repository if needed
         git_repo_path = os.path.join(path, '.git')
-        if not fileutil.exists(git_repo_path):
+        if not fsutil.exists(git_repo_path):
             cmds = [
                 'cd {}'.format(path),
                 'git init',
@@ -177,11 +176,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def save_to_file_system(self):
         path = self.path()
-        fileutil.ensure_dirpath(path)
+        fsutil.make_dirs(path)
         # write fontlib.json file
         fontlib_path = os.path.join(path, 'fontLib.json')
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
-        fileutil.write_file(fontlib_path, fontlib_str)
+        fsutil.write_file(fontlib_path, fontlib_str)
         # write all character-glyphs and relative layers
         for character_glyph in self.character_glyphs.all():
             character_glyph.save_to_file_system()
@@ -330,11 +329,6 @@ class GlifDataModel(models.Model):
     class Meta:
         abstract = True
 
-    def __init__(self, *args, **kwargs):
-        super(GlifDataModel, self).__init__(*args, **kwargs)
-        self.initial_data = self.data
-        self.initial_filename = self.filename
-
     data = models.TextField(
         verbose_name=_('Data'),
         help_text=_('(.glif xml data)'))
@@ -408,8 +402,7 @@ class GlifDataModel(models.Model):
         help_text=_('(autodetected from xml data)'))
 
     def _parse_data(self):
-        # if data and data is changed
-        if self.data and self.data != self.initial_data:
+        if self.data:
             gliph_data = GlifData()
             gliph_data.parse_string(self.data)
             if gliph_data.ok:
@@ -422,6 +415,7 @@ class GlifDataModel(models.Model):
 
     def _apply_data(self, data):
         if data:
+            self.data = data.xml_string
             self.name = data.name
             self.filename = data.filename
             self.unicode_hex = data.unicode_hex
@@ -456,7 +450,6 @@ class GlifDataModel(models.Model):
     def save(self, *args, **kwargs):
         self._apply_data(self._parse_data())
         super(GlifDataModel, self).save(*args, **kwargs)
-        self.initial_filename = self.filename
         self._update_components()
 
     def save_by(self, user):
@@ -464,8 +457,7 @@ class GlifDataModel(models.Model):
         self.save()
 
     def save_to_file_system(self):
-        # TODO: format xml data
-        fileutil.write_file(self.path(), self.data)
+        fsutil.write_file(self.path(), self.data)
 
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):

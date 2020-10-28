@@ -144,7 +144,7 @@ class GlifLayerAdmin(admin.ModelAdmin):
 
 class GlifLayerInline(admin.TabularInline):
 
-    fields = ('group_name', 'data', 'name', 'filename', 'created_at', 'updated_at', )
+    fields = ('group_name', 'data', 'name', 'filename', )
     readonly_fields = ('name', 'filename', )
     extra = 0
 

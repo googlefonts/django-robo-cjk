@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from fileutil import fileutil
-
 from robocjk.debug import logger
 from robocjk.io.decorators import threaded
 from robocjk.io.paths import (
@@ -15,6 +13,7 @@ from robocjk.io.paths import (
     # get_proof_path,
 )
 
+import fsutil
 import os
 
 
@@ -31,9 +30,9 @@ def create_or_update_project(instance, created, **kwargs):
     if instance.slug and instance.initial_slug and instance.slug != instance.initial_slug:
         old_name = instance.initial_slug
         old_path = get_project_path(instance, name=old_name)
-        if fileutil.exists(old_path):
+        if fsutil.exists(old_path):
             new_name = instance.slug
-            fileutil.rename_dir(old_path, name=new_name)
+            fsutil.rename_dir(old_path, new_name)
     # init git repository if needed
 #     path = instance.path()
 #     fileutil.ensure_dirpath(path)
@@ -60,9 +59,9 @@ def create_or_update_font(instance, created, **kwargs):
     if instance.slug and instance.initial_slug and instance.slug != instance.initial_slug:
         old_name = instance.initial_slug
         old_path = get_font_path(instance, name=old_name)
-        if fileutil.exists(old_path):
+        if fsutil.exists(old_path):
             new_name = os.path.split(get_font_path(instance, name=instance.slug))[-1]
-            fileutil.rename_dir(old_path, name=new_name)
+            fsutil.rename_dir(old_path, new_name)
     # fileutil.ensure_dirpath(instance.path())
 
 

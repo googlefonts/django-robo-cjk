@@ -7,9 +7,6 @@ from django.db import models
 import os
 import requests
 
-# TODO: implement logging, install python-fileutil / python-osutil
-# from abstract.utils import debug_util, os_util
-
 
 class FileUtilModel(models.Model):
 

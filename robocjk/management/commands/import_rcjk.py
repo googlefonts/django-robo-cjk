@@ -3,14 +3,14 @@
 from benedict import benedict
 
 from django.core.management.base import BaseCommand, CommandError
-
-from fileutil import fileutil
+from django.core.management import call_command
 
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, )
 
+import fsutil
 import os
 import re
 import zipfile
@@ -70,7 +70,7 @@ class Command(BaseCommand):
             filepath = os.path.join('/root/robocjk/temp/', filepath)
         if not filepath.endswith('.rcjk.zip'):
             raise CommandError('Invalid filepath, expected an "*.rcjk.zip" file.')
-        if not fileutil.exists(filepath):
+        if not fsutil.exists(filepath):
             raise CommandError('Invalid filepath, file "{}" doesn\'t exist.'.format(filepath))
 
         font_uid = options.get('font_uid')
@@ -84,11 +84,11 @@ class Command(BaseCommand):
 
         font_clear = options.get('font_clear', False)
         if font_clear:
-            print('Deleting existing atomic elements.')
+            print('Deleting existing atomic elements...')
             AtomicElement.objects.filter(font__uid=font_uid).delete()
-            print('Deleting existing deep components.')
+            print('Deleting existing deep components...')
             DeepComponent.objects.filter(font__uid=font_uid).delete()
-            print('Deleting existing character glyphs.')
+            print('Deleting existing character glyphs...')
             CharacterGlyph.objects.filter(font__uid=font_uid).delete()
 
         # read and index zip files by type

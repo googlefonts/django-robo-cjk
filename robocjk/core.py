@@ -30,19 +30,20 @@ class GlifData(object):
     def __init__(self, *args):
         super(GlifData, self).__init__()
 
-    def parse_file(self, fp):
-        self._ok = False
-        try:
-            self._xml = ElementTree.parse(fp)
-        except ElementTree.ParseError as xml_data_error:
-            self._error = xml_data_error
-            return
-        try:
-            self._parse_data()
-        except Exception as xml_parse_error:
-            self._error = xml_parse_error
-            return
-        self._ok = True
+#     def parse_file(self, fp):
+#         self._ok = False
+#         try:
+#             self._xml = ElementTree.parse(fp)
+#             self._xml_string = ElementTree.tostring(self._xml).decode()
+#         except ElementTree.ParseError as xml_data_error:
+#             self._error = xml_data_error
+#             return
+#         try:
+#             self._parse_data()
+#         except Exception as xml_parse_error:
+#             self._error = xml_parse_error
+#             return
+#         self._ok = True
 
     def parse_string(self, s):
         self._ok = False
@@ -50,6 +51,8 @@ class GlifData(object):
         try:
             self._xml_string = s.strip()
             self._xml = ElementTree.fromstring(self._xml_string)
+            self._xml_string = "<?xml version='1.0' encoding='UTF-8'?>\n{}".format(
+                ElementTree.tostring(self._xml).decode())
         except ElementTree.ParseError as xml_data_error:
             self._error = xml_data_error
             return

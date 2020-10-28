@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from abstract_models import (
-    UIDModel, HashidModel, NameSlugModel, TimestampModel,
-)
-
 from benedict import benedict
 from benedict.serializers import Base64Serializer
 
@@ -13,6 +9,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
+from robocjk.abstract_models import (
+    UIDModel, HashidModel, NameSlugModel, TimestampModel,
+)
 from robocjk.api.serializers import (
     serialize_project,
     serialize_font,

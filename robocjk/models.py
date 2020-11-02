@@ -23,6 +23,7 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
+from robocjk.io import settings as io_settings
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
@@ -33,7 +34,6 @@ from robocjk.io.paths import (
     get_atomic_element_layer_path,
     get_proof_path,
 )
-from robocjk.io import settings as io_settings
 from robocjk.managers import (
     CharacterGlyphManager, CharacterGlyphLayerManager,
     DeepComponentManager,

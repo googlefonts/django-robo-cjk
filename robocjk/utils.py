@@ -101,12 +101,12 @@ def username_to_filename(username, existing=[], prefix="", suffix=""):
     # test for clash
     fullname = prefix + username + suffix
     if fullname.lower() in existing:
-        fullname = handle_clash1(username, existing, prefix, suffix)
+        fullname = _handle_clash1(username, existing, prefix, suffix)
     # finished
     return fullname
 
 
-def handle_clash1(username, existing=[], prefix="", suffix=""):
+def _handle_clash1(username, existing=[], prefix="", suffix=""):
     """
     existing should be a case-insensitive list
     of all existing file names.
@@ -116,19 +116,19 @@ def handle_clash1(username, existing=[], prefix="", suffix=""):
     >>> existing = ["a" * 5]
 
     >>> e = list(existing)
-    >>> handle_clash1(username="A" * 5, existing=e,
+    >>> _handle_clash1(username="A" * 5, existing=e,
     ...     prefix=prefix, suffix=suffix)
     '00000.AAAAA000000000000001.0000000000'
 
     >>> e = list(existing)
     >>> e.append(prefix + "aaaaa" + "1".zfill(15) + suffix)
-    >>> handle_clash1(username="A" * 5, existing=e,
+    >>> _handle_clash1(username="A" * 5, existing=e,
     ...     prefix=prefix, suffix=suffix)
     '00000.AAAAA000000000000002.0000000000'
 
     >>> e = list(existing)
     >>> e.append(prefix + "AAAAA" + "2".zfill(15) + suffix)
-    >>> handle_clash1(username="A" * 5, existing=e,
+    >>> _handle_clash1(username="A" * 5, existing=e,
     ...     prefix=prefix, suffix=suffix)
     '00000.AAAAA000000000000001.0000000000'
     """
@@ -155,12 +155,12 @@ def handle_clash1(username, existing=[], prefix="", suffix=""):
             break
     # if there is a clash, go to the next fallback
     if final_name is None:
-        final_name = handle_clash2(existing, prefix, suffix)
+        final_name = _handle_clash2(existing, prefix, suffix)
     # finished
     return final_name
 
 
-def handle_clash2(existing=[], prefix="", suffix=""):
+def _handle_clash2(existing=[], prefix="", suffix=""):
     """
     existing should be a case-insensitive list
     of all existing file names.
@@ -170,17 +170,17 @@ def handle_clash2(existing=[], prefix="", suffix=""):
     >>> existing = [prefix + str(i) + suffix for i in range(100)]
 
     >>> e = list(existing)
-    >>> handle_clash2(existing=e, prefix=prefix, suffix=suffix)
+    >>> _handle_clash2(existing=e, prefix=prefix, suffix=suffix)
     '00000.100.0000000000'
 
     >>> e = list(existing)
     >>> e.remove(prefix + "1" + suffix)
-    >>> handle_clash2(existing=e, prefix=prefix, suffix=suffix)
+    >>> _handle_clash2(existing=e, prefix=prefix, suffix=suffix)
     '00000.1.0000000000'
 
     >>> e = list(existing)
     >>> e.remove(prefix + "2" + suffix)
-    >>> handle_clash2(existing=e, prefix=prefix, suffix=suffix)
+    >>> _handle_clash2(existing=e, prefix=prefix, suffix=suffix)
     '00000.2.0000000000'
     """
     # calculate the longest possible string

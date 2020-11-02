@@ -227,8 +227,8 @@ def atomic_element_delete(request, atomic_element, *args, **kwargs):
 @api_view
 @require_user
 @require_atomic_element()
-def atomic_element_lock(request, atomic_element, *args, **kwargs):
-    if atomic_element.lock_by(request.user, save=True):
+def atomic_element_lock(request, user, atomic_element, *args, **kwargs):
+    if atomic_element.lock_by(user, save=True):
         return ApiResponseSuccess(atomic_element.serialize())
     return ApiResponseForbidden(
         'Atomic Element can\'t be locked, it has already been locked by another user.')
@@ -237,8 +237,8 @@ def atomic_element_lock(request, atomic_element, *args, **kwargs):
 @api_view
 @require_user
 @require_atomic_element()
-def atomic_element_unlock(request, atomic_element, *args, **kwargs):
-    if atomic_element.unlock_by(request.user, save=True):
+def atomic_element_unlock(request, user, atomic_element, *args, **kwargs):
+    if atomic_element.unlock_by(user, save=True):
         return ApiResponseSuccess(atomic_element.serialize())
     return ApiResponseForbidden(
         'Atomic Element can\'t be unlocked, it has been locked by another user.')
@@ -364,8 +364,8 @@ def deep_component_delete(request, deep_component, *args, **kwargs):
 @api_view
 @require_user
 @require_deep_component()
-def deep_component_lock(request, deep_component, *args, **kwargs):
-    if deep_component.lock_by(request.user, save=True):
+def deep_component_lock(request, user, deep_component, *args, **kwargs):
+    if deep_component.lock_by(user, save=True):
         return ApiResponseSuccess(deep_component.serialize())
     return ApiResponseForbidden(
         'Deep Component can\'t be locked, it has already been locked by another user.')
@@ -374,8 +374,8 @@ def deep_component_lock(request, deep_component, *args, **kwargs):
 @api_view
 @require_user
 @require_deep_component()
-def deep_component_unlock(request, deep_component, *args, **kwargs):
-    if deep_component.unlock_by(request.user, save=True):
+def deep_component_unlock(request, user, deep_component, *args, **kwargs):
+    if deep_component.unlock_by(user, save=True):
         return ApiResponseSuccess(deep_component.serialize())
     return ApiResponseForbidden(
         'Deep Component can\'t be unlocked, it has been locked by another user.')
@@ -445,8 +445,8 @@ def character_glyph_delete(request, character_glyph, *args, **kwargs):
 @api_view
 @require_user
 @require_character_glyph()
-def character_glyph_lock(request, character_glyph, *args, **kwargs):
-    if character_glyph.lock_by(request.user, save=True):
+def character_glyph_lock(request, user, character_glyph, *args, **kwargs):
+    if character_glyph.lock_by(user, save=True):
         return ApiResponseSuccess(character_glyph.serialize())
     return ApiResponseForbidden(
         'Character Glyph can\'t be locked, it has already been locked by another user.')
@@ -455,8 +455,8 @@ def character_glyph_lock(request, character_glyph, *args, **kwargs):
 @api_view
 @require_user
 @require_character_glyph()
-def character_glyph_unlock(request, character_glyph, *args, **kwargs):
-    if character_glyph.unlock_by(request.user, save=True):
+def character_glyph_unlock(request, user, character_glyph, *args, **kwargs):
+    if character_glyph.unlock_by(user, save=True):
         return ApiResponseSuccess(character_glyph.serialize())
     return ApiResponseForbidden(
         'Character Glyph can\'t be unlocked, it has been locked by another user.')
@@ -464,7 +464,7 @@ def character_glyph_unlock(request, character_glyph, *args, **kwargs):
 
 @api_view
 @require_user
-@require_character_glyph(prefix_params=True)
+@require_character_glyph(check_locked=True, prefix_params=True)
 @require_data
 @require_params(group_name='str')
 def character_glyph_layer_create(request, user, params, font, character_glyph, data, glif, *args, **kwargs):

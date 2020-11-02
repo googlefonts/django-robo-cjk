@@ -54,7 +54,6 @@ ENV_DIR = os.path.dirname(BASE_DIR)
 SECRET_KEY = env('SECRET_KEY')
 
 JWT_SECRET = env('JWT_SECRET')
-JWT_HEADER_KEY = 'HTTP_AUTHORIZATION'
 JWT_ALGORITHM = 'HS256'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -442,19 +441,6 @@ HASHIDS_OPTIONS = {
     'alphabet': HASHIDS_ALPHABET,
     'min_length': HASHIDS_MIN_LENGTH,
 }
-
-# django-crontab - https://github.com/kraiz/django-crontab
-# http://en.wikipedia.org/wiki/Cron#Format
-# http://www.openjs.com/scripts/jslibrary/demos/crontab.php
-# CRONJOBS = [
-#     # ('00 03 * * *', 'app.cron.task'), # every night at 3:00
-#     # ('00 * * * *', 'app.cron.task'), # every hour at *:00
-#     # ('*/10 * * * *', 'app.cron.send_refund_email'), # every 10 minutes
-# ]
-# CRONTAB_LOCK_JOBS = True
-# CRONTAB_DJANGO_MANAGE_PATH = '%s%s' % (ENV_DIR, '/sources/manage.py', )
-# CRONTAB_PYTHON_EXECUTABLE = os.path.abspath('%s/bin/python' % (ENV_DIR, ))
-# CRONTAB_COMMENT = ENV_NAME
 
 
 # django-solo - https://github.com/lazybird/django-solo

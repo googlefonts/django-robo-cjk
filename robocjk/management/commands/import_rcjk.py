@@ -11,7 +11,6 @@ from robocjk.models import (
     AtomicElement, AtomicElementLayer, Proof, )
 
 import fsutil
-import os
 import re
 import zipfile
 
@@ -67,7 +66,7 @@ class Command(BaseCommand):
 
         filepath = options.get('filepath')
         if not filepath.startswith('/'):
-            filepath = os.path.join('/root/robocjk/temp/', filepath)
+            filepath = fsutil.join_path('/root/robocjk/temp/', filepath)
         if not filepath.endswith('.rcjk.zip'):
             raise CommandError('Invalid filepath, expected an "*.rcjk.zip" file.')
         if not fsutil.exists(filepath):

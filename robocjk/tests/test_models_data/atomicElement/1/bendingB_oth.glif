@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="bendingBoth" format="2">
+  <advance width="1000"/>
+  <outline>
+    <contour>
+      <point x="14" y="180" type="line"/>
+      <point x="286" y="-51"/>
+      <point x="691" y="-66"/>
+      <point x="986" y="180" type="curve"/>
+      <point x="937" y="237" type="line"/>
+      <point x="682" y="23"/>
+      <point x="318" y="24"/>
+      <point x="63" y="238" type="curve"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>robocjk.atomicElement.glyphVariations</key>
+      <dict/>
+    </dict>
+  </lib>
+</glyph>

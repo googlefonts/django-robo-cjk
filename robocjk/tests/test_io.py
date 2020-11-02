@@ -2,6 +2,8 @@
 
 from django.test import TestCase
 
+from robocjk.io import paths
+
 
 class IOTestCase(TestCase):
 

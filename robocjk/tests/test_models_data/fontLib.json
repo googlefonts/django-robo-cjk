@@ -1,0 +1,24 @@
+{
+    "com.typemytype.robofont.segmentType": "curve",
+    "robocjk.fontVariations": [
+        "wght"
+    ],
+    "CJKDesignFrameSettings": {
+        "em_Dimension": [
+            1000,
+            1000
+        ],
+        "characterFace": 90,
+        "overshoot": [
+            20,
+            20
+        ],
+        "customsFrames": [],
+        "horizontalLine": 15,
+        "verticalLine": 15,
+        "type": "han"
+    },
+    "robocjk.defaultGlyphWidth": 1000,
+    "com.typemytype.robofont.guideline.showMeasurements.bj4ZrgHhis": false,
+    "com.typemytype.robofont.guideline.magnetic.bj4ZrgHhis": 5.0
+}

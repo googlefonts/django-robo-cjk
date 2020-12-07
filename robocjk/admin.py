@@ -42,12 +42,12 @@ class ProjectAdmin(admin.ModelAdmin):
 class FontAdmin(admin.ModelAdmin):
 
     def info(self, font, *args, **kwargs):
-        html = 'Character Glyphs: <strong>{}</strong><br>'\
+        html = 'Character Glyphs: <strong>{}</strong> <em>({} layers)</em><br>'\
                'Deep Components: <strong>{}</strong><br>'\
-               'Atomic Elements: <strong>{}</strong>'.format(
-                    font.num_character_glyphs(),
+               'Atomic Elements: <strong>{}</strong> <em>({} layers)</em>'.format(
+                    font.num_character_glyphs(), font.num_character_glyphs_layers(),
                     font.num_deep_components(),
-                    font.num_atomic_elements())
+                    font.num_atomic_elements(), font.num_atomic_elements_layers())
         return mark_safe(html)
 
     list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )

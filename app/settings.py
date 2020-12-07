@@ -74,6 +74,7 @@ MANAGERS = [
     ('Fabio Caccamo', 'fabio.caccamo@gmail.com', )
 ]
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -90,10 +91,9 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
 
-    'debug_toolbar',
-    'corsheaders',
-
     'admin_auto_filters',
+    'corsheaders',
+    'debug_toolbar',
     # 'ckeditor',
     # 'django_crontab',
     'django_json_widget',

@@ -87,7 +87,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         fsutil.remove_dir(path)
         fsutil.make_dirs(path)
         # init git repository if needed
-        git_repo_path = os.path.join(path, '.git')
+        git_repo_path = fsutil.join_path(path, '.git')
         if not fsutil.exists(git_repo_path):
             cmds = [
                 'cd {}'.format(path),
@@ -160,11 +160,17 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     def num_character_glyphs(self):
         return self.character_glyphs.count()
 
+    def num_character_glyphs_layers(self):
+        return CharacterGlyphLayer.objects.filter(glif__font=self).count()
+
     def num_deep_components(self):
         return self.deep_components.count()
 
     def num_atomic_elements(self):
         return self.atomic_elements.count()
+
+    def num_atomic_elements_layers(self):
+        return AtomicElementLayer.objects.filter(glif__font=self).count()
 
     def path(self):
         return get_font_path(self)
@@ -177,7 +183,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         path = self.path()
         fsutil.make_dirs(path)
         # write fontlib.json file
-        fontlib_path = os.path.join(path, 'fontLib.json')
+        fontlib_path = fsutil.join_path(path, 'fontLib.json')
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write all character-glyphs and relative layers

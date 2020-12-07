@@ -4,6 +4,7 @@ from django.urls import path
 
 from robocjk.api.views import (
     auth_token, auth_refresh_token,
+    user_list, user_me,
     project_list, project_get,
     font_list, font_get, font_update,
     glif_list,
@@ -27,6 +28,14 @@ urlpatterns = [
     # Auth (jwt token)
     path('api/auth/token/', auth_token, name='auth_token'),
     path('api/auth/token-refresh/', auth_refresh_token, name='auth_token_refresh'),
+
+    # Users
+    path('api/user/list/', user_list, name='user_list'),
+    # path('api/user/get/', user_get, name='user_get'),
+    path('api/user/me/', user_me, name='user_me'),
+    # path('api/user/create/', user_create, name='user_create'),
+    # path('api/user/update/', user_update, name='user_update'),
+    # path('api/user/delete/', user_delete, name='user_delete'),
 
     # Project
     path('api/project/list/', project_list, name='project_list'),

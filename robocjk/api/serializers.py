@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+USER_FIELDS = ['id', 'username', 'first_name', 'last_name', 'email']
+
 PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url']
 
 FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib']
@@ -25,6 +27,11 @@ def _serialize_object(obj, fields):
     return { field:getattr(obj, field, None) for field in fields }
 
 
+def serialize_user(obj, **kwargs):
+    data = _serialize_object(obj, USER_FIELDS)
+    return data
+
+
 def serialize_project(obj, **kwargs):
     data = _serialize_object(obj, PROJECT_FIELDS)
     return data
@@ -40,13 +47,7 @@ def _serialize_glif(obj):
     data['locked_by_user'] = None
     if obj.locked_by_id:
         user = obj.locked_by
-        data['locked_by_user'] = {
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-        }
+        data['locked_by_user'] = serialize_user(user)
     return data
 
 

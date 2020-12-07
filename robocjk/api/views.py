@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout
 
 from robocjk.api.auth import get_auth_token
 from robocjk.api.decorators import (
@@ -25,16 +25,21 @@ from robocjk.api.http import (
     ApiResponseSuccess,
 )
 from robocjk.api.serializers import (
+    USER_FIELDS,
     PROJECT_FIELDS,
     FONT_FIELDS,
     ATOMIC_ELEMENT_ID_FIELDS,
     DEEP_COMPONENT_ID_FIELDS,
     CHARACTER_GLYPH_ID_FIELDS,
+    serialize_user,
 )
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer,
     DeepComponent, AtomicElement, AtomicElementLayer, Proof, )
+
+
+UserClass = get_user_model()
 
 
 @api_view
@@ -58,6 +63,27 @@ def auth_token(request, params, *args, **kwargs):
 def auth_refresh_token(request, *args, **kwargs):
     # TODO
     pass
+
+
+@api_view
+@require_user
+def user_list(request, params, *args, **kwargs):
+    data = list(UserClass.objects.values(*USER_FIELDS))
+    return ApiResponseSuccess(data)
+
+
+# @api_view
+# @require_user
+# def user_get(request, params, *args, **kwargs):
+#     data = {} # list(Project.objects.values(*PROJECT_FIELDS))
+#     return ApiResponseSuccess(data)
+
+
+@api_view
+@require_user
+def user_me(request, params, user, *args, **kwargs):
+    data = serialize_user(user)
+    return ApiResponseSuccess(data)
 
 
 @api_view

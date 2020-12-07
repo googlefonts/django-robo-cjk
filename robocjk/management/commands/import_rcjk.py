@@ -23,24 +23,24 @@ class Command(BaseCommand):
 
         super(Command, self).__init__(*args, **kwargs)
 
-        self._font_pattern = r'((?P<font_name>[\w\-_]+)\.rcjk\/)'
+        self._font_pattern = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
 
         self._fontlib_pattern = r'^{}?fontLib\.json$'.format(self._font_pattern)
         self._fontlib_re = re.compile(self._fontlib_pattern)
 
-        self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_]+)\.glif$'.format(self._font_pattern)
+        self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
         self._atomic_element_re = re.compile(self._atomic_element_pattern)
 
-        self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_]+)\/(?P<glif_name>[\w\-\_]+)\.glif$'.format(self._font_pattern)
+        self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
         self._atomic_element_layer_re = re.compile(self._atomic_element_layer_pattern)
 
-        self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_]+)\.glif$'.format(self._font_pattern)
+        self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
         self._deep_component_re = re.compile(self._deep_component_pattern)
 
-        self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_]+)\.glif$'.format(self._font_pattern)
+        self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
         self._character_glyph_re = re.compile(self._character_glyph_pattern)
 
-        self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_]+)\/(?P<glif_name>[\w\-\_]+)\.glif$'.format(self._font_pattern)
+        self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
         self._character_glyph_layer_re = re.compile(self._character_glyph_layer_pattern)
 
     def add_arguments(self, parser):

@@ -38,6 +38,10 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 - [**Auth**](#auth)
    - [Auth **Token**](#auth-token)
 
+- [**User**](#user)
+   - [User **List**](#user-list)
+   - [User **Me**](#user-me)
+
 - [**Project**](#project)
    - [Project **List**](#project-list)
    - [Project **Get**](#project-get)
@@ -115,6 +119,77 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 {
     "data": {
         "auth_token": "eyJ0..."
+    },
+    "error": null,
+    "status": 200
+}
+```
+
+---
+
+### User
+
+#### User List
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/user/list/` | `POST` |
+
+##### Response
+
+```json
+{
+    "data": [
+        {
+            "email": "fabio.caccamo@black-foundry.com",
+            "first_name": "Fabio",
+            "id": 1,
+            "last_name": "Caccamo",
+            "username": "fabio.caccamo"
+        },
+        {
+            "email": "jeremie.hornus@black-foundry.com",
+            "first_name": "Jeremie",
+            "id": 2,
+            "last_name": "Hornus",
+            "username": "jeremie.hornus"
+        },
+        {
+            "email": "gaetan.baehr@black-foundry.com",
+            "first_name": "Gaetan",
+            "id": 3,
+            "last_name": "Baehr",
+            "username": "gaetan.baehr"
+        },
+        # ...
+    ],
+    "error": null,
+    "status": 200
+}
+```
+
+---
+
+#### User Me
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/user/me/` | `POST` |
+
+##### Response
+
+```json
+{
+    "data": {
+        "email": "fabio.caccamo@black-foundry.com",
+        "first_name": "Fabio",
+        "id": 1,
+        "last_name": "Caccamo",
+        "username": "fabio.caccamo"
     },
     "error": null,
     "status": 200

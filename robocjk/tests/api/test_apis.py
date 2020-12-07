@@ -97,10 +97,10 @@ class APIsTestCase(TestCase):
         data = response.json()
         return (response, data['data'], )
 
-    def test_0005_auth_token(self):
-        # print('test_0005_auth_token')
+    def test_0000_auth_token(self):
+        # print('test_0000_auth_token')
         payload = {
-            'username': 'fabio.caccamo@black-foundry.com',
+            'username': 'fabio.caccamo',
             'password': '->rR080_#_çJK?!'
         }
         response, data = self.get_response('/api/auth/token/', payload=payload)
@@ -109,6 +109,20 @@ class APIsTestCase(TestCase):
         auth_token = data['auth_token']
         self.assertTrue(len(auth_token) > 50)
         self.__class__.auth_token = auth_token
+
+    def test_0005_user_list(self):
+        # print('test_0005_user_list')
+        payload = {
+        }
+        response, data = self.get_response('/api/user/list/', payload=payload)
+        self.assert_response_ok(response)
+
+    def test_0006_user_me(self):
+        # print('test_0006_user_me')
+        payload = {
+        }
+        response, data = self.get_response('/api/user/me/', payload=payload)
+        self.assert_response_ok(response)
 
     def test_0010_project_list(self):
         # print('test_0010_project_list')

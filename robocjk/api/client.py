@@ -8,7 +8,7 @@ class Client(object):
     """
     Client to interact with the Robo-CJK back-end.
     Usage:
-        c = Client(username, password)
+        c = Client(host, username, password)
         data = c.projects_list()
     """
 
@@ -22,13 +22,12 @@ class Client(object):
         return value if isinstance(value, str) else None
 
 
-    def __init__(self, username, password):
+    def __init__(self, host, username, password):
         """
         Initialize a new Robo-CJK API client using the given credentials,
         then authentication is automatically managed by the client, no need to do anything.
         """
-        # TODO: dynamic dev/prod host
-        self._host = 'http://164.90.229.235'
+        self._host = host # 'http://164.90.229.235'
         self._username = username
         self._password = password
         self._auth_token = None
@@ -39,7 +38,7 @@ class Client(object):
         Call an API method by its 'view-name' passing the given params.
         """
         # get api absolute url
-        url = _api_url(view_name)
+        url = self._api_url(view_name)
         # clean request post data (remove empty entries)
         data = params or {}
         keys = list(data.keys())
@@ -56,14 +55,16 @@ class Client(object):
         options = {
             'data': data,
             'headers': headers,
-            'verify': False, # TODO
+            'verify': self._host.startswith('https://'),
         }
         # send post request
         response = requests.post(url, **options)
         if response.status_code == 401:
             # unauthorized - request a new auth token
-            self.auth_token()
-            return self._api_call(view_name, params)
+            auth_response = self.auth_token()
+            self._auth_token = auth_response.get('data', {}).get('auth_token', None)
+            if self._auth_token:
+                return self._api_call(view_name, params)
         # read response json data and return dict
         response_data = response.json()
         return response_data
@@ -120,12 +121,12 @@ class Client(object):
             # Character Glyph
             'character_glyph_list': '/api/character-glyph/list/',
             'character_glyph_get': '/api/character-glyph/get/',
-            'deep_component_create': '/api/character-glyph/create/',
-            'deep_component_update': '/api/character-glyph/update/',
-            'deep_component_update_status': '/api/character-glyph/update-status/',
-            'deep_component_delete': '/api/character-glyph/delete/',
-            'deep_component_lock': '/api/character-glyph/lock/',
-            'deep_component_unlock': '/api/character-glyph/unlock/',
+            'character_glyph_create': '/api/character-glyph/create/',
+            'character_glyph_update': '/api/character-glyph/update/',
+            'character_glyph_update_status': '/api/character-glyph/update-status/',
+            'character_glyph_delete': '/api/character-glyph/delete/',
+            'character_glyph_lock': '/api/character-glyph/lock/',
+            'character_glyph_unlock': '/api/character-glyph/unlock/',
             'character_glyph_layer_create': '/api/character-glyph/layer/create/',
             'character_glyph_layer_rename': '/api/character-glyph/layer/rename/',
             'character_glyph_layer_update': '/api/character-glyph/layer/update/',
@@ -144,9 +145,7 @@ class Client(object):
             'username': self._username,
             'password': self._password,
         }
-        response_data = self._api_call('auth_token', params)
-        self._auth_token = response_data.get('data.auth_token', None)
-        return response_data
+        return self._api_call('auth_token', params)
 
 
     # def auth_refresh_token(self, token):
@@ -222,7 +221,7 @@ class Client(object):
         """
         params = {
             'font_uid': font_uid,
-            'is_locked_by_current_user':, is_locked_by_current_user,
+            'is_locked_by_current_user': is_locked_by_current_user,
             'is_locked': is_locked,
             'is_empty': is_empty,
             'has_variation_axis': has_variation_axis,

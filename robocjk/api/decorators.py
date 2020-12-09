@@ -246,12 +246,13 @@ def require_atomic_element(**kwargs):
                 return ApiResponseInternalServerError()
             # check lock
             user = kwargs['user']
-            if not obj.is_lockable_by(user):
-                return ApiResponseForbidden(
-                    'Atomic Element object has already been locked by another user.')
-            if not obj.is_locked_by(user) and check_locked:
-                return ApiResponseForbidden(
-                    'Atomic Element object must be locked by the current user.')
+            if check_locked:
+                if not obj.is_lockable_by(user):
+                    return ApiResponseForbidden(
+                        'Atomic Element object has already been locked by another user.')
+                if not obj.is_locked_by(user):
+                    return ApiResponseForbidden(
+                        'Atomic Element object must be locked by the current user.')
             # success
             kwargs['atomic_element'] = obj
             return view_func(request, *args, **kwargs)
@@ -329,12 +330,13 @@ def require_deep_component(**kwargs):
                 return ApiResponseInternalServerError()
             # check lock
             user = kwargs['user']
-            if not obj.is_lockable_by(user):
-                return ApiResponseForbidden(
-                    'Deep Component object has already been locked by another user.')
-            if not obj.is_locked_by(user) and check_locked:
-                return ApiResponseForbidden(
-                    'Deep Component object must be locked by the current user.')
+            if check_locked:
+                if not obj.is_lockable_by(user):
+                    return ApiResponseForbidden(
+                        'Deep Component object has already been locked by another user.')
+                if not obj.is_locked_by(user):
+                    return ApiResponseForbidden(
+                        'Deep Component object must be locked by the current user.')
             # success
             kwargs['deep_component'] = obj
             return view_func(request, *args, **kwargs)
@@ -377,12 +379,13 @@ def require_character_glyph(**kwargs):
                 return ApiResponseInternalServerError()
             # check lock
             user = kwargs['user']
-            if not obj.is_lockable_by(user):
-                return ApiResponseForbidden(
-                    'Character Glyph object has been locked by another user.')
-            if not obj.is_locked_by(user) and check_locked:
-                return ApiResponseForbidden(
-                    'Character Glyph object must be locked by the current user.')
+            if check_locked:
+                if not obj.is_lockable_by(user):
+                    return ApiResponseForbidden(
+                        'Character Glyph object has been locked by another user.')
+                if not obj.is_locked_by(user):
+                    return ApiResponseForbidden(
+                        'Character Glyph object must be locked by the current user.')
             # success
             kwargs['character_glyph'] = obj
             return view_func(request, *args, **kwargs)

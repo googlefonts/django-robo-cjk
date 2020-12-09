@@ -64,7 +64,7 @@ class FontAdmin(admin.ModelAdmin):
           'fields': ('created_at', 'updated_at', )
       }),
       (None, {
-          'fields': ('project', 'name', 'slug', 'available', 'fontlib', ) # 'glyphs_composition',
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', 'glyphs_composition', )
       }),
     )
     save_on_top = True

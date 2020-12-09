@@ -382,7 +382,8 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 | Param | Type | Required |
 |---|---|---|
 | `font_uid` | `str` | yes |
-| `fontlib` | `json` | yes |
+| `fontlib` | `json` | no |
+| `glyphs_composition` | `json` | no |
 
 ##### Response
 

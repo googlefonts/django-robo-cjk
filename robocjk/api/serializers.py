@@ -5,7 +5,7 @@ USER_FIELDS = ['id', 'username', 'first_name', 'last_name', 'email']
 
 PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url']
 
-FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib']
+FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib', 'glyphs_composition']
 
 ATOMIC_ELEMENT_ID_FIELDS = ['id', 'name']
 DEEP_COMPONENT_ID_FIELDS = ['id', 'name']

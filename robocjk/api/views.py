@@ -162,11 +162,20 @@ def font_get(request, font, *args, **kwargs):
 @api_view
 @require_user
 @require_font
-@require_params(fontlib='str')
 def font_update(request, user, params, font, *args, **kwargs):
+    font_changed = False
+    # look for fontlib data
     fontlib = params.get_dict('fontlib')
     if fontlib:
         font.fontlib = fontlib
+        font_changed = True
+    # look for glyphs_composition data
+    glyphs_composition = params.get_dict('glyphs_composition')
+    if glyphs_composition:
+        font.glyphs_composition = glyphs_composition
+        font_changed = True
+    # font is changed, save it
+    if font_changed:
         font.save_by(user)
     return ApiResponseSuccess(font.serialize())
 

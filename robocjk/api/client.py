@@ -14,7 +14,12 @@ class Client(object):
 
     @staticmethod
     def _if_int(value):
-        return value if isinstance(value, int) else None
+        if isinstance(value, int):
+            return value
+        try:
+            return int(value)
+        except ValueError:
+            return None
 
 
     @staticmethod

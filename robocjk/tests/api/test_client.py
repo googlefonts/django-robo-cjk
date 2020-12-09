@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.test import TestCase
 # from django.test import (
 #     Client, override_settings, RequestFactory, SimpleTestCase, TestCase,
@@ -13,9 +14,9 @@ class ClientTestCase(TestCase):
     def setUpTestData(self):
         # Set up data for the whole TestCase
         self._client = Client(
-            host='http://164.90.229.235',
-            username='fabio.caccamo',
-            password='->rR080_#_çJK?!'
+            host=settings.TEST_API_HOST,
+            username=settings.TEST_API_USERNAME,
+            password=settings.TEST_API_PASSWORD
         )
         self._project_uid = 'fde4fc80-c136-4e2f-a9be-c80e18b9f213'
         self._font_uid = 'cbac1f2d-6b6c-46a4-a477-798d49042ff4'

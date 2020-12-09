@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.test import (
     Client, override_settings, RequestFactory, SimpleTestCase, TestCase,
 )
@@ -77,7 +78,7 @@ class APIsTestCase(TestCase):
 
     @classmethod
     def get_response(cls, url, payload=None, files=None, headers=None):
-        host = 'http://164.90.229.235'
+        host = settings.TEST_API_HOST
         # view_url = reverse('view_name')
         absolute_url = '{}{}'.format(host, url)
         payload = payload or {}
@@ -100,8 +101,8 @@ class APIsTestCase(TestCase):
     def test_0000_auth_token(self):
         # print('test_0000_auth_token')
         payload = {
-            'username': 'fabio.caccamo',
-            'password': '->rR080_#_çJK?!'
+            'username': settings.TEST_API_USERNAME,
+            'password': settings.TEST_API_PASSWORD,
         }
         response, data = self.get_response('/api/auth/token/', payload=payload)
         self.assert_response_ok(response)

@@ -126,7 +126,7 @@ class GlifLayerAdmin(admin.ModelAdmin):
 
     list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('group_name', )
-    list_filter = (GlifFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_filter = ('glif__font', GlifFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     fieldsets = (

@@ -62,6 +62,7 @@ class Client(object):
         if self._auth_token:
             headers['Authorization'] = 'Bearer {}'.format(self._auth_token)
         headers['Cache-Control'] = 'no-cache'
+        headers['Pragma'] = 'no-cache'
         # request options
         options = {
             'data': data,
@@ -553,7 +554,7 @@ class Client(object):
         return self._api_call('character_glyph_get', params)
 
 
-    def character_glyph_create(self, font_uid, data):
+    def character_glyph_create(self, font_uid, character_glyph_data):
         """
         Create a new Character Glyph with the specified glif data.
         """

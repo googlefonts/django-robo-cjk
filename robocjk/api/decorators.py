@@ -215,7 +215,7 @@ def require_status(view_func):
 
 def require_atomic_element(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', ['locked_by']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
     prefetch_related = kwargs.get('prefetch_related', ['layers', 'deep_components']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
@@ -285,6 +285,8 @@ def require_atomic_element_layer(**kwargs):
             try:
                 obj = atomic_element.layers.get(**filters)
             except obj_cls.DoesNotExist:
+                filters['font_uid'] = atomic_element.font.uid
+                filters['atomic_elemens_id'] = atomic_element.id
                 return ApiResponseNotFound(
                     'Atomic Element Layer object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:
@@ -299,7 +301,7 @@ def require_atomic_element_layer(**kwargs):
 
 def require_deep_component(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', ['locked_by']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
     prefetch_related = kwargs.get('prefetch_related', ['character_glyphs', 'atomic_elements']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
@@ -347,7 +349,7 @@ def require_deep_component(**kwargs):
 
 def require_character_glyph(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', ['locked_by']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
     prefetch_related = kwargs.get('prefetch_related', ['layers', 'deep_components']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
@@ -418,6 +420,8 @@ def require_character_glyph_layer(**kwargs):
             try:
                 obj = character_glyph.layers.get(**filters)
             except obj_cls.DoesNotExist:
+                filters['font_uid'] = character_glyph.font.uid
+                filters['character_glyph_id'] = character_glyph.id
                 return ApiResponseNotFound(
                     'Character Glyph Layer object with \'{}\' not found.'.format(filters))
             except obj_cls.MultipleObjectsReturned:

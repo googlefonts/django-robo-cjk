@@ -234,7 +234,7 @@ def require_atomic_element(**kwargs):
             if not filters:
                 return ApiResponseBadRequest(
                     'Missing parameter \'{}id\' or \'{}name\'.'.format(prefix, prefix))
-            filters['font_id'] = kwargs['font'].id
+            filters['font__uid'] = kwargs['font'].uid
             # retrieve atomic element object
             obj_cls = AtomicElement
             try:
@@ -318,7 +318,7 @@ def require_deep_component(**kwargs):
             if not filters:
                 return ApiResponseBadRequest(
                     'Missing parameter \'{}id\' or \'{}name\'.'.format(prefix, prefix))
-            filters['font_id'] = kwargs['font'].id
+            filters['font__uid'] = kwargs['font'].uid
             # retrieve deep component object
             obj_cls = DeepComponent
             try:
@@ -367,7 +367,7 @@ def require_character_glyph(**kwargs):
             if not filters:
                 return ApiResponseBadRequest(
                     'Missing parameter \'{}id\' or \'{}name\' or \'{}unicode_hex\'.'.format(prefix, prefix, prefix))
-            filters['font_id'] = kwargs['font'].id
+            filters['font__uid'] = kwargs['font'].uid
             # retrieve character glyph objecs
             obj_cls = CharacterGlyph
             try:

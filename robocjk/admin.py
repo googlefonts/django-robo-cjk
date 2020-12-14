@@ -87,6 +87,7 @@ class GlifAdmin(admin.ModelAdmin):
             padding: 3px 5px 2px;
             border-radius: 3px;
             line-height: 1.0;
+            white-space: nowrap;
             '''.format(obj.status_color)
         html = '<span style="{}">{}</span>'.format(
             css, obj.get_status_display())

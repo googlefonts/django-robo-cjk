@@ -45,10 +45,12 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 - [**Project**](#project)
    - [Project **List**](#project-list)
    - [Project **Get**](#project-get)
+   - [Project **Create**](#project-create)
    
 - [**Font**](#font)
    - [Font **List**](#font-list)
    - [Font **Get**](#font-get)
+   - [Font **Create**](#font-create)
    - [Font **Update**](#font-update)
    
 - [**Glif**](#glif)
@@ -243,7 +245,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 | Param | Type | Required |
 |---|---|---|
-| `project_uid` | `str` | yes |
+| `project_uid` | `string` | yes |
 
 ##### Response
 
@@ -262,6 +264,25 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ---
 
+#### Project Create
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/project/create/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `name` | `string` | yes |
+| `repo_url` | `string` | yes |
+
+##### Response
+
+See [Project Get](#project-get) response.
+
+---
+
 ### Font
 
 #### Font List
@@ -274,7 +295,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 | Param | Type | Required |
 |---|---|---|
-| `project_uid` | `str` | yes |
+| `project_uid` | `string` | yes |
 
 ##### Response
 
@@ -329,7 +350,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 
 ##### Response
 
@@ -371,6 +392,25 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ---
 
+#### Font Create
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/font/create/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `project_uid` | `string` | yes |
+| `name` | `string` | yes |
+
+##### Response
+
+See [Font Get](#font-get) response.
+
+---
+
 #### Font Update
 
 ##### Request
@@ -381,7 +421,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `fontlib` | `json` | no |
 | `glyphs_composition` | `json` | no |
 
@@ -403,7 +443,7 @@ See [Font Get](#font-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `status` | `string` | no |
 | `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
@@ -467,7 +507,7 @@ See [Font Get](#font-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `status` | `string` | no |
 | `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
@@ -511,7 +551,7 @@ See [Font Get](#font-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -602,7 +642,7 @@ The created Atomic Element is automatically locked by the current user.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `data` | `string` | yes |
 
 - `data` is the Atomic Element `.glif` file data in `xml` format.
@@ -623,7 +663,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `data` | `string` | yes |
@@ -647,7 +687,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
@@ -670,7 +710,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -703,7 +743,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -725,7 +765,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -749,7 +789,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
 | `group_name` | `string` | yes |
@@ -773,7 +813,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |
@@ -799,7 +839,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |
@@ -825,7 +865,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `atomic_element_id` | `int` | yes `*` |
 | `atomic_element_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |
@@ -863,7 +903,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `status` | `string` | no |
 | `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
@@ -907,7 +947,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1007,7 +1047,7 @@ The created Deep Component is automatically locked by the current user.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `data` | `string` | yes |
 
 - `data` is the Deep Component `.glif` file data in `xml` format.
@@ -1028,7 +1068,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `data` | `string` | yes |
@@ -1052,7 +1092,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
@@ -1075,7 +1115,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1108,7 +1148,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1130,7 +1170,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1154,7 +1194,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `status` | `string` | no |
 | `is_locked_by_current_user` | `bool` | no |
 | `is_locked` | `bool` | no |
@@ -1202,7 +1242,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1286,7 +1326,7 @@ The created Character Glyph is automatically locked by the current user.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `data` | `string` | yes |
 
 - `data` is the Character Glyph `.glif` file data in `xml` format.
@@ -1307,7 +1347,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `data` | `string` | yes |
@@ -1331,7 +1371,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 | `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
@@ -1354,7 +1394,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1387,7 +1427,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1409,7 +1449,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
 
@@ -1433,7 +1473,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
 | `group_name` | `string` | yes |
@@ -1457,7 +1497,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |
@@ -1483,7 +1523,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |
@@ -1509,7 +1549,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 | Param | Type | Required |
 |---|---|---|
-| `font_uid` | `str` | yes |
+| `font_uid` | `string` | yes |
 | `character_glyph_id` | `int` | yes `*` |
 | `character_glyph_name` | `string` | yes `*` |
 | `id` | `int` | yes `**` |

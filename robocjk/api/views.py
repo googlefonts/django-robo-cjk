@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.core.exceptions import ValidationError
 
 from robocjk.api.auth import get_auth_token
 from robocjk.api.decorators import (
@@ -35,8 +37,10 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.models import (
+    repo_ssh_url_validator,
     Project, Font, CharacterGlyph, CharacterGlyphLayer,
     DeepComponent, AtomicElement, AtomicElementLayer, Proof, )
+from robocjk.settings import API_AUTH_TOKEN_EXPIRATION
 
 
 UserClass = get_user_model()
@@ -49,7 +53,7 @@ def auth_token(request, params, *args, **kwargs):
     if not username or not password:
         return ApiResponseBadRequest(
             'Unable to generate auth token, missing username and/or password parameters.')
-    token = get_auth_token(request, username, password, expiration={'days':1 })
+    token = get_auth_token(request, username, password, expiration=API_AUTH_TOKEN_EXPIRATION)
     if token is None:
         return ApiResponseBadRequest(
             'Unable to generate auth token, invalid credentials.')
@@ -100,19 +104,30 @@ def project_get(request, project, *args, **kwargs):
     return ApiResponseSuccess(project.serialize())
 
 
-# @api_view
-# @require_user
-# @require_params(name='str')
-# def project_create(request, params, *args, **kwargs):
-#     name = params.get_str('name')
-#     if Project.objects.filter(name__iexact=name).exists():
-#         return ApiResponseBadRequest(
-#             'Project with name=\'{}\' already exists, ' \
-#             'please choose a different name.'.format(name))
-#     project = Project()
-#     project.name = name
-#     project.save()
-#     return ApiResponseSuccess(project.serialize())
+@api_view
+@require_user
+@require_params(name='str', repo_url='str')
+def project_create(request, params, *args, **kwargs):
+    name = params.get_str('name')
+    repo_url = params.get_str('repo_url')
+    try:
+        repo_ssh_url_validator(repo_url)
+    except ValidationError as repo_url_error:
+        return ApiResponseBadRequest(
+            'Invalid parameter \'repo_url\': {} -> {}'.format(repo_url, repo_url_error.message))
+    if Project.objects.filter(name__iexact=name).exists():
+        return ApiResponseBadRequest(
+            'Project with name=\'{}\' already exists, ' \
+            'please choose a different name.'.format(name))
+    if Project.objects.filter(repo_url__iexact=repo_url).exists():
+        return ApiResponseBadRequest(
+            'Project with repo_url=\'{}\' already exists, ' \
+            'please choose a different repository url.'.format(repo_url))
+    project = Project()
+    project.name = name
+    project.repo_url = repo_url
+    project.save()
+    return ApiResponseSuccess(project.serialize())
 
 
 # @api_view
@@ -130,11 +145,13 @@ def project_get(request, project, *args, **kwargs):
 #     return ApiResponseSuccess(project.serialize())
 
 
-# @api_view
-# @require_user
-# @require_project
-# def project_delete(request, project, *args, **kwargs):
-#    return ApiResponseSuccess(project.delete())
+@api_view
+@require_user
+@require_project
+def project_delete(request, user, project, *args, **kwargs):
+    if not user.is_superuser:
+        return ApiResponseForbidden('Only super-users are allowed to delete projects.')
+    return ApiResponseSuccess(project.delete())
 
 
 @api_view
@@ -152,11 +169,24 @@ def font_get(request, font, *args, **kwargs):
     return ApiResponseSuccess(font.serialize())
 
 
-# @api_view
-# @require_user
-# def font_create(request, params, *args, **kwargs):
-#     data = {}
-#     return ApiResponseSuccess(data)
+@api_view
+@require_user
+@require_project
+@require_params(name='str')
+def font_create(request, params, *args, **kwargs):
+    project = kwargs['project']
+    name = params.get_str('name')
+    if Font.objects.filter(name__iexact=name).exists():
+        return ApiResponseBadRequest(
+            'Font with name=\'{}\' already exists, ' \
+            'please choose a different name.'.format(name))
+    font = Font()
+    font.project = project
+    font.name = name
+    font.fontlib = params.get_dict('fontlib')
+    font.glyphs_composition = params.get_dict('glyphs_composition')
+    font.save()
+    return ApiResponseSuccess(font.serialize())
 
 
 @api_view
@@ -180,11 +210,13 @@ def font_update(request, user, params, font, *args, **kwargs):
     return ApiResponseSuccess(font.serialize())
 
 
-# @api_view
-# @require_user
-# @require_font
-# def font_delete(request, font, *args, **kwargs):
-#     return ApiResponseSuccess(font.delete())
+@api_view
+@require_user
+@require_font
+def font_delete(request, user, font, *args, **kwargs):
+    if not user.is_superuser:
+        return ApiResponseForbidden('Only super-users are allowed to delete fonts.')
+    return ApiResponseSuccess(font.delete())
 
 
 @api_view

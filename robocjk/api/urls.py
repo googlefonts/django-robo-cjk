@@ -5,8 +5,8 @@ from django.urls import path
 from robocjk.api.views import (
     auth_token, auth_refresh_token,
     user_list, user_me,
-    project_list, project_get,
-    font_list, font_get, font_update,
+    project_list, project_get, project_create, project_delete,
+    font_list, font_get, font_create, font_update, font_delete,
     glif_list,
     atomic_element_list, atomic_element_get, atomic_element_create,
     atomic_element_update, atomic_element_update_status, atomic_element_delete,
@@ -40,18 +40,18 @@ urlpatterns = [
     # Project
     path('api/project/list/', project_list, name='project_list'),
     path('api/project/get/', project_get, name='project_get'),
-    # path('api/project/create/', project_create, name='project_create'),
+    path('api/project/create/', project_create, name='project_create'),
     # path('api/project/rename/', project_rename, name='project_rename'),
     # path('api/project/update/', project_update, name='project_update'),
-    # path('api/project/delete/', project_delete, name='project_delete'),
+    path('api/project/delete/', project_delete, name='project_delete'),
 
     # Font
     path('api/font/list/', font_list, name='font_list'),
     path('api/font/get/', font_get, name='font_get'),
-    # path('api/font/create/', font_create, name='font_create'),
+    path('api/font/create/', font_create, name='font_create'),
     path('api/font/update/', font_update, name='font_update'),
     # path('api/font/rename/', font_rename, name='font_rename'),
-    # path('api/font/delete/', font_delete, name='font_delete'),
+    path('api/font/delete/', font_delete, name='font_delete'),
 
     # All glif (Atomic Element + Deep Component + Character Glyph)
     path('api/glif/list/', glif_list, name='glif_list'),

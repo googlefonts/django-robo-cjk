@@ -4,7 +4,7 @@ from benedict import benedict
 from benedict.serializers import Base64Serializer
 
 from django.contrib.auth import get_user_model
-from django.core.validators import FileExtensionValidator, RegexValidator
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
@@ -23,7 +23,6 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
-from robocjk.io import settings as io_settings
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
@@ -39,6 +38,7 @@ from robocjk.managers import (
     DeepComponentManager,
     AtomicElementManager, AtomicElementLayerManager,
 )
+from robocjk.settings import GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 import datetime as dt
 import fsutil
@@ -51,8 +51,7 @@ import os
 3. “character glyphs”, contain only references to deep components, not to atomic elements, and outlines
 """
 
-repo_ssh_url_validator = RegexValidator(io_settings.GIT_SSH_REPOSITORY_PATTERN,
-    _('Invalid repository URL - Expected .git repository SSH URL, eg. git@github.com:username/repository.git'))
+repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):

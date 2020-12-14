@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from robocjk.io import settings as io_settings
+from robocjk.settings import GIT_REPOSITORIES_PATH
 
 import fsutil
-import os
 
 
 def get_project_path(instance, name=None):
-    return os.path.join(
-        io_settings.GIT_REPOSITORIES_PATH,
+    return fsutil.join_path(
+        GIT_REPOSITORIES_PATH,
         (name or instance.slug))
 
 
@@ -25,14 +24,14 @@ def get_glif_filename(instance, name=None):
 
 
 def get_character_glyph_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.font),
         'characterGlyph',
         get_glif_filename(instance, name))
 
 
 def get_character_glyph_layer_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.glif.font),
         'characterGlyph',
         instance.group_name,
@@ -40,21 +39,21 @@ def get_character_glyph_layer_path(instance, name=None):
 
 
 def get_deep_component_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.font),
         'deepComponent',
         get_glif_filename(instance, name))
 
 
 def get_atomic_element_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.font),
         'atomicElement',
         get_glif_filename(instance, name))
 
 
 def get_atomic_element_layer_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.glif.font),
         'atomicElement',
         instance.group_name,
@@ -62,7 +61,7 @@ def get_atomic_element_layer_path(instance, name=None):
 
 
 def get_proof_path(instance):
-    return os.path.join(
+    return fsutil.join_path(
         get_font_path(instance.font),
         'Proofing',
         fsutil.get_filename(self.file.path))

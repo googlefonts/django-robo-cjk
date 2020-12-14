@@ -319,7 +319,7 @@ class APIsTestCase(TestCase):
         payload = {
            'font_uid': self.get_font_uid(),
            'name': 'hengpietest',
-           'status': 'todo',
+           'status': 'wip',
         }
         response, data = self.get_response('/api/atomic-element/update-status/', payload=payload)
         self.assert_response_ok(response)
@@ -542,7 +542,7 @@ class APIsTestCase(TestCase):
         payload = {
             'font_uid': self.get_font_uid(),
             'name': 'DC_200CA_01test',
-            'status': 'todo',
+            'status': 'wip',
         }
         response, data = self.get_response('/api/deep-component/update-status/', payload=payload)
         self.assert_response_ok(response)
@@ -652,7 +652,7 @@ class APIsTestCase(TestCase):
         payload = {
             'font_uid': self.get_font_uid(),
             'name': 'uni200CAtest',
-            'status': 'todo',
+            'status': 'wip',
         }
         response, data = self.get_response('/api/character-glyph/update-status/', payload=payload)
         self.assert_response_ok(response)

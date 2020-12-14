@@ -101,14 +101,24 @@ def require_project(view_func):
 
 def require_font(view_func):
     @wraps(view_func)
-    @require_params(font_uid='str')
+    # @require_params(font_uid='str')
     def wrapper(request, *args, **kwargs):
         # build query filters
         params = kwargs['params']
         font_uid = params.get_uuid('font_uid')
         if not font_uid:
+            # actually this is used only for testing delete api (in postman tests) without knowing the font_uid.
+            project_uid = params.get_uuid('project_uid')
+            font_name = params.get_str('font_name')
+            if project_uid and font_name:
+                try:
+                    font_obj = Font.objects.get(project__uid=project_uid, name=font_name)
+                    font_uid = font_obj.uid
+                except Font.DoesNotExist:
+                    pass
+        if not font_uid:
             return ApiResponseBadRequest(
-                'Missing or invalid parameter \'{}font_uid\'.')
+                'Invalid or missing parameter \'{}font_uid\'.')
         try:
             font_obj = Font.objects.get(uid=font_uid)
         except Font.DoesNotExist:

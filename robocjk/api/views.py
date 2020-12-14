@@ -158,7 +158,11 @@ def project_delete(request, user, project, *args, **kwargs):
 @require_user
 @require_project
 def font_list(request, params, *args, **kwargs):
-    data = list(Font.objects.values(*FONT_FIELDS))
+    font_fields = set(FONT_FIELDS)
+    font_fields.remove('fontlib')
+    font_fields.remove('glyphs_composition')
+    font_fields = list(font_fields)
+    data = list(Font.objects.values(*font_fields))
     return ApiResponseSuccess(data)
 
 

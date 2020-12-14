@@ -79,7 +79,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(list(self._character_glyph.layers.all()), [self._character_glyph_layer])
         self.assertEqual(list(self._character_glyph.deep_components.all()), [self._deep_component])
         self.assertTrue(isinstance(self._character_glyph.serialize(), dict))
-        self.assertEqual(self._character_glyph.status, StatusModel.STATUS_TODO)
+        self.assertEqual(self._character_glyph.status, StatusModel.STATUS_WIP)
 
     def test_character_glyph_layer(self):
         self.assertEqual(self._character_glyph_layer.glif, self._character_glyph)
@@ -95,7 +95,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(self._deep_component.unicode_hex, '')
         self.assertEqual(self._deep_component.filename, 'D_C__2B_740_00.glif')
         self.assertTrue(isinstance(self._deep_component.serialize(), dict))
-        self.assertEqual(self._deep_component.status, StatusModel.STATUS_TODO)
+        self.assertEqual(self._deep_component.status, StatusModel.STATUS_WIP)
 
     def test_atomic_element(self):
         self.assertEqual(self._atomic_element.font, self._font1)
@@ -104,7 +104,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(self._atomic_element.filename, 'bendingB_oth.glif')
         self.assertEqual(list(self._atomic_element.layers.all()), [self._atomic_element_layer])
         self.assertTrue(isinstance(self._atomic_element.serialize(), dict))
-        self.assertEqual(self._atomic_element.status, StatusModel.STATUS_TODO)
+        self.assertEqual(self._atomic_element.status, StatusModel.STATUS_WIP)
 
     def test_atomic_element_layer(self):
         self.assertEqual(self._atomic_element_layer.glif, self._atomic_element)

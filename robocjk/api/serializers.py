@@ -23,41 +23,42 @@ GLIF_LAYER_FIELDS = [
 ]
 
 
-def _serialize_object(obj, fields):
-    return { field:getattr(obj, field, None) for field in fields }
+def _serialize_object(obj, fields, **kwargs):
+    exclude_fields = kwargs.get('exclude_fields', [])
+    return { field:getattr(obj, field, None) for field in fields if not field in exclude_fields }
 
 
 def serialize_user(obj, **kwargs):
-    data = _serialize_object(obj, USER_FIELDS)
+    data = _serialize_object(obj, USER_FIELDS, **kwargs)
     return data
 
 
 def serialize_project(obj, **kwargs):
-    data = _serialize_object(obj, PROJECT_FIELDS)
+    data = _serialize_object(obj, PROJECT_FIELDS, **kwargs)
     return data
 
 
 def serialize_font(obj, **kwargs):
-    data = _serialize_object(obj, FONT_FIELDS)
+    data = _serialize_object(obj, FONT_FIELDS, **kwargs)
     return data
 
 
-def _serialize_glif(obj):
-    data = _serialize_object(obj, GLIF_FIELDS)
+def _serialize_glif(obj, **kwargs):
+    data = _serialize_object(obj, GLIF_FIELDS, **kwargs)
     data['locked_by_user'] = None
     if obj.locked_by_id:
         user = obj.locked_by
-        data['locked_by_user'] = serialize_user(user)
+        data['locked_by_user'] = serialize_user(user, **kwargs)
     return data
 
 
-def _serialize_glif_layer(obj):
-    data = _serialize_object(obj, GLIF_LAYER_FIELDS)
+def _serialize_glif_layer(obj, **kwargs):
+    data = _serialize_object(obj, GLIF_LAYER_FIELDS, **kwargs)
     return data
 
 
 def serialize_atomic_element(obj, **kwargs):
-    data = _serialize_glif(obj)
+    data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Atomic Element'
     data['type_code'] = 'AE'
     data['made_of'] = []
@@ -71,7 +72,7 @@ def serialize_atomic_element_layer(obj, **kwargs):
 
 
 def serialize_deep_component(obj, **kwargs):
-    data = _serialize_glif(obj)
+    data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Deep Component'
     data['type_code'] = 'DC'
     data['made_of'] = list(obj.atomic_elements.values(*GLIF_FIELDS))
@@ -81,7 +82,7 @@ def serialize_deep_component(obj, **kwargs):
 
 
 def serialize_character_glyph(obj, **kwargs):
-    data = _serialize_glif(obj)
+    data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Character Glyph'
     data['type_code'] = 'CG'
     data['made_of'] = list(obj.deep_components.values(*GLIF_FIELDS))

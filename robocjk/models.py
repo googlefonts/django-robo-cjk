@@ -116,7 +116,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             os.system(cmd)
 
     def serialize(self, **kwargs):
-        return serialize_project(self, *kwargs)
+        return serialize_project(self, **kwargs)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -196,7 +196,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             atomic_element.save_to_file_system()
 
     def serialize(self, **kwargs):
-        return serialize_font(self, *kwargs)
+        return serialize_font(self, **kwargs)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -282,14 +282,12 @@ class StatusModel(models.Model):
     class Meta:
         abstract = True
 
-    STATUS_TODO = 'todo'
     STATUS_WIP = 'wip'
     STATUS_CHECKING_1 = 'checking-1'
     STATUS_CHECKING_2 = 'checking-2'
     STATUS_CHECKING_3 = 'checking-3'
     STATUS_DONE = 'done'
     STATUS_CHOICES = (
-        (STATUS_TODO, _('Todo'), ),
         (STATUS_WIP, _('Wip'), ),
         (STATUS_CHECKING_1, _('Checking 1'), ),
         (STATUS_CHECKING_2, _('Checking 2'), ),
@@ -297,7 +295,6 @@ class StatusModel(models.Model):
         (STATUS_DONE, _('Done'), ),
     )
     STATUS_CHOICES_VALUES_LIST = [
-        STATUS_TODO,
         STATUS_WIP,
         STATUS_CHECKING_1,
         STATUS_CHECKING_2,
@@ -305,7 +302,6 @@ class StatusModel(models.Model):
         STATUS_DONE,
     ]
     STATUS_COLORS = {
-        STATUS_TODO: '#999999', # grey
         STATUS_WIP: '#e74c3c', # '#FF0000', # red
         STATUS_CHECKING_1: '#e67e22', # '#FF8800', # orange
         STATUS_CHECKING_2: '#f1c40f', # '#FFFF00', # yellow
@@ -315,7 +311,7 @@ class StatusModel(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default=STATUS_TODO,
+        default=STATUS_WIP,
         db_index=True,
         verbose_name=_('Status'))
 
@@ -506,7 +502,7 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
             layer.save_to_file_system()
 
     def serialize(self, **kwargs):
-        return serialize_character_glyph(self, *kwargs)
+        return serialize_character_glyph(self, **kwargs)
 
     def __str__(self):
         return force_str('{}'.format(

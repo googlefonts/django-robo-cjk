@@ -198,7 +198,7 @@ class Client(object):
         """
         params = {
             'name': name,
-            'repo_url', repo_url,
+            'repo_url': repo_url,
         }
         return self._api_call('project_create', params)
 

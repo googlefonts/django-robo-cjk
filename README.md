@@ -604,7 +604,7 @@ See [Font Get](#font-get) response.
         "locked_by_user": null,
         "made_of": [],
         "name": "curvedStroke",
-        "status": "todo",
+        "status": "wip",
         "type": "Atomic Element",
         "type_code": "AE",
         "unicode_hex": "",
@@ -690,7 +690,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 | `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
-| `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
+| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
 
 - `*` Atomic Element can be retrieved by `id` or by `name`, **only one of these parameters is required**.
 
@@ -985,7 +985,7 @@ See [Atomic Element Get](#atomic-element-get) response.
                 "locked_at": null,
                 "locked_by_id": null,
                 "name": "bendingBoth",
-                "status": "todo",
+                "status": "wip",
                 "unicode_hex": ""
             },
             {
@@ -1001,7 +1001,7 @@ See [Atomic Element Get](#atomic-element-get) response.
                 "locked_at": null,
                 "locked_by_id": null,
                 "name": "line",
-                "status": "todo",
+                "status": "wip",
                 "unicode_hex": ""
             },
             {
@@ -1017,12 +1017,12 @@ See [Atomic Element Get](#atomic-element-get) response.
                 "locked_at": null,
                 "locked_by_id": null,
                 "name": "pingNa",
-                "status": "todo",
+                "status": "wip",
                 "unicode_hex": ""
             }
         ],
         "name": "DC_24D13_00",
-        "status": "todo",
+        "status": "wip",
         "type": "Deep Component",
         "type_code": "DC",
         "unicode_hex": "",
@@ -1095,7 +1095,7 @@ See [Deep Component Get](#deep-component-get) response.
 | `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
-| `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
+| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
 
 - `*` Deep Component can be retrieved by `id` or by `name`, **only one of these parameters is required**.
 
@@ -1280,7 +1280,7 @@ See [Deep Component Get](#deep-component-get) response.
                 "locked_at": null,
                 "locked_by_id": null,
                 "name": "DC_4E00_00",
-                "status": "todo",
+                "status": "wip",
                 "unicode_hex": ""
             },
             {
@@ -1296,12 +1296,12 @@ See [Deep Component Get](#deep-component-get) response.
                 "locked_at": null,
                 "locked_by_id": null,
                 "name": "DC_8080_00",
-                "status": "todo",
+                "status": "wip",
                 "unicode_hex": ""
             }
         ],
         "name": "uni2EBB",
-        "status": "todo",
+        "status": "wip",
         "type": "Character Glyph",
         "type_code": "CG",
         "unicode_hex": "2EBB",
@@ -1374,7 +1374,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 | `font_uid` | `string` | yes |
 | `id` | `int` | yes `*` |
 | `name` | `string` | yes `*` |
-| `status` | `string` (`todo` or `wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
+| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
 
 - `*` Character Glyph can be retrieved by `id` or by `name`, **only one of these parameters is required**.
 

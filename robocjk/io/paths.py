@@ -12,7 +12,7 @@ def get_project_path(instance, name=None):
 
 
 def get_font_path(instance, name=None):
-    return os.path.join(
+    return fsutil.join_path(
         get_project_path(instance.project),
         '{}.rcjk'.format(name or instance.slug))
 

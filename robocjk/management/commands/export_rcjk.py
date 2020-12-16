@@ -7,7 +7,7 @@ from robocjk.models import Project
 
 class Command(BaseCommand):
 
-    help = 'Export .rcjk projects and push changes to their own git repositories.'
+    help = 'Export all .rcjk projects and push changes to their own git repositories.'
 
     def handle(self, *args, **options):
         projects_qs = Project.objects.prefetch_related('fonts').all()

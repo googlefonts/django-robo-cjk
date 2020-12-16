@@ -54,6 +54,12 @@ import os
 repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 
+def run_commands(*args):
+    cmds = args
+    cmd = ' && '.join(cmds)
+    os.system(cmd)
+
+
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     """
     The Project model.
@@ -83,19 +89,23 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def save_to_file_system(self):
         path = self.path()
-        fsutil.remove_dir(path)
+        print(path)
+        if fsutil.exists(path):
+            fsutil.remove_dir(path)
         fsutil.make_dirs(path)
-        # init git repository if needed
-        git_repo_path = fsutil.join_path(path, '.git')
-        if not fsutil.exists(git_repo_path):
-            cmds = [
-                'cd {}'.format(path),
-                'git init',
-                'git remote add origin {}'.format(self.repo_url),
-                'git pull origin master',
-            ]
-            cmd = ' && '.join(cmds)
-            os.system(cmd)
+        # fsutil.remove_dir_content(path)
+
+        # init and pull from git repository
+        run_commands(
+            'cd {}'.format(path),
+            'git init',
+            'git remote add origin {}'.format(self.repo_url),
+            'git pull --rebase origin master')
+
+        # remove pulled rcjk projects
+        rcjk_dirs = fsutil.search_dirs(path, '*.rcjk')
+        fsutil.remove_dirs(*rcjk_dirs)
+
         # save all project fonts to file.system
         fonts_qs = self.fonts.prefetch_related(
             'character_glyphs',
@@ -105,15 +115,13 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             'atomic_elements__layers').filter(available=True)
         for font in fonts_qs:
             font.save_to_file_system()
-            cmds = [
-                'cd {}'.format(path),
-                'git add -A',
-                'git commit -m "{}"'.format(
-                    'Updated {}.'.format(font.name)),
-                'git push -u origin master',
-            ]
-            cmd = ' && '.join(cmds)
-            os.system(cmd)
+
+        # add all changed files, commit and push to the git repository
+        run_commands(
+            'cd {}'.format(path),
+            'git add .',
+            'git commit -m "{}"'.format('Updated project.'),
+            'git push -u origin master')
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)
@@ -180,11 +188,17 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def save_to_file_system(self):
         path = self.path()
+        if fsutil.exists(path):
+            fsutil.remove_dir(path)
         fsutil.make_dirs(path)
-        # write fontlib.json file
+        # write fontLib.json file
         fontlib_path = fsutil.join_path(path, 'fontLib.json')
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
+        # write glyphsComposition.json file
+        glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
+        glyphs_composition_str = benedict(self.glyphs_composition, keypath_separator=None).dump()
+        fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
         # write all character-glyphs and relative layers
         for character_glyph in self.character_glyphs.all():
             character_glyph.save_to_file_system()

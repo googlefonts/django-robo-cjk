@@ -308,6 +308,13 @@ class StatusModel(models.Model):
         STATUS_CHECKING_3: '#2980b9', # '#0088FF', # blue
         STATUS_DONE: '#27ae60', # '#00FF88', # green
     }
+    STATUS_MARK_COLORS = {
+        '1,0,0,1': STATUS_WIP,
+        '1,0.5,0,1': STATUS_CHECKING_1,
+        '1,1,0,1': STATUS_CHECKING_2,
+        '0,0.5,1,1': STATUS_CHECKING_3,
+        '0,1,0.5,1': STATUS_DONE,
+    }
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

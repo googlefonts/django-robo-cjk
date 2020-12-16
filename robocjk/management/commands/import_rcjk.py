@@ -8,7 +8,7 @@ from django.core.management import call_command
 from robocjk.core import GlifData
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
-    AtomicElement, AtomicElementLayer, Proof, )
+    AtomicElement, AtomicElementLayer, Proof, StatusModel, )
 
 import fsutil
 import re
@@ -203,8 +203,15 @@ class Command(BaseCommand):
     def _import_glif(self, cls, font, content, match):
         data = GlifData()
         data.parse_string(content)
+        # parse status from mark color during import
+        status_color = data.status_color
+        status = None
+        if status_color:
+            status = StatusModel.STATUS_MARK_COLORS.get(status_color, None)
+        if status is None:
+            status = StatusModel.STATUS_WIP
         obj, created = cls.objects.update_or_create(
-            font=font, name=data.name, defaults={ 'data':content })
+            font=font, name=data.name, defaults={ 'status':status, 'data':content })
         print('Imported {}: {}'.format(cls, data.name))
 
     def _import_glif_layer(self, glif_cls, cls, font, content, match):

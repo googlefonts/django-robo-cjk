@@ -255,8 +255,11 @@ def require_atomic_element(**kwargs):
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
             # check lock
-            user = kwargs['user']
-            if check_locked:
+            ignore_lock = params.get_bool('ignore_lock', False)
+            if ignore_lock:
+                pass
+            elif check_locked:
+                user = kwargs['user']
                 if not obj.is_lockable_by(user):
                     return ApiResponseForbidden(
                         'Atomic Element object has already been locked by another user.')
@@ -341,8 +344,11 @@ def require_deep_component(**kwargs):
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
             # check lock
-            user = kwargs['user']
-            if check_locked:
+            ignore_lock = params.get_bool('ignore_lock', False)
+            if ignore_lock:
+                pass
+            elif check_locked:
+                user = kwargs['user']
                 if not obj.is_lockable_by(user):
                     return ApiResponseForbidden(
                         'Deep Component object has already been locked by another user.')
@@ -390,8 +396,11 @@ def require_character_glyph(**kwargs):
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
             # check lock
-            user = kwargs['user']
-            if check_locked:
+            ignore_lock = params.get_bool('ignore_lock', False)
+            if ignore_lock:
+                pass
+            elif check_locked:
+                user = kwargs['user']
                 if not obj.is_lockable_by(user):
                     return ApiResponseForbidden(
                         'Character Glyph object has been locked by another user.')

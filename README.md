@@ -13,7 +13,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 - Request method: `POST`
 - Response content type: `json`
 - Success Response example :green_circle::
-```json
+```javascript
 {
     "data": {
         "name": "...",
@@ -25,7 +25,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 }
 ```
 - Error response example :red_circle::
-```json
+```javascript
 {
     "data": null,
     "error": "Internal Server Error - Error description",
@@ -52,6 +52,10 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    - [Font **Get**](#font-get)
    - [Font **Create**](#font-create)
    - [Font **Update**](#font-update)
+   
+- [**Glyphs Composition**](#glyphs-composition)
+   - [Glyphs Composition **Get**](#glyphs-composition-get)
+   - [Glyphs Composition **Update**](#glyphs-composition-update)
    
 - [**Glif**](#glif)
    - [Glif **List**](#glif-list)
@@ -117,7 +121,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "auth_token": "eyJ0..."
@@ -141,7 +145,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -165,7 +169,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
             "last_name": "Baehr",
             "username": "gaetan.baehr"
         },
-        # ...
+        // ...
     ],
     "error": null,
     "status": 200
@@ -184,7 +188,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "email": "fabio.caccamo@black-foundry.com",
@@ -218,7 +222,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -249,7 +253,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "name": "GS",
@@ -299,7 +303,7 @@ See [Project Get](#project-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -354,7 +358,7 @@ See [Project Get](#project-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "fontlib": {
@@ -431,6 +435,53 @@ See [Font Get](#font-get) response.
 
 ---
 
+#### Glyphs Composition Get
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/glyphs-composition/get/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `font_uid` | `string` | yes |
+
+##### Response
+
+```javascript
+{
+    "data": {
+        "\u2e80": "\u4e36\u4e36", 
+        "\u2e84": "\u2e84", 
+        // ...
+    },
+    "error": null,
+    "status": 200
+}
+```
+
+---
+
+#### Glyphs Composition Update
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/glyphs-composition/update/` | `POST` |
+
+| Param | Type | Required |
+|---|---|---|
+| `font_uid` | `string` | yes |
+| `data` | `string` | yes |
+
+##### Response
+
+See [Glyphs Composition Get](#glyphs-composition-get) response.
+
+---
+
 ### Glif
 
 #### Glif List
@@ -455,7 +506,7 @@ See [Font Get](#font-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "atomic_elements": [
@@ -518,7 +569,7 @@ See [Font Get](#font-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -559,7 +610,7 @@ See [Font Get](#font-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "data": "<?xml version='1.0' encoding='UTF-8'?>\n<glyph name=\"curvedStroke\" format=\"2\">\n ... \n</glyph>\n",
@@ -718,7 +769,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         1,
@@ -876,7 +927,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         1,
@@ -914,7 +965,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -955,7 +1006,7 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "data": "<?xml version='1.0' encoding='UTF-8'?>\n<glyph name=\"DC_24D13_00\" format=\"2\"> ... </glyph>\n",
@@ -1123,7 +1174,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         1,
@@ -1206,7 +1257,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         {
@@ -1250,7 +1301,7 @@ See [Deep Component Get](#deep-component-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": {
         "data": "<?xml version='1.0' encoding='UTF-8'?>\n<glyph name=\"uni2EBB\" format=\"2\"> ... </glyph>\n",
@@ -1402,7 +1453,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         1,
@@ -1560,7 +1611,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 ##### Response
 
-```json
+```javascript
 {
     "data": [
         1,

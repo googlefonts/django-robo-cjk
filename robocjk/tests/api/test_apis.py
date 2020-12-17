@@ -181,6 +181,23 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/font/update/', payload=payload)
         self.assert_response_ok(response)
 
+    def test_0042_glyphs_composition_get(self):
+        # print('test_0042_glyphs_composition_get')
+        payload = {
+            'font_uid': self.get_font_uid(),
+        }
+        response, data = self.get_response('/api/glyphs-composition/get/', payload=payload)
+        self.assert_response_ok(response)
+
+    def test_0043_glyphs_composition_update(self):
+        # print('test_0043_glyphs_composition_update')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'data': '{"Glyphs-Composition-Test":"ok"}',
+        }
+        response, data = self.get_response('/api/glyphs-composition/update/', payload=payload)
+        self.assert_response_ok(response)
+
     def test_0045_glif_list(self):
         # print('test_0045_glif_list')
         payload = {

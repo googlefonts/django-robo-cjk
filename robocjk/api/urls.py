@@ -7,6 +7,7 @@ from robocjk.api.views import (
     user_list, user_me,
     project_list, project_get, project_create, project_delete,
     font_list, font_get, font_create, font_update, font_delete,
+    glyphs_composition_get, glyphs_composition_update,
     glif_list,
     atomic_element_list, atomic_element_get, atomic_element_create,
     atomic_element_update, atomic_element_update_status, atomic_element_delete,
@@ -52,6 +53,10 @@ urlpatterns = [
     path('api/font/update/', font_update, name='font_update'),
     # path('api/font/rename/', font_rename, name='font_rename'),
     path('api/font/delete/', font_delete, name='font_delete'),
+
+    # Gliphs Composition
+    path('api/glyphs-composition/get/', glyphs_composition_get, name='glyphs_composition_get'),
+    path('api/glyphs-composition/update/', glyphs_composition_update, name='glyphs_composition_update'),
 
     # All glif (Atomic Element + Deep Component + Character Glyph)
     path('api/glif/list/', glif_list, name='glif_list'),

@@ -34,6 +34,8 @@ from robocjk.io.paths import (
     get_proof_path,
 )
 from robocjk.managers import (
+    ProjectManager,
+    FontManager,
     CharacterGlyphManager, CharacterGlyphLayerManager,
     DeepComponentManager,
     AtomicElementManager, AtomicElementLayerManager,
@@ -76,6 +78,8 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         validators=[repo_ssh_url_validator],
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
+
+    objects = ProjectManager()
 
     def num_fonts(self):
         return self.fonts.count()
@@ -158,11 +162,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         default=dict,
         verbose_name=_('FontLib'))
 
-    glyphs_composition = models.JSONField(
-        blank=True,
-        null=True,
-        default=dict,
-        verbose_name=_('Glyphs Composition'))
+    objects = FontManager()
 
     def num_character_glyphs(self):
         return self.character_glyphs.count()
@@ -187,6 +187,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         self.save()
 
     def save_to_file_system(self):
+        if not self.available:
+            return
         path = self.path()
         if fsutil.exists(path):
             fsutil.remove_dir(path)
@@ -196,8 +198,9 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write glyphsComposition.json file
+        glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=self.id)
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
-        glyphs_composition_str = benedict(self.glyphs_composition, keypath_separator=None).dump()
+        glyphs_composition_str = benedict(glyphs_composition_obj.serialize(), keypath_separator=None).dump()
         fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
         # write all character-glyphs and relative layers
         for character_glyph in self.character_glyphs.all():
@@ -215,6 +218,37 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     def __str__(self):
         return force_str('{}'.format(
             self.name))
+
+
+class GlyphsComposition(TimestampModel):
+    """
+    The Glyphs Composition model.
+    """
+    class Meta:
+        app_label = 'robocjk'
+        verbose_name = _('Glyphs Composition')
+        verbose_name_plural = _('Glyphs Composition')
+
+    font = models.OneToOneField(
+        'robocjk.Font',
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='glyphs_composition',
+        verbose_name=_('Font'))
+
+    data = models.JSONField(
+        blank=True,
+        null=True,
+        default=dict,
+        verbose_name=_('Data'))
+
+    def serialize(self, **kwargs):
+        return self.data or {}
+
+    def __str__(self):
+        return force_str('{} / {}'.format(
+            self.font.name,
+            _('Glyphs Composition')))
 
 
 class LockableModel(models.Model):

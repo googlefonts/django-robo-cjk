@@ -38,8 +38,11 @@ from robocjk.api.serializers import (
 from robocjk.core import GlifData
 from robocjk.models import (
     repo_ssh_url_validator,
-    Project, Font, CharacterGlyph, CharacterGlyphLayer,
-    DeepComponent, AtomicElement, AtomicElementLayer, Proof, )
+    Project, Font, GlyphsComposition,
+    CharacterGlyph, CharacterGlyphLayer,
+    DeepComponent,
+    AtomicElement, AtomicElementLayer,
+    Proof, )
 from robocjk.settings import API_AUTH_TOKEN_EXPIRATION
 
 
@@ -160,7 +163,6 @@ def project_delete(request, user, project, *args, **kwargs):
 def font_list(request, params, *args, **kwargs):
     font_fields = set(FONT_FIELDS)
     font_fields.remove('fontlib')
-    font_fields.remove('glyphs_composition')
     font_fields = list(font_fields)
     data = list(Font.objects.values(*font_fields))
     return ApiResponseSuccess(data)
@@ -188,7 +190,6 @@ def font_create(request, params, *args, **kwargs):
     font.project = project
     font.name = name
     font.fontlib = params.get_dict('fontlib')
-    font.glyphs_composition = params.get_dict('glyphs_composition')
     font.save()
     return ApiResponseSuccess(font.serialize())
 
@@ -203,11 +204,6 @@ def font_update(request, user, params, font, *args, **kwargs):
     if fontlib:
         font.fontlib = fontlib
         font_changed = True
-    # look for glyphs_composition data
-    glyphs_composition = params.get_dict('glyphs_composition')
-    if glyphs_composition:
-        font.glyphs_composition = glyphs_composition
-        font_changed = True
     # font is changed, save it
     if font_changed:
         font.save_by(user)
@@ -221,6 +217,25 @@ def font_delete(request, user, font, *args, **kwargs):
     if not user.is_superuser:
         return ApiResponseForbidden('Only super-users are allowed to delete fonts.')
     return ApiResponseSuccess(font.delete())
+
+
+@api_view
+@require_user
+@require_font
+def glyphs_composition_get(request, font, *args, **kwargs):
+    glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=font.id)
+    return ApiResponseSuccess(glyphs_composition_obj.serialize())
+
+
+@api_view
+@require_user
+@require_font
+@require_params(data='str')
+def glyphs_composition_update(request, font, params, *args, **kwargs):
+    glyphs_composition_data = params.get_dict('data')
+    glyphs_composition_obj, _ = GlyphsComposition.objects.update_or_create(
+        font_id=font.id, defaults={'data':glyphs_composition_data})
+    return ApiResponseSuccess(glyphs_composition_obj.serialize())
 
 
 @api_view

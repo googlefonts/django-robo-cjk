@@ -101,6 +101,16 @@ class ClientTestCase(TestCase):
         # print(data)
         self.assert_response_ok(data)
 
+    def test_glyphs_composition_get(self):
+        data = self._client.glyphs_composition_get(font_uid=self._font_uid)
+        # print(data)
+        self.assert_response_ok(data)
+
+    def test_glyphs_composition_update(self):
+        data = self._client.glyphs_composition_update(font_uid=self._font_uid, data={'Glyphs-Composition-Test':'ok'})
+        # print(data)
+        self.assert_response_ok(data)
+
     def test_font_glif_list(self):
         data = self._client.glif_list(font_uid=self._font_uid)
         # print(data)

@@ -1,24 +1,29 @@
 # -*- coding: utf-8 -*-
 
-from admin_auto_filters.filters import AutocompleteFilter
-
-from copy import deepcopy
+# from admin_auto_filters.filters import AutocompleteFilter
 
 from django.contrib import admin
 from django.db import models
+from django.db.models import Count
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from django_json_widget.widgets import JSONEditorWidget
 
 from robocjk.models import (
-    Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
-    AtomicElement, AtomicElementLayer, Proof, )
+    Project,
+    Font,
+    GlyphsComposition,
+    CharacterGlyph, CharacterGlyphLayer,
+    DeepComponent,
+    AtomicElement, AtomicElementLayer,
+    Proof, )
 
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
 
+    list_select_related = ()
     list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
@@ -36,20 +41,22 @@ class ProjectAdmin(admin.ModelAdmin):
       }),
     )
     save_on_top = True
+    show_full_result_count = False
 
 
 @admin.register(Font)
 class FontAdmin(admin.ModelAdmin):
 
     def info(self, font, *args, **kwargs):
-        html = 'Character Glyphs: <strong>{}</strong> <em>({} layers)</em><br>'\
-               'Deep Components: <strong>{}</strong><br>'\
-               'Atomic Elements: <strong>{}</strong> <em>({} layers)</em>'.format(
-                    font.num_character_glyphs(), font.num_character_glyphs_layers(),
+        html = '<span style="white-space: nowrap;">Character Glyphs: <strong>{}</strong></span><br>'\
+               '<span style="white-space: nowrap;">Deep Components: <strong>{}</strong></span><br>'\
+               '<span style="white-space: nowrap;">Atomic Elements: <strong>{}</strong></span>'.format(
+                    font.num_character_glyphs(),
                     font.num_deep_components(),
-                    font.num_atomic_elements(), font.num_atomic_elements_layers())
+                    font.num_atomic_elements())
         return mark_safe(html)
 
+    list_select_related = ()
     list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )
     list_filter = ('project', 'available', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
@@ -64,16 +71,78 @@ class FontAdmin(admin.ModelAdmin):
           'fields': ('created_at', 'updated_at', )
       }),
       (None, {
-          'fields': ('project', 'name', 'slug', 'available', 'fontlib', 'glyphs_composition', )
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', )
       }),
     )
     save_on_top = True
-
+    show_full_result_count = False
     formfield_overrides = {
         models.JSONField: {
             'widget': JSONEditorWidget(width='100%', height='350px'),
         },
     }
+
+
+@admin.register(GlyphsComposition)
+class GlyphsCompositionAdmin(admin.ModelAdmin):
+
+    list_select_related = ()
+    list_display = ('font', 'created_at', 'updated_at', )
+    readonly_fields = ('created_at', 'updated_at', )
+    fieldsets = (
+      ('Metadata', {
+          'classes': ('collapse',),
+          'fields': ('created_at', 'updated_at', )
+      }),
+      (None, {
+          'fields': ('font', 'data', )
+      }),
+    )
+    save_on_top = True
+    show_full_result_count = False
+    formfield_overrides = {
+        models.JSONField: {
+            'widget': JSONEditorWidget(width='100%', height='500px'),
+        },
+    }
+
+
+class FontFilter(admin.SimpleListFilter):
+    title = _('Font')
+    parameter_name = 'font'
+
+    def lookups(self, request, model_admin):
+        # This is where you create filter options; we have two:
+        fonts = Font.objects.select_related('project').all()
+        return [(font.id, '{} / {}'.format(font.project.name, font.name)) for font in fonts]
+
+    def queryset(self, request, queryset):
+        font_id=self.value()
+        if self.value():
+            return queryset.filter(font_id=font_id)
+        return queryset
+
+
+class GlifFontFilter(admin.SimpleListFilter):
+    title = _('Font')
+    parameter_name = 'font'
+
+    def lookups(self, request, model_admin):
+        # This is where you create filter options; we have two:
+        fonts = Font.objects.select_related('project').all()
+        return [(font.id, '{} / {}'.format(font.project.name, font.name)) for font in fonts]
+
+    def queryset(self, request, queryset):
+        font_id=self.value()
+        if self.value():
+            return queryset.select_related('glif').filter(glif__font_id=font_id)
+        return queryset
+
+
+# class GlifFilter(AutocompleteFilter):
+#
+#     title = _('Glif')
+#     field_name = 'glif'
 
 
 class GlifAdmin(admin.ModelAdmin):
@@ -96,11 +165,13 @@ class GlifAdmin(admin.ModelAdmin):
     status_display.short_description = _('Status')
     status_display.allow_tags = True
 
+    list_select_related = ()
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('name', )
-    list_filter = ('font__project', 'font', 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
+    list_filter = (FontFilter, 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    # raw_id_fields = ('font', )
 
     def get_fieldsets(self, request, obj=None):
         return (
@@ -117,19 +188,15 @@ class GlifAdmin(admin.ModelAdmin):
     show_full_result_count = False
 
 
-class GlifFilter(AutocompleteFilter):
-
-    title = _('Glif')
-    field_name = 'glif'
-
-
 class GlifLayerAdmin(admin.ModelAdmin):
 
+    list_select_related = ()
     list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('group_name', )
-    list_filter = ('glif__font', GlifFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_filter = (GlifFontFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    raw_id_fields = ('glif', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse', ),
@@ -204,6 +271,7 @@ class AtomicElementLayerAdmin(GlifLayerAdmin):
 @admin.register(Proof)
 class ProofAdmin(admin.ModelAdmin):
 
+    list_select_related = ()
     list_display = ('file', 'filetype', 'created_at', 'updated_at', 'user', )
     list_filter = ('font', 'user', 'filetype', )
     search_fields = ('file', 'filetype', )

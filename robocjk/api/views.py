@@ -160,11 +160,11 @@ def project_delete(request, user, project, *args, **kwargs):
 @api_view
 @require_user
 @require_project
-def font_list(request, params, *args, **kwargs):
+def font_list(request, user, project, *args, **kwargs):
     font_fields = set(FONT_FIELDS)
     font_fields.remove('fontlib')
     font_fields = list(font_fields)
-    data = list(Font.objects.values(*font_fields))
+    data = list(Font.objects.filter(project_id=project.id).values(*font_fields))
     return ApiResponseSuccess(data)
 
 

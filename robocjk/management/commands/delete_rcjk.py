@@ -29,6 +29,6 @@ class Command(BaseCommand):
         except Font.DoesNotExist:
             raise CommandError('Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(font_uid))
 
-        # font_obj.available = False
-        # font_obj.save()
+        font_obj.available = False
+        font_obj.save()
         font_obj.delete()

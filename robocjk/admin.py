@@ -12,99 +12,12 @@ from django_json_widget.widgets import JSONEditorWidget
 
 from robocjk.models import (
     Project,
-    Font,
+    Font, FontImport,
     GlyphsComposition,
     CharacterGlyph, CharacterGlyphLayer,
     DeepComponent,
     AtomicElement, AtomicElementLayer,
     Proof, )
-
-
-@admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
-
-    list_select_related = ()
-    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', )
-    search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
-    fieldsets = (
-      ('Identifiers', {
-          'classes': ('collapse',),
-          'fields': ('hashid', 'uid', )
-      }),
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('name', 'slug', 'repo_url', )
-      }),
-    )
-    save_on_top = True
-    show_full_result_count = False
-
-
-@admin.register(Font)
-class FontAdmin(admin.ModelAdmin):
-
-    def info(self, font, *args, **kwargs):
-        html = '<span style="white-space: nowrap;">Character Glyphs: <strong>{}</strong></span><br>'\
-               '<span style="white-space: nowrap;">Deep Components: <strong>{}</strong></span><br>'\
-               '<span style="white-space: nowrap;">Atomic Elements: <strong>{}</strong></span>'.format(
-                    font.num_character_glyphs(),
-                    font.num_deep_components(),
-                    font.num_atomic_elements())
-        return mark_safe(html)
-
-    list_select_related = ()
-    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )
-    list_filter = ('project', 'available', )
-    search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', )
-    fieldsets = (
-      ('Identifiers', {
-          'classes': ('collapse',),
-          'fields': ('hashid', 'uid', )
-      }),
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('project', 'name', 'slug', 'available', 'fontlib', )
-      }),
-    )
-    save_on_top = True
-    show_full_result_count = False
-    formfield_overrides = {
-        models.JSONField: {
-            'widget': JSONEditorWidget(width='100%', height='350px'),
-        },
-    }
-
-
-@admin.register(GlyphsComposition)
-class GlyphsCompositionAdmin(admin.ModelAdmin):
-
-    list_select_related = ()
-    list_display = ('font', 'created_at', 'updated_at', )
-    readonly_fields = ('created_at', 'updated_at', )
-    fieldsets = (
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('font', 'data', )
-      }),
-    )
-    save_on_top = True
-    show_full_result_count = False
-    formfield_overrides = {
-        models.JSONField: {
-            'widget': JSONEditorWidget(width='100%', height='500px'),
-        },
-    }
 
 
 class FontFilter(admin.SimpleListFilter):
@@ -143,6 +56,125 @@ class GlifFontFilter(admin.SimpleListFilter):
 #
 #     title = _('Glif')
 #     field_name = 'glif'
+
+
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+
+    list_select_related = ()
+    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', )
+    search_fields = ('name', 'slug', 'uid', 'hashid', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
+    fieldsets = (
+      ('Identifiers', {
+          'classes': ('collapse',),
+          'fields': ('hashid', 'uid', )
+      }),
+      ('Metadata', {
+          'classes': ('collapse',),
+          'fields': ('created_at', 'updated_at', )
+      }),
+      (None, {
+          'fields': ('name', 'slug', 'repo_url', )
+      }),
+    )
+    save_on_top = True
+    show_full_result_count = False
+
+
+@admin.register(FontImport)
+class FontImportAdmin(admin.ModelAdmin):
+
+    list_select_related = ()
+    list_display = ('filename', 'status', 'created_at', 'updated_at', )
+    list_filter = (FontFilter, 'status', )
+    readonly_fields = ('id', 'status', 'created_at', 'updated_at', )
+    fieldsets = (
+      ('Metadata', {
+          'classes': ('collapse',),
+          'fields': ('created_at', 'updated_at', )
+      }),
+      (None, {
+          'fields': ('font', 'file', 'status', 'logs', )
+      }),
+    )
+    save_on_top = True
+    show_full_result_count = False
+
+
+class FontImportInline(admin.TabularInline):
+
+    model = FontImport
+    fields = ('file', 'filename', 'status', 'created_at', 'updated_at', )
+    readonly_fields = ('filename', 'status', 'created_at', 'updated_at', )
+    extra = 0
+
+
+@admin.register(Font)
+class FontAdmin(admin.ModelAdmin):
+
+    def info(self, font, *args, **kwargs):
+        html = '<span style="white-space: nowrap;">Character Glyphs: <strong>{}</strong></span><br>'\
+               '<span style="white-space: nowrap;">Deep Components: <strong>{}</strong></span><br>'\
+               '<span style="white-space: nowrap;">Atomic Elements: <strong>{}</strong></span>'.format(
+                    font.num_character_glyphs(),
+                    font.num_deep_components(),
+                    font.num_atomic_elements())
+        return mark_safe(html)
+
+    list_select_related = ()
+    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )
+    list_filter = ('project', 'available', )
+    search_fields = ('name', 'slug', 'uid', 'hashid', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', )
+    fieldsets = (
+      ('Identifiers', {
+          'classes': ('collapse',),
+          'fields': ('hashid', 'uid', )
+      }),
+      ('Metadata', {
+          'classes': ('collapse',),
+          'fields': ('created_at', 'updated_at', )
+      }),
+      (None, {
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', )
+      }),
+    )
+    inlines = [FontImportInline]
+    save_on_top = True
+    show_full_result_count = False
+    formfield_overrides = {
+        models.JSONField: {
+            'widget': JSONEditorWidget(width='100%', height='350px'),
+        },
+    }
+
+
+
+
+
+@admin.register(GlyphsComposition)
+class GlyphsCompositionAdmin(admin.ModelAdmin):
+
+    list_select_related = ()
+    list_display = ('font', 'created_at', 'updated_at', )
+    readonly_fields = ('created_at', 'updated_at', )
+    fieldsets = (
+      ('Metadata', {
+          'classes': ('collapse',),
+          'fields': ('created_at', 'updated_at', )
+      }),
+      (None, {
+          'fields': ('font', 'data', )
+      }),
+    )
+    save_on_top = True
+    show_full_result_count = False
+    formfield_overrides = {
+        models.JSONField: {
+            'widget': JSONEditorWidget(width='100%', height='500px'),
+        },
+    }
 
 
 class GlifAdmin(admin.ModelAdmin):

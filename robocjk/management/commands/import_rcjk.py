@@ -67,27 +67,33 @@ class Command(BaseCommand):
         filepath = options.get('filepath')
         if not filepath.startswith('/'):
             filepath = fsutil.join_path('/root/robocjk/temp/', filepath)
-        if not filepath.endswith('.rcjk.zip'):
-            raise CommandError('Invalid filepath, expected an "*.rcjk.zip" file.')
+        if not filepath.endswith('.zip'):
+            message = 'Invalid filepath, expected a .zip file containing .rcjk font project.'
+            self.stderr.write(message)
+            raise CommandError(message)
         if not fsutil.exists(filepath):
-            raise CommandError('Invalid filepath, file "{}" doesn\'t exist.'.format(filepath))
+            message = 'Invalid filepath, file "{}" doesn\'t exist.'.format(filepath)
+            self.stderr.write(message)
+            raise CommandError(message)
 
         font_uid = options.get('font_uid')
         try:
             font_obj = Font.objects.select_related('project').get(uid=font_uid)
         except Font.DoesNotExist:
-            raise CommandError('Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(font_uid))
+            message = 'Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(font_uid)
+            self.stderr.write(message)
+            raise CommandError(message)
 
         font_obj.available = False
         font_obj.save()
 
         font_clear = options.get('font_clear', False)
         if font_clear:
-            print('Deleting existing atomic elements...')
+            self.stdout.write('Deleting existing atomic elements...')
             AtomicElement.objects.filter(font__uid=font_uid).delete()
-            print('Deleting existing deep components...')
+            self.stdout.write('Deleting existing deep components...')
             DeepComponent.objects.filter(font__uid=font_uid).delete()
-            print('Deleting existing character glyphs...')
+            self.stdout.write('Deleting existing character glyphs...')
             CharacterGlyph.objects.filter(font__uid=font_uid).delete()
 
         # read and index zip files by type
@@ -104,7 +110,6 @@ class Command(BaseCommand):
             }
 
             for name in names:
-                # print(name)
 
                 match = self._character_glyph_re.match(name)
                 if match:
@@ -136,22 +141,22 @@ class Command(BaseCommand):
                     names_dict['fontlib'].append((name, match, ))
                     continue
 
-            print('Found {} atomic elements to import.'.format(
+            self.stdout.write('Found {} atomic elements to import.'.format(
                 len(names_dict['atomic_elements'])))
 
-            print('Found {} atomic elements layers to import.'.format(
+            self.stdout.write('Found {} atomic elements layers to import.'.format(
                 len(names_dict['atomic_elements_layers'])))
 
-            print('Found {} deep components to import.'.format(
+            self.stdout.write('Found {} deep components to import.'.format(
                 len(names_dict['deep_components'])))
 
-            print('Found {} character glyphs to import.'.format(
+            self.stdout.write('Found {} character glyphs to import.'.format(
                 len(names_dict['character_glyphs'])))
 
-            print('Found {} character glyphs layers to import.'.format(
+            self.stdout.write('Found {} character glyphs layers to import.'.format(
                 len(names_dict['character_glyphs_layers'])))
 
-            print('Found {} fontlib to import.'.format(
+            self.stdout.write('Found {} fontlib to import.'.format(
                 len(names_dict['fontlib'])))
 
             # import fontlib
@@ -189,7 +194,6 @@ class Command(BaseCommand):
                 self._import_character_glyph_layer(
                     font_obj, self._zipfile_read(file, name), match)
 
-        # font_obj.project.save_to_file_system()
         font_obj.available = True
         font_obj.save()
 
@@ -212,7 +216,7 @@ class Command(BaseCommand):
             status = StatusModel.STATUS_WIP
         obj, created = cls.objects.update_or_create(
             font=font, name=data.name, defaults={ 'status':status, 'data':content })
-        print('Imported {}: {}'.format(cls, data.name))
+        # self.stdout.write('Imported {}: {}'.format(cls, data.name))
 
     def _import_glif_layer(self, glif_cls, cls, font, content, match):
         data = GlifData()
@@ -221,11 +225,11 @@ class Command(BaseCommand):
         try:
             glif_obj = glif_cls.objects.get(font=font, name=data.name)
         except glif_cls.DoesNotExist:
-            print('Import Error {} [{}]: {}'.format(cls, layer_name, data.name))
+            self.stderr.write('Import Error {} [{}]: {}'.format(cls, layer_name, data.name))
             return
         obj, created = cls.objects.update_or_create(
             glif=glif_obj, group_name=layer_name, defaults={ 'data':content })
-        print('Imported {} [{}]: {}'.format(cls, layer_name, data.name))
+        # self.stdout.write('Imported {} [{}]: {}'.format(cls, layer_name, data.name))
 
     def _import_atomic_element(self, font, content, match):
         self._import_glif(AtomicElement, font, content, match)

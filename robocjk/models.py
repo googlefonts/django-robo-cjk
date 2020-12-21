@@ -220,6 +220,58 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             self.name))
 
 
+class FontImport(TimestampModel):
+
+    STATUS_WAITING = 'waiting'
+    STATUS_LOADING = 'loading'
+    STATUS_COMPLETED = 'completed'
+    STATUS_ERROR = 'error'
+    STATUS_CHOICES = (
+        (STATUS_WAITING, _('Waiting'), ),
+        (STATUS_LOADING, _('Loading'), ),
+        (STATUS_COMPLETED, _('Completed'), ),
+        (STATUS_ERROR, _('Error'), ),
+    )
+
+    font = models.ForeignKey(
+        'robocjk.Font',
+        on_delete=models.CASCADE,
+        verbose_name=_('Font'))
+
+    file = models.FileField(
+        upload_to='fonts/imports',
+        validators=[FileExtensionValidator(
+            allowed_extensions=('zip', ))],
+        verbose_name=_('File'),
+        help_text=_('.zip file containing .rcjk font project.'))
+
+    logs = models.TextField(
+        blank=True,
+        verbose_name=_('Logs'))
+
+    @property
+    def filename(self):
+        return fsutil.get_filename(self.file.path)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_WAITING,
+        db_index=True,
+        verbose_name=_('Status'))
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Font Import')
+        verbose_name_plural = _('Fonts Imports')
+
+    def __str__(self):
+        return force_str('{} [{}]: {}'.format(
+            _('Font Import'),
+            self.status,
+            self.filename))
+
+
 class GlyphsComposition(TimestampModel):
     """
     The Glyphs Composition model.

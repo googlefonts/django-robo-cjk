@@ -5,6 +5,8 @@ from django.http import JsonResponse
 
 class ApiResponse(JsonResponse):
 
+    error = None
+
     def __init__(self, data=None, status=None, error=None):
         super(ApiResponse, self).__init__(
             data={
@@ -16,6 +18,7 @@ class ApiResponse(JsonResponse):
             json_dumps_params={
                 'sort_keys':True,
             })
+        self.error = error
 
     def _format_error(self, prefix, message=''):
         return '{} - {}'.format(prefix, message) if message else prefix

@@ -366,12 +366,12 @@ LOGGING = {
         'app': {
             'handlers': ['debug_file'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
         'robocjk': {
-            'handlers': ['debug_file'],
+            'handlers': ['debug_file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
     }
 }

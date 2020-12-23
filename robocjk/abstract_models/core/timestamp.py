@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from slugify import slugify
+
 
 class TimestampModel(models.Model):
 
@@ -28,6 +30,30 @@ class TimestampModel(models.Model):
         related_name='+',
         verbose_name=_('Updated by'))
 
+    editors = models.ManyToManyField(
+        get_user_model(),
+        related_name='+',
+        verbose_name=_('Editors'))
+
+    editors_history = models.TextField(
+        blank=True,
+        verbose_name=_('Editors History'))
+
+    def update_editors_history(self, user):
+        editor_name = user.get_full_name()
+        editors_separator = ', '
+        editors_list = list(filter(None, self.editors_history.split(editors_separator)))
+        # editors_list = [editor for editor in editors_list if slugify(editor) != slugify(editor_name)]
+        if not editors_list or editor_name != editors_list[-1]:
+            editors_list.append(editor_name)
+            if len(editors_list) > 100:
+                # TODO: last 100 items
+                pass
+            self.editors_history = editors_separator.join(editors_list)
+
     def save_by(self, user):
+        # if user and user.id != self.updated_by_id:
+        self.update_editors_history(user)
         self.updated_by = user
         self.save()
+        self.editors.add(user)

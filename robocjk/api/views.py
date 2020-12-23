@@ -110,7 +110,7 @@ def project_get(request, project, *args, **kwargs):
 @api_view
 @require_user
 @require_params(name='str', repo_url='str')
-def project_create(request, params, *args, **kwargs):
+def project_create(request, params, user, *args, **kwargs):
     name = params.get_str('name')
     repo_url = params.get_str('repo_url')
     try:
@@ -129,7 +129,7 @@ def project_create(request, params, *args, **kwargs):
     project = Project()
     project.name = name
     project.repo_url = repo_url
-    project.save()
+    project.save_by(user)
     return ApiResponseSuccess(project.serialize())
 
 
@@ -179,7 +179,7 @@ def font_get(request, font, *args, **kwargs):
 @require_user
 @require_project
 @require_params(name='str')
-def font_create(request, params, *args, **kwargs):
+def font_create(request, params, user, *args, **kwargs):
     project = kwargs['project']
     name = params.get_str('name')
     if Font.objects.filter(name__iexact=name).exists():
@@ -190,14 +190,14 @@ def font_create(request, params, *args, **kwargs):
     font.project = project
     font.name = name
     font.fontlib = params.get_dict('fontlib')
-    font.save()
+    font.save_by(user)
     return ApiResponseSuccess(font.serialize())
 
 
 @api_view
 @require_user
 @require_font
-def font_update(request, user, params, font, *args, **kwargs):
+def font_update(request, params, user, font, *args, **kwargs):
     font_changed = False
     # look for fontlib data
     fontlib = params.get_dict('fontlib')
@@ -231,10 +231,10 @@ def glyphs_composition_get(request, font, *args, **kwargs):
 @require_user
 @require_font
 @require_params(data='str')
-def glyphs_composition_update(request, font, params, *args, **kwargs):
+def glyphs_composition_update(request, params, user, font, *args, **kwargs):
     glyphs_composition_data = params.get_dict('data')
     glyphs_composition_obj, _ = GlyphsComposition.objects.update_or_create(
-        font_id=font.id, defaults={'data':glyphs_composition_data})
+        font_id=font.id, defaults={'data':glyphs_composition_data, 'updated_by':user })
     return ApiResponseSuccess(glyphs_composition_obj.serialize())
 
 

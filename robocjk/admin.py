@@ -62,21 +62,22 @@ class GlifFontFilter(admin.SimpleListFilter):
 class ProjectAdmin(admin.ModelAdmin):
 
     list_select_related = ()
-    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', )
+    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', 'updated_by', )
+    # list_filter = ('updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', 'updated_by', )
     fieldsets = (
-      ('Identifiers', {
-          'classes': ('collapse',),
-          'fields': ('hashid', 'uid', )
-      }),
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('name', 'slug', 'repo_url', )
-      }),
+        ('Identifiers', {
+            'classes': ('collapse',),
+            'fields': ('hashid', 'uid', )
+        }),
+        ('Metadata', {
+            'classes': ('collapse',),
+            'fields': ('created_at', 'updated_at', 'updated_by', )
+        }),
+        (None, {
+            'fields': ('name', 'slug', 'repo_url', )
+        }),
     )
     save_on_top = True
     show_full_result_count = False
@@ -88,15 +89,15 @@ class FontImportAdmin(admin.ModelAdmin):
     list_select_related = ()
     list_display = ('filename', 'status', 'created_at', 'updated_at', )
     list_filter = (FontFilter, 'status', )
-    readonly_fields = ('id', 'status', 'created_at', 'updated_at', )
+    readonly_fields = ('id', 'status', 'created_at', 'updated_at', 'updated_by', )
     fieldsets = (
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('font', 'file', 'status', 'logs', )
-      }),
+        ('Metadata', {
+            'classes': ('collapse',),
+            'fields': ('created_at', 'updated_at', 'updated_by', )
+        }),
+        (None, {
+            'fields': ('font', 'file', 'status', 'logs', )
+        }),
     )
     save_on_top = True
     show_full_result_count = False
@@ -123,22 +124,22 @@ class FontAdmin(admin.ModelAdmin):
         return mark_safe(html)
 
     list_select_related = ()
-    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', )
-    list_filter = ('project', 'available', )
+    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', )
+    list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', )
     fieldsets = (
-      ('Identifiers', {
+        ('Identifiers', {
           'classes': ('collapse',),
           'fields': ('hashid', 'uid', )
-      }),
-      ('Metadata', {
+        }),
+        ('Metadata', {
           'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
+          'fields': ('created_at', 'updated_at', 'updated_by', )
+        }),
+        (None, {
           'fields': ('project', 'name', 'slug', 'available', 'fontlib', )
-      }),
+        }),
     )
     inlines = [FontImportInline]
     save_on_top = True
@@ -150,23 +151,21 @@ class FontAdmin(admin.ModelAdmin):
     }
 
 
-
-
-
 @admin.register(GlyphsComposition)
 class GlyphsCompositionAdmin(admin.ModelAdmin):
 
     list_select_related = ()
-    list_display = ('font', 'created_at', 'updated_at', )
-    readonly_fields = ('created_at', 'updated_at', )
+    list_display = ('font', 'created_at', 'updated_at', 'updated_by', )
+    list_filter = ('updated_by', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', )
     fieldsets = (
-      ('Metadata', {
-          'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', )
-      }),
-      (None, {
-          'fields': ('font', 'data', )
-      }),
+        ('Metadata', {
+            'classes': ('collapse',),
+            'fields': ('created_at', 'updated_at', 'updated_by', )
+        }),
+        (None, {
+            'fields': ('font', 'data', )
+        }),
     )
     save_on_top = True
     show_full_result_count = False
@@ -300,22 +299,22 @@ class AtomicElementLayerAdmin(GlifLayerAdmin):
     pass
 
 
-@admin.register(Proof)
-class ProofAdmin(admin.ModelAdmin):
-
-    list_select_related = ()
-    list_display = ('file', 'filetype', 'created_at', 'updated_at', 'user', )
-    list_filter = ('font', 'user', 'filetype', )
-    search_fields = ('file', 'filetype', )
-    readonly_fields = ('created_at', 'updated_at', )
-    fieldsets = (
-        ('Metadata', {
-            'classes': ('collapse', ),
-            'fields': ('created_at', 'updated_at', )
-        }),
-        (None, {
-            'fields': ('user', 'file', 'filetype', )
-        }),
-    )
-    save_on_top = True
+# @admin.register(Proof)
+# class ProofAdmin(admin.ModelAdmin):
+#
+#     list_select_related = ()
+#     list_display = ('file', 'filetype', 'created_at', 'updated_at', 'updated_by', 'user', )
+#     list_filter = ('font', 'user', 'filetype', )
+#     search_fields = ('file', 'filetype', )
+#     readonly_fields = ('created_at', 'updated_at', 'updated_by', )
+#     fieldsets = (
+#         ('Metadata', {
+#             'classes': ('collapse', ),
+#             'fields': ('created_at', 'updated_at', 'updated_by', )
+#         }),
+#         (None, {
+#             'fields': ('user', 'file', 'filetype', )
+#         }),
+#     )
+#     save_on_top = True
 

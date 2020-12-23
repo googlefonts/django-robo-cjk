@@ -87,10 +87,6 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     def path(self):
         return get_project_path(self)
 
-    def save_by(self, user):
-        self.updated_by = user
-        self.save()
-
     def save_to_file_system(self):
         path = self.path()
         print(path)
@@ -181,10 +177,6 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def path(self):
         return get_font_path(self)
-
-    def save_by(self, user):
-        self.updated_by = user
-        self.save()
 
     def save_to_file_system(self):
         if not self.available:
@@ -558,10 +550,6 @@ class GlifDataModel(models.Model):
         self._apply_data(self._parse_data())
         super(GlifDataModel, self).save(*args, **kwargs)
         self._update_components()
-
-    def save_by(self, user):
-        self.updated_by = user
-        self.save()
 
     def save_to_file_system(self):
         fsutil.write_file(self.path(), self.data)

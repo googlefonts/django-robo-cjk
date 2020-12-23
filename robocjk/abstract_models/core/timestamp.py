@@ -27,3 +27,7 @@ class TimestampModel(models.Model):
         on_delete=models.SET_NULL,
         related_name='+',
         verbose_name=_('Updated by'))
+
+    def save_by(self, user):
+        self.updated_by = user
+        self.save()

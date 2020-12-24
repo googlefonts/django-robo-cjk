@@ -6,6 +6,10 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 
 ## API
 
+- [Globals](#globals)
+- [Endpoints](#endpoints)
+- [Client](#client)
+
 ### Globals
 
 - Base URL: `http://164.90.229.235` *(temporary development environment, it will change very soon)*
@@ -408,6 +412,8 @@ See [Project Get](#project-get) response.
 |---|---|---|
 | `project_uid` | `string` | yes |
 | `name` | `string` | yes |
+| `fontlib` | `json` | no |
+| `features` | `string` | no |
 
 ##### Response
 
@@ -427,7 +433,7 @@ See [Font Get](#font-get) response.
 |---|---|---|
 | `font_uid` | `string` | yes |
 | `fontlib` | `json` | no |
-| `glyphs_composition` | `json` | no |
+| `features` | `string` | no |
 
 ##### Response
 
@@ -1625,3 +1631,22 @@ See [Character Glyph Get](#character-glyph-get) response.
 ```
 
 ---
+
+### Client
+
+There is client that is possible to use to interact with APIs easily. 
+
+**Using the client all the API endpoints are available as methods and the authentication token will be managed/renewed automatically.**
+
+Usage:
+```python
+from robocjk.api.client import Client
+
+c = Client(
+    host='https://...', 
+    username='<username>', 
+    password='<password>')
+    
+response = c.user_me()
+print(response)
+```

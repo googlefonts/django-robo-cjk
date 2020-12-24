@@ -190,6 +190,7 @@ def font_create(request, params, user, *args, **kwargs):
     font.project = project
     font.name = name
     font.fontlib = params.get_dict('fontlib')
+    font.features = params.get_str('features')
     font.save_by(user)
     return ApiResponseSuccess(font.serialize())
 
@@ -203,6 +204,10 @@ def font_update(request, params, user, font, *args, **kwargs):
     fontlib = params.get_dict('fontlib')
     if fontlib:
         font.fontlib = fontlib
+        font_changed = True
+    features = params.get_str('features')
+    if features:
+        font.features = features
         font_changed = True
     # font is changed, save it
     if font_changed:

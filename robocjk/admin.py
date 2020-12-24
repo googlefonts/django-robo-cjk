@@ -65,7 +65,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'created_at', 'updated_at', 'updated_by', )
     # list_filter = ('updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', 'updated_by', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Identifiers', {
             'classes': ('collapse',),
@@ -73,7 +73,7 @@ class ProjectAdmin(admin.ModelAdmin):
         }),
         ('Metadata', {
             'classes': ('collapse',),
-            'fields': ('created_at', 'updated_at', 'updated_by', )
+            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('name', 'slug', 'repo_url', )
@@ -89,11 +89,11 @@ class FontImportAdmin(admin.ModelAdmin):
     list_select_related = ()
     list_display = ('filename', 'status', 'created_at', 'updated_at', )
     list_filter = (FontFilter, 'status', )
-    readonly_fields = ('id', 'status', 'created_at', 'updated_at', 'updated_by', )
+    readonly_fields = ('id', 'status', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse',),
-            'fields': ('created_at', 'updated_at', 'updated_by', )
+            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('font', 'file', 'status', 'logs', )
@@ -127,7 +127,7 @@ class FontAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', )
     list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
-    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', )
+    readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Identifiers', {
           'classes': ('collapse',),
@@ -135,10 +135,10 @@ class FontAdmin(admin.ModelAdmin):
         }),
         ('Metadata', {
           'classes': ('collapse',),
-          'fields': ('created_at', 'updated_at', 'updated_by', )
+          'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
-          'fields': ('project', 'name', 'slug', 'available', 'fontlib', )
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', 'features', )
         }),
     )
     inlines = [FontImportInline]
@@ -157,11 +157,11 @@ class GlyphsCompositionAdmin(admin.ModelAdmin):
     list_select_related = ()
     list_display = ('font', 'created_at', 'updated_at', 'updated_by', )
     list_filter = ('updated_by', )
-    readonly_fields = ('created_at', 'updated_at', 'updated_by', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse',),
-            'fields': ('created_at', 'updated_at', 'updated_by', )
+            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('font', 'data', )
@@ -201,14 +201,14 @@ class GlifAdmin(admin.ModelAdmin):
     list_display_links = ('name', )
     list_filter = (FontFilter, 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
-    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     # raw_id_fields = ('font', )
 
     def get_fieldsets(self, request, obj=None):
         return (
             ('Metadata', {
                 'classes': ('collapse', ),
-                'fields': ('created_at', 'updated_at', 'updated_by', 'is_locked', 'locked_by', 'locked_at', )
+                'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'is_locked', 'locked_by', 'locked_at', )
             }),
             (None, {
                 'fields': ('font', 'status', 'data', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
@@ -226,12 +226,12 @@ class GlifLayerAdmin(admin.ModelAdmin):
     list_display_links = ('group_name', )
     list_filter = (GlifFontFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
-    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+    readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     raw_id_fields = ('glif', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse', ),
-            'fields': ('created_at', 'updated_at', 'updated_by', )
+            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('glif', 'group_name', 'data', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )

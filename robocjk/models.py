@@ -158,6 +158,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         default=dict,
         verbose_name=_('FontLib'))
 
+    features = models.TextField(
+        blank=True,
+        verbose_name=_('Features'))
+
     objects = FontManager()
 
     def num_character_glyphs(self):
@@ -189,6 +193,9 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         fontlib_path = fsutil.join_path(path, 'fontLib.json')
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
+        # write features.fea file
+        features_path = fsutil.join_path(path, 'features.fea')
+        fsutil.write_file(features_path, self.features)
         # write glyphsComposition.json file
         glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=self.id)
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')

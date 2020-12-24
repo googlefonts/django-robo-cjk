@@ -24,24 +24,59 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
 
         self._font_pattern = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
-
         self._fontlib_pattern = r'^{}?fontLib\.json$'.format(self._font_pattern)
-        self._fontlib_re = re.compile(self._fontlib_pattern)
-
+        self._features_pattern = r'^{}?features\.fea$'.format(self._font_pattern)
         self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._atomic_element_re = re.compile(self._atomic_element_pattern)
-
         self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._atomic_element_layer_re = re.compile(self._atomic_element_layer_pattern)
-
         self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._deep_component_re = re.compile(self._deep_component_pattern)
-
         self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_re = re.compile(self._character_glyph_pattern)
-
         self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_layer_re = re.compile(self._character_glyph_layer_pattern)
+
+        self._import_mappings = [
+            {
+                'pattern': self._character_glyph_pattern,
+                'group_name': 'character_glyphs',
+                'import_func': self._import_character_glyph,
+            },
+            {
+                'pattern': self._character_glyph_layer_pattern,
+                'group_name': 'character_glyphs_layers',
+                'import_func': self._import_character_glyph_layer,
+            },
+            {
+                'pattern': self._deep_component_pattern,
+                'group_name': 'deep_components',
+                'import_func': self._import_deep_component,
+            },
+            {
+                'pattern': self._atomic_element_pattern,
+                'group_name': 'atomic_elements',
+                'import_func': self._import_atomic_element,
+            },
+            {
+                'pattern': self._atomic_element_layer_pattern,
+                'group_name': 'atomic_elements_layers',
+                'import_func': self._import_atomic_element_layer,
+            },
+            {
+                'pattern': self._fontlib_pattern,
+                'group_name': 'fontlib',
+                'import_func': self._import_fontlib,
+            },
+            {
+                'pattern': self._features_pattern,
+                'group_name': 'features',
+                'import_func': self._import_features,
+            },
+        ]
+
+        for item in self._import_mappings:
+            item['pattern_re'] = re.compile(item['pattern'])
+
+        self._import_groups = {
+            item['group_name']:[] for item in self._import_mappings
+        }
+
 
     def add_arguments(self, parser):
         # https://docs.python.org/3/library/argparse.html
@@ -98,101 +133,23 @@ class Command(BaseCommand):
 
         # read and index zip files by type
         with zipfile.ZipFile(filepath, 'r') as file:
-
             names = file.namelist()
-            names_dict = {
-                'atomic_elements': [],
-                'atomic_elements_layers': [],
-                'deep_components': [],
-                'character_glyphs': [],
-                'character_glyphs_layers': [],
-                'fontlib': [],
-            }
 
             for name in names:
+                for item in self._import_mappings:
+                    match = item['pattern_re'].match(name)
+                    if match:
+                        self._import_groups[item['group_name']].append((name, match, ))
+                        continue
 
-                match = self._character_glyph_re.match(name)
-                if match:
-                    names_dict['character_glyphs'].append((name, match, ))
-                    continue
+            for item in self._import_mappings:
+                group_name = item['group_name']
+                self.stdout.write('Found {} {} to import.'.format(
+                    len(self._import_groups[group_name]), group_name.replace('_', ' ').title()))
 
-                match = self._character_glyph_layer_re.match(name)
-                if match:
-                    names_dict['character_glyphs_layers'].append((name, match, ))
-                    continue
-
-                match = self._deep_component_re.match(name)
-                if match:
-                    names_dict['deep_components'].append((name, match, ))
-                    continue
-
-                match = self._atomic_element_re.match(name)
-                if match:
-                    names_dict['atomic_elements'].append((name, match, ))
-                    continue
-
-                match = self._atomic_element_layer_re.match(name)
-                if match:
-                    names_dict['atomic_elements_layers'].append((name, match, ))
-                    continue
-
-                match = self._fontlib_re.match(name)
-                if match:
-                    names_dict['fontlib'].append((name, match, ))
-                    continue
-
-            self.stdout.write('Found {} atomic elements to import.'.format(
-                len(names_dict['atomic_elements'])))
-
-            self.stdout.write('Found {} atomic elements layers to import.'.format(
-                len(names_dict['atomic_elements_layers'])))
-
-            self.stdout.write('Found {} deep components to import.'.format(
-                len(names_dict['deep_components'])))
-
-            self.stdout.write('Found {} character glyphs to import.'.format(
-                len(names_dict['character_glyphs'])))
-
-            self.stdout.write('Found {} character glyphs layers to import.'.format(
-                len(names_dict['character_glyphs_layers'])))
-
-            self.stdout.write('Found {} fontlib to import.'.format(
-                len(names_dict['fontlib'])))
-
-            # import fontlib
-            for name, match in names_dict['fontlib']:
-                self._import_fontlib(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import atomic elements
-            for name, match in names_dict['atomic_elements']:
-                self._import_atomic_element(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import atomic elements layers
-            for name, match in names_dict['atomic_elements_layers']:
-                self._import_atomic_element_layer(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import deep components
-            for name, match in names_dict['deep_components']:
-                self._import_deep_component(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import character glyphs
-            for name, match in names_dict['character_glyphs']:
-                self._import_character_glyph(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import character glyphs layers
-            for name, match in names_dict['character_glyphs_layers']:
-                self._import_character_glyph_layer(
-                    font_obj, self._zipfile_read(file, name), match)
-
-            # import character glyphs layers
-            for name, match in names_dict['character_glyphs_layers']:
-                self._import_character_glyph_layer(
-                    font_obj, self._zipfile_read(file, name), match)
+            for item in self._import_mappings:
+                for name, match in self._import_groups[item['group_name']]:
+                    item['import_func'](font_obj, self._zipfile_read(file, name), match)
 
         font_obj.available = True
         font_obj.save()
@@ -202,6 +159,10 @@ class Command(BaseCommand):
 
     def _import_fontlib(self, font, content, match):
         font.fontlib = benedict.from_json(content, keypath_separator=None)
+        font.save()
+
+    def _import_features(self, font, content, match):
+        font.features = content
         font.save()
 
     def _import_glif(self, cls, font, content, match):

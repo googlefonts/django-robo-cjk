@@ -49,6 +49,13 @@ from robocjk.settings import API_AUTH_TOKEN_EXPIRATION
 UserClass = get_user_model()
 
 
+def _get_glif_serialization_options(params):
+    return {
+        'return_layers': params.get_bool('return_layers', True),
+        'return_related': params.get_bool('return_related', True),
+    }
+
+
 @api_view
 def auth_token(request, params, *args, **kwargs):
     username = params.get_str('username')
@@ -74,7 +81,7 @@ def auth_refresh_token(request, *args, **kwargs):
 
 @api_view
 @require_user
-def user_list(request, params, *args, **kwargs):
+def user_list(request, params, user, *args, **kwargs):
     data = list(UserClass.objects.values(*USER_FIELDS))
     return ApiResponseSuccess(data)
 
@@ -95,7 +102,7 @@ def user_me(request, params, user, *args, **kwargs):
 
 @api_view
 @require_user
-def project_list(request, params, *args, **kwargs):
+def project_list(request, params, user, *args, **kwargs):
     data = list(Project.objects.values(*PROJECT_FIELDS))
     return ApiResponseSuccess(data)
 
@@ -103,7 +110,7 @@ def project_list(request, params, *args, **kwargs):
 @api_view
 @require_user
 @require_project
-def project_get(request, project, *args, **kwargs):
+def project_get(request, params, user, project, *args, **kwargs):
     return ApiResponseSuccess(project.serialize())
 
 
@@ -151,7 +158,7 @@ def project_create(request, params, user, *args, **kwargs):
 @api_view
 @require_user
 @require_project
-def project_delete(request, user, project, *args, **kwargs):
+def project_delete(request, params, user, project, *args, **kwargs):
     if not user.is_superuser:
         return ApiResponseForbidden('Only super-users are allowed to delete projects.')
     return ApiResponseSuccess(project.delete())
@@ -160,7 +167,7 @@ def project_delete(request, user, project, *args, **kwargs):
 @api_view
 @require_user
 @require_project
-def font_list(request, user, project, *args, **kwargs):
+def font_list(request, params, user, project, *args, **kwargs):
     font_fields = set(FONT_FIELDS)
     font_fields.remove('fontlib')
     font_fields = list(font_fields)
@@ -171,7 +178,7 @@ def font_list(request, user, project, *args, **kwargs):
 @api_view
 @require_user
 @require_font
-def font_get(request, font, *args, **kwargs):
+def font_get(request, params, user, font, *args, **kwargs):
     return ApiResponseSuccess(font.serialize())
 
 
@@ -218,7 +225,7 @@ def font_update(request, params, user, font, *args, **kwargs):
 @api_view
 @require_user
 @require_font
-def font_delete(request, user, font, *args, **kwargs):
+def font_delete(request, params, user, font, *args, **kwargs):
     if not user.is_superuser:
         return ApiResponseForbidden('Only super-users are allowed to delete fonts.')
     return ApiResponseSuccess(font.delete())
@@ -227,7 +234,7 @@ def font_delete(request, user, font, *args, **kwargs):
 @api_view
 @require_user
 @require_font
-def glyphs_composition_get(request, font, *args, **kwargs):
+def glyphs_composition_get(request, params, user, font, *args, **kwargs):
     glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=font.id)
     return ApiResponseSuccess(glyphs_composition_obj.serialize())
 
@@ -246,7 +253,7 @@ def glyphs_composition_update(request, params, user, font, *args, **kwargs):
 @api_view
 @require_user
 @require_glif_filters
-def glif_list(request, glif_filters, *args, **kwargs):
+def glif_list(request, params, user, glif_filters, *args, **kwargs):
     data = {
         'atomic_elements': list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)),
         'deep_components': list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)),
@@ -258,7 +265,7 @@ def glif_list(request, glif_filters, *args, **kwargs):
 @api_view
 @require_user
 @require_glif_filters
-def atomic_element_list(request, glif_filters, *args, **kwargs):
+def atomic_element_list(request, params, user, glif_filters, *args, **kwargs):
     data = list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS))
     return ApiResponseSuccess(data)
 
@@ -266,15 +273,15 @@ def atomic_element_list(request, glif_filters, *args, **kwargs):
 @api_view
 @require_user
 @require_atomic_element()
-def atomic_element_get(request, atomic_element, *args, **kwargs):
-    return ApiResponseSuccess(atomic_element.serialize())
+def atomic_element_get(request, params, user, atomic_element, *args, **kwargs):
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_font
 @require_data
-def atomic_element_create(request, user, font, data, glif, *args, **kwargs):
+def atomic_element_create(request, params, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
     if AtomicElement.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
@@ -285,42 +292,42 @@ def atomic_element_create(request, user, font, data, glif, *args, **kwargs):
     atomic_element.data = data
     atomic_element.lock_by(user)
     atomic_element.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element(check_locked=True)
 @require_data
-def atomic_element_update(request, user, atomic_element, data, glif, *args, **kwargs):
+def atomic_element_update(request, params, user, atomic_element, data, glif, *args, **kwargs):
     atomic_element.data = data
     atomic_element.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element(check_locked=True)
 @require_status
-def atomic_element_update_status(request, user, atomic_element, status, *args, **kwargs):
+def atomic_element_update_status(request, params, user, atomic_element, status, *args, **kwargs):
     atomic_element.status = status
     atomic_element.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element(check_locked=True)
-def atomic_element_delete(request, atomic_element, *args, **kwargs):
+def atomic_element_delete(request, params, user, atomic_element, *args, **kwargs):
     return ApiResponseSuccess(atomic_element.delete())
 
 
 @api_view
 @require_user
 @require_atomic_element()
-def atomic_element_lock(request, user, atomic_element, *args, **kwargs):
+def atomic_element_lock(request, params, user, atomic_element, *args, **kwargs):
     if atomic_element.lock_by(user, save=True):
-        return ApiResponseSuccess(atomic_element.serialize())
+        return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Atomic Element can\'t be locked, it has already been locked by another user.')
 
@@ -328,9 +335,9 @@ def atomic_element_lock(request, user, atomic_element, *args, **kwargs):
 @api_view
 @require_user
 @require_atomic_element()
-def atomic_element_unlock(request, user, atomic_element, *args, **kwargs):
+def atomic_element_unlock(request, params, user, atomic_element, *args, **kwargs):
     if atomic_element.unlock_by(user, save=True):
-        return ApiResponseSuccess(atomic_element.serialize())
+        return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Atomic Element can\'t be unlocked, it has been locked by another user.')
 
@@ -340,7 +347,7 @@ def atomic_element_unlock(request, user, atomic_element, *args, **kwargs):
 @require_atomic_element(check_locked=True, prefix_params=True)
 @require_data
 @require_params(group_name='str')
-def atomic_element_layer_create(request, user, params, font, atomic_element, data, glif, *args, **kwargs):
+def atomic_element_layer_create(request, params, user, font, atomic_element, data, glif, *args, **kwargs):
     group_name = params.get('group_name')
     options = {
         'glif_id': atomic_element.id,
@@ -356,14 +363,14 @@ def atomic_element_layer_create(request, user, params, font, atomic_element, dat
             'Atomic Element Layer with font_id=\'{}\', glif_id=\'{}\', ' \
             'glif__name=\'{}\' group_name=\'{}\' already exists.'.format(
                 font.id, atomic_element.id, atomic_element.name, group_name))
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element_layer()
 @require_params(new_group_name='str')
-def atomic_element_layer_rename(request, user, params, font, atomic_element, atomic_element_layer, *args, **kwargs):
+def atomic_element_layer_rename(request, params, user, font, atomic_element, atomic_element_layer, *args, **kwargs):
     new_group_name = params.get('new_group_name')
     if AtomicElementLayer.objects.filter(glif_id=atomic_element.id, group_name__iexact=new_group_name).exclude(id=atomic_element_layer.id).exists():
         return ApiResponseBadRequest(
@@ -372,30 +379,30 @@ def atomic_element_layer_rename(request, user, params, font, atomic_element, ato
                 font.id, atomic_element.id, atomic_element.name, new_group_name))
     atomic_element_layer.group_name = new_group_name
     atomic_element_layer.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element_layer()
 @require_data
-def atomic_element_layer_update(request, user, atomic_element, atomic_element_layer, data, *args, **kwargs):
+def atomic_element_layer_update(request, params, user, atomic_element, atomic_element_layer, data, *args, **kwargs):
     atomic_element_layer.data = data
     atomic_element_layer.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize())
+    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_atomic_element_layer()
-def atomic_element_layer_delete(request, atomic_element_layer, *args, **kwargs):
+def atomic_element_layer_delete(request, params, user, atomic_element_layer, *args, **kwargs):
     return ApiResponseSuccess(atomic_element_layer.delete())
 
 
 @api_view
 @require_user
 @require_glif_filters
-def deep_component_list(request, glif_filters, *args, **kwargs):
+def deep_component_list(request, params, user, glif_filters, *args, **kwargs):
     data = list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS))
     return ApiResponseSuccess(data)
 
@@ -403,15 +410,15 @@ def deep_component_list(request, glif_filters, *args, **kwargs):
 @api_view
 @require_user
 @require_deep_component()
-def deep_component_get(request, deep_component, *args, **kwargs):
-    return ApiResponseSuccess(deep_component.serialize())
+def deep_component_get(request, params, user, deep_component, *args, **kwargs):
+    return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_font
 @require_data
-def deep_component_create(request, user, font, data, glif, *args, **kwargs):
+def deep_component_create(request, params, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
     if DeepComponent.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
@@ -422,42 +429,42 @@ def deep_component_create(request, user, font, data, glif, *args, **kwargs):
     deep_component.data = data
     deep_component.lock_by(user)
     deep_component.save_by(user)
-    return ApiResponseSuccess(deep_component.serialize())
+    return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_deep_component(check_locked=True)
 @require_data
-def deep_component_update(request, user, deep_component, data, glif, *args, **kwargs):
+def deep_component_update(request, params, user, deep_component, data, glif, *args, **kwargs):
     deep_component.data = data
     deep_component.save_by(user)
-    return ApiResponseSuccess(deep_component.serialize())
+    return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_deep_component(check_locked=True)
 @require_status
-def deep_component_update_status(request, user, deep_component, status, *args, **kwargs):
+def deep_component_update_status(request, params, user, deep_component, status, *args, **kwargs):
     deep_component.status = status
     deep_component.save_by(user)
-    return ApiResponseSuccess(deep_component.serialize())
+    return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_deep_component(check_locked=True)
-def deep_component_delete(request, deep_component, *args, **kwargs):
+def deep_component_delete(request, params, user, deep_component, *args, **kwargs):
     return ApiResponseSuccess(deep_component.delete())
 
 
 @api_view
 @require_user
 @require_deep_component()
-def deep_component_lock(request, user, deep_component, *args, **kwargs):
+def deep_component_lock(request, params, user, deep_component, *args, **kwargs):
     if deep_component.lock_by(user, save=True):
-        return ApiResponseSuccess(deep_component.serialize())
+        return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Deep Component can\'t be locked, it has already been locked by another user.')
 
@@ -465,9 +472,9 @@ def deep_component_lock(request, user, deep_component, *args, **kwargs):
 @api_view
 @require_user
 @require_deep_component()
-def deep_component_unlock(request, user, deep_component, *args, **kwargs):
+def deep_component_unlock(request, params, user, deep_component, *args, **kwargs):
     if deep_component.unlock_by(user, save=True):
-        return ApiResponseSuccess(deep_component.serialize())
+        return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Deep Component can\'t be unlocked, it has been locked by another user.')
 
@@ -475,23 +482,23 @@ def deep_component_unlock(request, user, deep_component, *args, **kwargs):
 @api_view
 @require_user
 @require_glif_filters
-def character_glyph_list(request, glif_filters, *args, **kwargs):
+def character_glyph_list(request, params, user, glif_filters, *args, **kwargs):
     data = list(CharacterGlyph.objects.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS))
     return ApiResponseSuccess(data)
 
 
 @api_view
 @require_user
-@require_character_glyph(select_related=['locked_by'], prefetch_related=['layers', 'deep_components'])
-def character_glyph_get(request, character_glyph, *args, **kwargs):
-    return ApiResponseSuccess(character_glyph.serialize())
+@require_character_glyph()
+def character_glyph_get(request, params, user, character_glyph, *args, **kwargs):
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_font
 @require_data
-def character_glyph_create(request, user, font, data, glif, *args, **kwargs):
+def character_glyph_create(request, params, user, font, data, glif, *args, **kwargs):
     filters = { 'font_id':font.id, 'name':glif.name }
     if CharacterGlyph.objects.filter(**filters).exists():
         return ApiResponseBadRequest(
@@ -502,43 +509,42 @@ def character_glyph_create(request, user, font, data, glif, *args, **kwargs):
     character_glyph.data = data
     character_glyph.lock_by(user)
     character_glyph.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph(check_locked=True)
 @require_data
-def character_glyph_update(request, user, character_glyph, data, glif, *args, **kwargs):
-    # TODO: check lock
+def character_glyph_update(request, params, user, character_glyph, data, glif, *args, **kwargs):
     character_glyph.data = data
     character_glyph.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph(check_locked=True)
 @require_status
-def character_glyph_update_status(request, user, character_glyph, status, *args, **kwargs):
+def character_glyph_update_status(request, params, user, character_glyph, status, *args, **kwargs):
     character_glyph.status = status
     character_glyph.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph(check_locked=True)
-def character_glyph_delete(request, character_glyph, *args, **kwargs):
+def character_glyph_delete(request, params, user, character_glyph, *args, **kwargs):
     return ApiResponseSuccess(character_glyph.delete())
 
 
 @api_view
 @require_user
 @require_character_glyph()
-def character_glyph_lock(request, user, character_glyph, *args, **kwargs):
+def character_glyph_lock(request, params, user, character_glyph, *args, **kwargs):
     if character_glyph.lock_by(user, save=True):
-        return ApiResponseSuccess(character_glyph.serialize())
+        return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Character Glyph can\'t be locked, it has already been locked by another user.')
 
@@ -546,9 +552,9 @@ def character_glyph_lock(request, user, character_glyph, *args, **kwargs):
 @api_view
 @require_user
 @require_character_glyph()
-def character_glyph_unlock(request, user, character_glyph, *args, **kwargs):
+def character_glyph_unlock(request, params, user, character_glyph, *args, **kwargs):
     if character_glyph.unlock_by(user, save=True):
-        return ApiResponseSuccess(character_glyph.serialize())
+        return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
     return ApiResponseForbidden(
         'Character Glyph can\'t be unlocked, it has been locked by another user.')
 
@@ -558,7 +564,7 @@ def character_glyph_unlock(request, user, character_glyph, *args, **kwargs):
 @require_character_glyph(check_locked=True, prefix_params=True)
 @require_data
 @require_params(group_name='str')
-def character_glyph_layer_create(request, user, params, font, character_glyph, data, glif, *args, **kwargs):
+def character_glyph_layer_create(request, params, user, font, character_glyph, data, glif, *args, **kwargs):
     group_name = params.get('group_name')
     options = {
         'glif_id': character_glyph.id,
@@ -574,14 +580,14 @@ def character_glyph_layer_create(request, user, params, font, character_glyph, d
             'Character Glyph Layer with font_id=\'{}\', glif_id=\'{}\', glif__name=\'{}\', '
             'group_name=\'{}\' already exists.'.format(
                 font.id, character_glyph.id, character_glyph.name, group_name))
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph_layer()
 @require_params(new_group_name='str')
-def character_glyph_layer_rename(request, user, params, font, character_glyph, character_glyph_layer, *args, **kwargs):
+def character_glyph_layer_rename(request, params, user, font, character_glyph, character_glyph_layer, *args, **kwargs):
     new_group_name = params.get('new_group_name')
     if CharacterGlyphLayer.objects.filter(glif_id=character_glyph.id, group_name__iexact=new_group_name).exclude(id=character_glyph_layer.id).exists():
         return ApiResponseBadRequest(
@@ -590,22 +596,22 @@ def character_glyph_layer_rename(request, user, params, font, character_glyph, c
                 font.id, character_glyph.id, character_glyph.name, new_group_name))
     character_glyph_layer.group_name = new_group_name
     character_glyph_layer.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph_layer()
 @require_data
-def character_glyph_layer_update(request, user, character_glyph, character_glyph_layer, data, *args, **kwargs):
+def character_glyph_layer_update(request, params, user, character_glyph, character_glyph_layer, data, *args, **kwargs):
     character_glyph_layer.data = data
     character_glyph_layer.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize())
+    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 
 
 @api_view
 @require_user
 @require_character_glyph_layer()
-def character_glyph_layer_delete(request, character_glyph_layer, *args, **kwargs):
+def character_glyph_layer_delete(request, params, user, character_glyph_layer, *args, **kwargs):
     return ApiResponseSuccess(character_glyph_layer.delete())
 

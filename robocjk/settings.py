@@ -8,7 +8,7 @@ import re
 
 
 API_AUTH_TOKEN_EXPIRATION = {'days':1 } if settings.DEBUG else {'minutes':5}
-API_RESPONSE_TIME_LIMIT = 0.25 if settings.DEBUG else 0.25
+API_RESPONSE_TIME_LIMIT = 0.4 if settings.DEBUG else 0.4
 
 GIT_REPOSITORIES_PATH = '/root/.rcjks'
 

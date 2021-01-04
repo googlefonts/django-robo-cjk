@@ -345,7 +345,7 @@ class LockableModel(models.Model):
             if save:
                 self.save()
             return True
-        return self.locked_by == user
+        return self.locked_by_id == user.id
 
     def is_lockable_by(self, user):
         if not self._is_valid_user(user):

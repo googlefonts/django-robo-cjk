@@ -58,12 +58,14 @@ def _serialize_glif_layer(obj, **kwargs):
 
 
 def serialize_atomic_element(obj, **kwargs):
+    return_layers = kwargs.get('return_layers', True)
+    return_related = kwargs.get('return_related', True)
     data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Atomic Element'
     data['type_code'] = 'AE'
-    if kwargs.get('return_layers', True):
+    if return_layers:
         data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
-    if kwargs.get('return_related', True):
+    if return_related:
         data['made_of'] = []
         data['used_by'] = list(obj.deep_components.values(*DEEP_COMPONENT_ID_FIELDS))
     return data
@@ -74,25 +76,29 @@ def serialize_atomic_element_layer(obj, **kwargs):
 
 
 def serialize_deep_component(obj, **kwargs):
+    return_layers = kwargs.get('return_layers', True)
+    return_related = kwargs.get('return_related', True)
     data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Deep Component'
     data['type_code'] = 'DC'
-    if kwargs.get('return_layers', True):
+    if return_layers:
         data['layers'] = []
-    if kwargs.get('return_related', True):
-        data['made_of'] = [serialize_atomic_element(glif_obj) for glif_obj in obj.atomic_elements.all()]
+    if return_related:
+        data['made_of'] = [serialize_atomic_element(glif_obj, **kwargs) for glif_obj in obj.atomic_elements.all()]
         data['used_by'] = list(obj.character_glyphs.values(*CHARACTER_GLYPH_ID_FIELDS))
     return data
 
 
 def serialize_character_glyph(obj, **kwargs):
+    return_layers = kwargs.get('return_layers', True)
+    return_related = kwargs.get('return_related', True)
     data = _serialize_glif(obj, **kwargs)
     data['type'] = 'Character Glyph'
     data['type_code'] = 'CG'
-    if kwargs.get('return_layers', True):
+    if return_layers:
         data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
-    if kwargs.get('return_related', True):
-        data['made_of'] = [serialize_deep_component(glif_obj) for glif_obj in obj.deep_components.all()]
+    if return_related:
+        data['made_of'] = [serialize_deep_component(glif_obj, **kwargs) for glif_obj in obj.deep_components.all()]
         data['used_by'] = []
     return data
 

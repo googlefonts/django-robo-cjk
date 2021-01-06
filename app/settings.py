@@ -18,7 +18,8 @@ import os
 
 # https://github.com/joke2k/django-environ
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    DEBUG_TOOLBAR_SHOW=(bool, False),
 )
 env_root = (environ.Path(__file__) - 3) # get root of the project
 env_path = env_root() + '/conf/env_settings'
@@ -96,6 +97,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'admin_auto_filters',
+    # 'cachalot',
     'corsheaders',
     'debug_toolbar',
     # 'ckeditor',
@@ -298,6 +300,7 @@ CACHES = {
     },
     'cachalot': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 3600, # 1 hour
     },
 #     'solo': {
 #         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -337,7 +340,7 @@ LOGGING = {
             # 'class': 'logging.FileHandler',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-debug.log',
-            'maxBytes': 1024 * 1024 * 1, # 1 MB
+            'maxBytes': 1024 * 1024 * 2, # 2 MB
             'backupCount': 5,
             'formatter':'simple',
         },
@@ -346,7 +349,7 @@ LOGGING = {
             # 'class': 'logging.FileHandler',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-errors.log',
-            'maxBytes': 1024 * 1024 * 1, # 1 MB
+            'maxBytes': 1024 * 1024 * 2, # 2 MB
             'backupCount': 5,
             'formatter': 'verbose',
         },

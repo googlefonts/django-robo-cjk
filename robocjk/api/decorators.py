@@ -240,8 +240,8 @@ def require_status(view_func):
 
 def require_atomic_element(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', []) or [] # ['font', 'locked_by']) or []
-    prefetch_related = kwargs.get('prefetch_related', []) or [] #['deep_components', 'layers']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
+    prefetch_related = kwargs.get('prefetch_related', ['layers', 'deep_components']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
     def decorator(view_func, *args, **kwargs):
@@ -329,8 +329,8 @@ def require_atomic_element_layer(**kwargs):
 
 def require_deep_component(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', []) or [] # ['font', 'locked_by']) or []
-    prefetch_related = kwargs.get('prefetch_related', []) or [] # ['character_glyphs', 'atomic_elements', 'atomic_elements__layers']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
+    prefetch_related = kwargs.get('prefetch_related', ['character_glyphs', 'atomic_elements', 'atomic_elements__layers']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
     def decorator(view_func, *args, **kwargs):
@@ -380,8 +380,8 @@ def require_deep_component(**kwargs):
 
 def require_character_glyph(**kwargs):
     # read decorator options
-    select_related = kwargs.get('select_related', []) or [] #['font', 'locked_by']) or []
-    prefetch_related = kwargs.get('prefetch_related', []) or [] # ['layers', 'deep_components', 'deep_components__atomic_elements', 'deep_components__atomic_elements__layers']) or []
+    select_related = kwargs.get('select_related', ['font', 'locked_by']) or []
+    prefetch_related = kwargs.get('prefetch_related', ['layers', 'deep_components', 'deep_components__atomic_elements', 'deep_components__atomic_elements__layers']) or []
     prefix_params = kwargs.get('prefix_params', False)
     check_locked = kwargs.get('check_locked', False)
     def decorator(view_func, *args, **kwargs):

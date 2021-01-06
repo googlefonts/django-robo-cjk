@@ -17,7 +17,9 @@ from robocjk.models import (
     CharacterGlyph, CharacterGlyphLayer,
     DeepComponent,
     AtomicElement, AtomicElementLayer,
-    Proof, )
+    Proof,
+)
+from robocjk.utils import unicode_to_char
 
 
 class FontFilter(admin.SimpleListFilter):
@@ -255,6 +257,13 @@ class CharacterGlyphLayerInline(GlifLayerInline):
 
 @admin.register(CharacterGlyph)
 class CharacterGlyphAdmin(GlifAdmin):
+
+    def character(self, obj):
+        return unicode_to_char(obj.unicode_hex) if obj.unicode_hex else ''
+
+    def get_list_display(self, request):
+        l = super(CharacterGlyphAdmin, self).get_list_display(request)
+        return ('character', ) + l
 
     def get_fieldsets(self, request, obj=None):
         f = super(CharacterGlyphAdmin, self).get_fieldsets(request, obj)

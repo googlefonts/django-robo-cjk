@@ -151,7 +151,6 @@ def require_font(view_func):
 
 def require_glif_filters(view_func):
     @wraps(view_func)
-    @require_font
     def wrapper(request, *args, **kwargs):
         # build query filters
         user = kwargs['user']

@@ -8,7 +8,7 @@ from robocjk.api.views import (
     project_list, project_get, project_create, project_delete,
     font_list, font_get, font_create, font_update, font_delete,
     glyphs_composition_get, glyphs_composition_update,
-    glif_list,
+    glif_list, glif_lock, glif_unlock,
     atomic_element_list, atomic_element_get, atomic_element_create,
     atomic_element_update, atomic_element_update_status, atomic_element_delete,
     atomic_element_lock, atomic_element_unlock,
@@ -60,6 +60,8 @@ urlpatterns = [
 
     # All glif (Atomic Element + Deep Component + Character Glyph)
     path('api/glif/list/', glif_list, name='glif_list'),
+    path('api/glif/lock/', glif_lock, name='glif_lock'),
+    path('api/glif/unlock/', glif_unlock, name='glif_unlock'),
 
     # Atomic Element
     path('api/atomic-element/list/', atomic_element_list, name='atomic_element_list'),

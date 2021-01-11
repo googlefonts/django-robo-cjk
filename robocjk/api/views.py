@@ -252,8 +252,9 @@ def glyphs_composition_update(request, params, user, font, *args, **kwargs):
 
 @api_view
 @require_user
+@require_font
 @require_glif_filters
-def glif_list(request, params, user, glif_filters, *args, **kwargs):
+def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
     data = {
         'atomic_elements': list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)),
         'deep_components': list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)),
@@ -264,8 +265,25 @@ def glif_list(request, params, user, glif_filters, *args, **kwargs):
 
 @api_view
 @require_user
+@require_font
+def glif_lock(request, params, user, *args, **kwargs):
+    data = {}
+    return ApiResponseSuccess(data)
+
+
+@api_view
+@require_user
+@require_font
+def glif_unlock(request, params, user, *args, **kwargs):
+    data = {}
+    return ApiResponseSuccess(data)
+
+
+@api_view
+@require_user
+@require_font
 @require_glif_filters
-def atomic_element_list(request, params, user, glif_filters, *args, **kwargs):
+def atomic_element_list(request, params, user, font, glif_filters, *args, **kwargs):
     data = list(AtomicElement.objects.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS))
     return ApiResponseSuccess(data)
 
@@ -401,6 +419,7 @@ def atomic_element_layer_delete(request, params, user, atomic_element_layer, *ar
 
 @api_view
 @require_user
+@require_font
 @require_glif_filters
 def deep_component_list(request, params, user, glif_filters, *args, **kwargs):
     data = list(DeepComponent.objects.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS))
@@ -481,8 +500,9 @@ def deep_component_unlock(request, params, user, deep_component, *args, **kwargs
 
 @api_view
 @require_user
+@require_font
 @require_glif_filters
-def character_glyph_list(request, params, user, glif_filters, *args, **kwargs):
+def character_glyph_list(request, params, user, font, glif_filters, *args, **kwargs):
     data = list(CharacterGlyph.objects.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS))
     return ApiResponseSuccess(data)
 

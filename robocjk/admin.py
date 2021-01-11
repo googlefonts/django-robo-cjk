@@ -3,6 +3,8 @@
 # from admin_auto_filters.filters import AutocompleteFilter
 
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Count
 from django.utils.safestring import mark_safe
@@ -20,6 +22,47 @@ from robocjk.models import (
     Proof,
 )
 from robocjk.utils import unicode_to_char
+
+
+admin.site.unregister(User)
+
+
+@admin.register(User)
+class CustomizedUserAdmin(UserAdmin):
+
+    """
+    https://github.com/django/django/blob/master/django/contrib/auth/admin.py
+    """
+
+    save_on_top = True
+
+    def is_administrator(self, request):
+        user = request.user
+        return user.is_superuser or user.groups.filter(name__iexact='administrators').exists()
+
+    def get_queryset(self, request):
+        qs = super(CustomizedUserAdmin, self).get_queryset(request)
+        if self.is_administrator(request):
+            return qs
+        # only for who is not administrator (designers)
+        # show only their own record in the changelist
+        return qs.filter(pk=request.user.pk)
+
+    def get_fieldsets(self, request, obj=None):
+        f = super(CustomizedUserAdmin, self).get_fieldsets(request, obj=obj)
+        if self.is_administrator(request):
+            return f
+        # only for who is not administrator (designers)
+        # don't show permissions and groups fieldset
+        return (f[0], f[1], f[3], )
+
+    def get_readonly_fields(self, request, obj=None):
+        f = super(CustomizedUserAdmin, self).get_readonly_fields(request, obj=obj)
+        if self.is_administrator(request):
+            return f
+        # only for who is not administrator (designers)
+        # allow only password modification
+        return ('username', 'first_name', 'last_name', 'email', 'last_login', 'date_joined', )
 
 
 class FontFilter(admin.SimpleListFilter):

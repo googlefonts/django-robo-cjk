@@ -36,13 +36,13 @@ class CustomizedUserAdmin(UserAdmin):
 
     save_on_top = True
 
-    def is_administrator(self, request):
+    def _is_administrator(self, request):
         user = request.user
         return user.is_superuser or user.groups.filter(name__iexact='administrators').exists()
 
     def get_queryset(self, request):
         qs = super(CustomizedUserAdmin, self).get_queryset(request)
-        if self.is_administrator(request):
+        if self._is_administrator(request):
             return qs
         # only for who is not administrator (designers)
         # show only their own record in the changelist
@@ -50,7 +50,7 @@ class CustomizedUserAdmin(UserAdmin):
 
     def get_fieldsets(self, request, obj=None):
         f = super(CustomizedUserAdmin, self).get_fieldsets(request, obj=obj)
-        if self.is_administrator(request):
+        if self._is_administrator(request):
             return f
         # only for who is not administrator (designers)
         # don't show permissions and groups fieldset
@@ -58,11 +58,18 @@ class CustomizedUserAdmin(UserAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         f = super(CustomizedUserAdmin, self).get_readonly_fields(request, obj=obj)
-        if self.is_administrator(request):
+        if self._is_administrator(request):
             return f
         # only for who is not administrator (designers)
         # allow only password modification
-        return ('username', 'first_name', 'last_name', 'email', 'last_login', 'date_joined', )
+        # return ('username', 'first_name', 'last_name', 'email', 'last_login', 'date_joined', )
+        return ('username', 'last_login', 'date_joined', )
+
+    def get_list_filter(self, request):
+        f = super(CustomizedUserAdmin, self).get_list_filter(request)
+        if self._is_administrator(request):
+            return f
+        return ()
 
 
 class FontFilter(admin.SimpleListFilter):

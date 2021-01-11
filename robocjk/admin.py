@@ -61,7 +61,7 @@ class CustomizedUserAdmin(UserAdmin):
         if self._is_administrator(request):
             return f
         # only for who is not administrator (designers)
-        # allow only password modification
+        # allow only 'first_name', 'last_name', 'email' and 'password' modification
         # return ('username', 'first_name', 'last_name', 'email', 'last_login', 'date_joined', )
         return ('username', 'last_login', 'date_joined', )
 

@@ -92,7 +92,7 @@ class APIsTestCase(TestCase):
             'data': payload,
             'headers': headers,
             'files': files,
-            'verify': False, # TODO
+            'verify': False,
         }
         response = requests.post(absolute_url, **options)
         data = response.json()

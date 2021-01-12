@@ -85,34 +85,20 @@ MANAGERS = [
 INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.sites',
-    'django.contrib.sitemaps',
+    # 'django.contrib.sites',
+    # 'django.contrib.sitemaps',
     'django.contrib.staticfiles',
-
-    'admin_auto_filters',
-    # 'cachalot',
     'corsheaders',
     'debug_toolbar',
-    # 'ckeditor',
-    # 'django_crontab',
     'django_json_widget',
-    # 'solo',
-    # 'treenode',
-
     'robocjk',
 ]
-
-# if not DEBUG:
-#     INSTALLED_APPS += [
-#         'cachalot',
-#     ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
@@ -129,9 +115,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'htmlmin.middleware.HtmlMinifyMiddleware',
-    # 'htmlmin.middleware.MarkRequestMiddleware',
-    # 'maintenance_mode.middleware.MaintenanceModeMiddleware',
 ]
 
 TEMPLATES = [
@@ -172,13 +155,6 @@ APPEND_SLASH = True
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     },
-# }
 
 DATABASES = {
     'default': {
@@ -298,13 +274,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': ENV_DIR + '/cache/',
     },
-    'cachalot': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'TIMEOUT': 3600, # 1 hour
-    },
-#     'solo': {
-#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#     },
 }
 
 
@@ -380,53 +349,19 @@ LOGGING = {
 }
 
 
-# django-autoslug - https://pypi.python.org/pypi/django-autoslug
-# from slugify import slugify
-# AUTOSLUG_SLUGIFY_FUNCTION = slugify
-# AUTOSLUG_MODELTRANSLATION_ENABLE = True
-
-
-# django-cachalot - https://pypi.python.org/pypi/django-cachalot
-CACHALOT_CACHE = 'cachalot'
-
-
 # django-cors-headers
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
 )
 
 
-# django-ckeditor - https://pypi.python.org/pypi/django-ckeditor
-# CKEDITOR_CONFIGS = {
-#     'default': {
-#         'removePlugins': 'elementspath',
-#         'enterMode':2, #http://docs.ckeditor.com/#!/api/CKEDITOR-property-ENTER_BR
-#         'skin': 'light',
-#         'defaultLanguage': LANGUAGE_CODE,
-#         'toolbar': 'Custom',
-#         'toolbar_Custom': [
-#             # ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'RemoveFormat', 'Source'],
-#             ['Bold', 'Italic', 'Underline', 'Deleted', '-', 'Link', 'Unlink', '-', 'NumberedList', 'BulletedList', '-', 'RemoveFormat', 'Source'],
-#         ],
-#         'width':624,
-#         'height':190,
-#         'tabSpaces':4,
-#     }
-# }
-# CKEDITOR_CONFIGS['inline'] = CKEDITOR_CONFIGS['default'].copy()
-# CKEDITOR_CONFIGS['inline'].update({
-#     'width':400,
-#     'height':100,
-# })
-
-
 # django-csp - https://django-csp.readthedocs.io/
 CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", 'data:', 'blob:',
     # 'cdn.jsdelivr.net', 'use.fontawesome.com',
-    '*.black-foundry.com', '*.kxcdn.com',
-    '*.google.com', '*.googleapis.com', '*.gstatic.com',
-    '*.google-analytics.com', '*.doubleclick.net', '*.googletagmanager.com', '*.hotjar.com',
-
+    '*.black-foundry.com',
+    # '*.kxcdn.com',
+    # '*.google.com', '*.googleapis.com', '*.gstatic.com',
+    # '*.google-analytics.com', '*.doubleclick.net', '*.googletagmanager.com', '*.hotjar.com',
     # '*.youtube.com', '*.vimeo.com',
 )
 
@@ -448,9 +383,3 @@ HASHIDS_OPTIONS = {
     'alphabet': HASHIDS_ALPHABET,
     'min_length': HASHIDS_MIN_LENGTH,
 }
-
-
-# django-solo - https://github.com/lazybird/django-solo
-# SOLO_CACHE = 'solo'
-# SOLO_CACHE_TIMEOUT = 60 * 5  # 5 mins
-# SOLO_CACHE_PREFIX = 'solo'

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# from admin_auto_filters.filters import AutocompleteFilter
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -102,12 +100,6 @@ class GlifFontFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.select_related('glif').filter(glif__font_id=font_id)
         return queryset
-
-
-# class GlifFilter(AutocompleteFilter):
-#
-#     title = _('Glif')
-#     field_name = 'glif'
 
 
 @admin.register(Project)

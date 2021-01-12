@@ -66,7 +66,7 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = [
     '164.90.229.235', '.robocjk-development.black-foundry.com',
-    '161.35.31.249', '.robocjk-production.black-foundry.com',
+    '161.35.31.249', '.robocjk.black-foundry.com',
 ]
 
 SITE_ID = 1

@@ -26,9 +26,12 @@ from robocjk.debug import logger
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
+    get_character_glyphs_path,
     get_character_glyph_path,
     get_character_glyph_layer_path,
+    get_deep_components_path,
     get_deep_component_path,
+    get_atomic_elements_path,
     get_atomic_element_path,
     get_atomic_element_layer_path,
     get_proof_path,
@@ -89,23 +92,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     def save_to_file_system(self):
         path = self.path()
-        print(path)
-        if fsutil.exists(path):
-            fsutil.remove_dir(path)
         fsutil.make_dirs(path)
-        # fsutil.remove_dir_content(path)
-
+        fsutil.remove_dir_content(path)
         # init and pull from git repository
         run_commands(
             'cd {}'.format(path),
             'git init',
             'git remote add origin {}'.format(self.repo_url),
             'git pull --rebase origin master')
-
-        # remove pulled rcjk projects
-        rcjk_dirs = fsutil.search_dirs(path, '*.rcjk')
-        fsutil.remove_dirs(*rcjk_dirs)
-
         # save all project fonts to file.system
         fonts_qs = self.fonts.prefetch_related(
             'character_glyphs',
@@ -113,9 +107,15 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             'deep_components',
             'atomic_elements',
             'atomic_elements__layers').filter(available=True)
-        for font in fonts_qs:
+        fonts_list = list(fonts_qs)
+        # cleanup - remove .rcjk projects that don't belong anymore to a project font
+        fonts_rcjk_pulled_dirs = set(fsutil.search_dirs(path, '*.rcjk'))
+        fonts_rcjk_dirs = {font.path() for font in fonts_list}
+        fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
+        fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
+        # save all project fonts to the file system
+        for font in fonts_list:
             font.save_to_file_system()
-
         # add all changed files, commit and push to the git repository
         run_commands(
             'cd {}'.format(path),
@@ -186,8 +186,6 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         if not self.available:
             return
         path = self.path()
-        if fsutil.exists(path):
-            fsutil.remove_dir(path)
         fsutil.make_dirs(path)
         # write fontLib.json file
         fontlib_path = fsutil.join_path(path, 'fontLib.json')
@@ -201,6 +199,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
         glyphs_composition_str = benedict(glyphs_composition_obj.serialize(), keypath_separator=None).dump()
         fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
+        # delete existing character-glyphs, deep-components and atomic-elements directories
+        fsutil.remove_dirs(
+            get_character_glyphs_path(self),
+            get_deep_components_path(self),
+            get_atomic_elements_path(self))
         # write all character-glyphs and relative layers
         for character_glyph in self.character_glyphs.all():
             character_glyph.save_to_file_system()

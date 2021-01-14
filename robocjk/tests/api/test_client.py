@@ -67,111 +67,135 @@ class ClientTestCase(TestCase):
         self.assert_response_error(response, 503)
 
     def test_auth_token(self):
-        data = self._client.auth_token()
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.auth_token()
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_user_list(self):
-        data = self._client.user_list()
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.user_list()
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_user_me(self):
-        data = self._client.user_me()
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.user_me()
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_project_list(self):
-        data = self._client.project_list()
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.project_list()
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_project_get(self):
-        data = self._client.project_get(project_uid=self._project_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.project_get(project_uid=self._project_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_font_list(self):
-        data = self._client.font_list(project_uid=self._project_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.font_list(project_uid=self._project_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_font_get(self):
-        data = self._client.font_get(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.font_get(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_glyphs_composition_get(self):
-        data = self._client.glyphs_composition_get(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.glyphs_composition_get(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_glyphs_composition_update(self):
-        data = self._client.glyphs_composition_update(font_uid=self._font_uid, data={'Glyphs-Composition-Test':'ok'})
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.glyphs_composition_update(font_uid=self._font_uid, data={'Glyphs-Composition-Test':'ok'})
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_font_glif_list(self):
-        data = self._client.glif_list(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.glif_list(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
+
+    def test_font_glif_lock(self):
+        response = self._client.glif_lock(
+            font_uid=self._font_uid,
+            atomic_elements=[83, 'curvedStroke','line'],
+            deep_components=['DC_2008A_00', 'DC_20041_01'],
+            character_glyphs=['uni27607'])
+        # print(response)
+        self.assert_response_ok(response)
+        self.assertEqual(len(response['data']['atomic_elements']), 2)
+        self.assertEqual(len(response['data']['deep_components']), 2)
+        self.assertEqual(len(response['data']['character_glyphs']), 1)
+
+    def test_font_glif_unlock(self):
+        response = self._client.glif_lock(
+            font_uid=self._font_uid,
+            atomic_elements=[83, 'curvedStroke','line'],
+            deep_components=['DC_2008A_00', 'DC_20041_01'],
+            character_glyphs=['uni27607'])
+        # print(response)
+        self.assert_response_ok(response)
+        self.assertEqual(len(response['data']['atomic_elements']), 2)
+        self.assertEqual(len(response['data']['deep_components']), 2)
+        self.assertEqual(len(response['data']['character_glyphs']), 1)
 
     def test_atomic_element_list(self):
-        data = self._client.atomic_element_list(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.atomic_element_list(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_atomic_element_get(self):
-        data = self._client.atomic_element_get(font_uid=self._font_uid, atomic_element_id=83)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.atomic_element_get(font_uid=self._font_uid, atomic_element_id=83)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_atomic_element_lock(self):
-        data = self._client.atomic_element_lock(font_uid=self._font_uid, atomic_element_id=83)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.atomic_element_lock(font_uid=self._font_uid, atomic_element_id=83)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_atomic_element_unlock(self):
-        data = self._client.atomic_element_unlock(font_uid=self._font_uid, atomic_element_id=83)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.atomic_element_unlock(font_uid=self._font_uid, atomic_element_id=83)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_deep_component_list(self):
-        data = self._client.deep_component_list(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.deep_component_list(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_deep_component_get(self):
-        data = self._client.deep_component_get(font_uid=self._font_uid, deep_component_id=896)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.deep_component_get(font_uid=self._font_uid, deep_component_id=896)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_deep_component_lock(self):
-        data = self._client.deep_component_lock(font_uid=self._font_uid, deep_component_id=896)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.deep_component_lock(font_uid=self._font_uid, deep_component_id=896)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_deep_component_unlock(self):
-        data = self._client.deep_component_unlock(font_uid=self._font_uid, deep_component_id=896)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.deep_component_unlock(font_uid=self._font_uid, deep_component_id=896)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_character_glyph_list(self):
-        data = self._client.character_glyph_list(font_uid=self._font_uid)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.character_glyph_list(font_uid=self._font_uid)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_character_glyph_get(self):
-        data = self._client.character_glyph_get(font_uid=self._font_uid, character_glyph_id=18627)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.character_glyph_get(font_uid=self._font_uid, character_glyph_id=18627)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_character_glyph_lock(self):
-        data = self._client.character_glyph_lock(font_uid=self._font_uid, character_glyph_id=18627)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.character_glyph_lock(font_uid=self._font_uid, character_glyph_id=18627)
+        # print(response)
+        self.assert_response_ok(response)
 
     def test_character_glyph_unlock(self):
-        data = self._client.character_glyph_unlock(font_uid=self._font_uid, character_glyph_id=18627)
-        # print(data)
-        self.assert_response_ok(data)
+        response = self._client.character_glyph_unlock(font_uid=self._font_uid, character_glyph_id=18627)
+        # print(response)
+        self.assert_response_ok(response)

@@ -7,7 +7,12 @@ from django.test import (
 from django.urls import reverse
 
 import fsutil
+import json
 import requests
+import urllib3
+
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class APIsTestCase(TestCase):
@@ -208,6 +213,42 @@ class APIsTestCase(TestCase):
         self.assertTrue(isinstance(data['atomic_elements'], list))
         self.assertTrue(isinstance(data['deep_components'], list))
         self.assertTrue(isinstance(data['character_glyphs'], list))
+
+    def test_0046_glif_lock(self):
+        # print('test_0046_glif_lock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'atomic_elements_names': json.dumps(['curvedStroke', 'line']),
+            'atomic_elements_ids': 83,
+            'deep_components_names': json.dumps(['DC_2008A_00', 'DC_20041_01']),
+            'character_glyphs_names': json.dumps(['uni27607']),
+        }
+        response, data = self.get_response('/api/glif/lock/', payload=payload)
+        self.assert_response_ok(response)
+        self.assertTrue(isinstance(data['atomic_elements'], list))
+        self.assertTrue(isinstance(data['deep_components'], list))
+        self.assertTrue(isinstance(data['character_glyphs'], list))
+        self.assertEqual(len(data['atomic_elements']), 2)
+        self.assertEqual(len(data['deep_components']), 2)
+        self.assertEqual(len(data['character_glyphs']), 1)
+
+    def test_0047_glif_unlock(self):
+        # print('test_0047_glif_unlock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'atomic_elements_names': json.dumps(['curvedStroke', 'line']),
+            'atomic_elements_ids': 83,
+            'deep_components_names': json.dumps(['DC_2008A_00', 'DC_20041_01']),
+            'character_glyphs_names': json.dumps(['uni27607']),
+        }
+        response, data = self.get_response('/api/glif/unlock/', payload=payload)
+        self.assert_response_ok(response)
+        self.assertTrue(isinstance(data['atomic_elements'], list))
+        self.assertTrue(isinstance(data['deep_components'], list))
+        self.assertTrue(isinstance(data['character_glyphs'], list))
+        self.assertEqual(len(data['atomic_elements']), 2)
+        self.assertEqual(len(data['deep_components']), 2)
+        self.assertEqual(len(data['character_glyphs']), 1)
 
     def test_0050_atomic_element_list(self):
         # print('test_0050_atomic_element_list')

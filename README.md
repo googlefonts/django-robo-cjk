@@ -63,6 +63,8 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    
 - [**Glif**](#glif)
    - [Glif **List**](#glif-list)
+   - [Glif **Lock**](#glif-lock)
+   - [Glif **Unlock**](#glif-unlock)
 
 - [**Atomic Element**](#atomic-element)
    - [Atomic Element **List**](#atomic-element-list)
@@ -509,6 +511,124 @@ See [Glyphs Composition Get](#glyphs-composition-get) response.
 | `has_outlines` | `bool` | no |
 | `has_components` | `bool` | no |
 | `has_unicode` | `bool` | no |
+
+##### Response
+
+```javascript
+{
+    "data": {
+        "atomic_elements": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+        "deep_components": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+        "character_glyphs": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+    },
+    "error": null,
+    "status": 200
+```
+
+---
+
+#### Glif Lock
+
+Lock multiple glifs at once.
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/glif/lock/` | `POST` |
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `font_uid` | `string` | yes | |
+| `atomic_elements` | `string` | no | comma-separated list of names or ids |
+| `deep_components` | `string` | no | comma-separated list of names or ids |
+| `character_glyphs` | `string` | no | comma-separated list of names or ids |
+
+##### Response
+
+```javascript
+{
+    "data": {
+        "atomic_elements": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+        "deep_components": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+        "character_glyphs": [
+            {
+                "id": 1,
+                "name": "..."
+            },
+            {
+                "id": 2,
+                "name": "..."
+            }
+        ],
+    },
+    "error": null,
+    "status": 200
+```
+
+---
+
+#### Glif Unlock
+
+Unlock multiple glifs at once.
+
+##### Request
+
+| URL | Method |
+|---|---|
+| `/api/glif/unlock/` | `POST` |
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `font_uid` | `string` | yes | |
+| `atomic_elements` | `string` | no | comma-separated list of names or ids |
+| `deep_components` | `string` | no | comma-separated list of names or ids |
+| `character_glyphs` | `string` | no | comma-separated list of names or ids |
 
 ##### Response
 

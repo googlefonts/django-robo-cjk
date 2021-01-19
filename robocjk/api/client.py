@@ -573,6 +573,8 @@ class Client(object):
             'font_uid': font_uid,
             'id': self._if_int(deep_component_id),
             'name': self._if_str(deep_component_id),
+            'return_layers': return_layers,
+            'return_related': return_related,
         }
         return self._api_call('deep_component_get', params)
 
@@ -747,7 +749,7 @@ class Client(object):
         return self._api_call('character_glyph_update_status', params)
 
 
-    def character_glyph_delete(self, font_uid, character_glyph_id, ignore_lock=False):
+    def character_glyph_delete(self, font_uid, character_glyph_id, ignore_lock=False, return_layers=False, return_related=False):
         """
         Delete a Character Glyph (and all its layers).
         """

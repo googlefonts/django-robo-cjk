@@ -71,29 +71,23 @@ class CustomizedUserAdmin(UserAdmin):
 
 
 class FontFilter(admin.SimpleListFilter):
+
     title = _('Font')
     parameter_name = 'font'
 
     def lookups(self, request, model_admin):
         # This is where you create filter options; we have two:
-        fonts = Font.objects.select_related('project').all()
+        fonts = Font.objects.select_related('project').order_by('project__name', 'name').all()
         return [(font.id, '{} / {}'.format(font.project.name, font.name)) for font in fonts]
 
     def queryset(self, request, queryset):
         font_id=self.value()
-        if self.value():
+        if font_id:
             return queryset.filter(font_id=font_id)
         return queryset
 
 
-class GlifFontFilter(admin.SimpleListFilter):
-    title = _('Font')
-    parameter_name = 'font'
-
-    def lookups(self, request, model_admin):
-        # This is where you create filter options; we have two:
-        fonts = Font.objects.select_related('project').all()
-        return [(font.id, '{} / {}'.format(font.project.name, font.name)) for font in fonts]
+class GlifFontFilter(FontFilter):
 
     def queryset(self, request, queryset):
         font_id=self.value()
@@ -200,7 +194,7 @@ class GlyphsCompositionAdmin(admin.ModelAdmin):
 
     list_select_related = ()
     list_display = ('font', 'created_at', 'updated_at', 'updated_by', )
-    list_filter = ('updated_by', )
+    list_filter = (FontFilter, 'updated_by', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Metadata', {

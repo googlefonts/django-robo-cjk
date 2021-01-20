@@ -82,7 +82,16 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
+    designers = models.ManyToManyField(
+        get_user_model(),
+        blank=True,
+        related_name='projects',
+        verbose_name=_('Designers'))
+
     objects = ProjectManager()
+
+    def num_designers(self):
+        return self.designers.count()
 
     def num_fonts(self):
         return self.fonts.count()

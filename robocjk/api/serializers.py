@@ -35,6 +35,9 @@ def serialize_user(obj, **kwargs):
 
 def serialize_project(obj, **kwargs):
     data = _serialize_object(obj, PROJECT_FIELDS, **kwargs)
+#     return_related = kwargs.get('return_related', True)
+#     if return_related:
+#         data['designers'] = [serialize_user(user_obj, **kwargs) for user_obj in obj.designers.all()]
     return data
 
 

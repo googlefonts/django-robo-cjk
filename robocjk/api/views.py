@@ -103,7 +103,7 @@ def user_me(request, params, user, *args, **kwargs):
 @api_view
 @require_user
 def project_list(request, params, user, *args, **kwargs):
-    data = list(Project.objects.values(*PROJECT_FIELDS))
+    data = list(user.projects.values(*PROJECT_FIELDS))
     return ApiResponseSuccess(data)
 
 
@@ -171,7 +171,7 @@ def font_list(request, params, user, project, *args, **kwargs):
     font_fields = set(FONT_FIELDS)
     font_fields.remove('fontlib')
     font_fields = list(font_fields)
-    data = list(Font.objects.filter(project_id=project.id).values(*font_fields))
+    data = list(project.fonts.values(*font_fields))
     return ApiResponseSuccess(data)
 
 

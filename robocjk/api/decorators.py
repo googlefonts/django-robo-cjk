@@ -97,16 +97,17 @@ def require_project(view_func):
     @require_params(project_uid='str')
     def wrapper(request, *args, **kwargs):
         # build query filters
+        user = kwargs['user']
         params = kwargs['params']
         project_uid = params.get_uuid('project_uid')
         if not project_uid:
             return ApiResponseBadRequest(
                 'Missing or invalid parameter \'{}project_uid\'.')
         try:
-            project_obj = Project.objects.get(uid=project_uid)
+            project_obj = user.projects.prefetch_related('fonts').get(uid=project_uid)
         except Project.DoesNotExist:
             return ApiResponseNotFound(
-                'Project object with \'project_uid={}\' not found.'.format(project_uid))
+                'Project object with \'project_uid={}\' not found or the user have not the necessary permissions.'.format(project_uid))
         # success
         kwargs['project'] = project_obj
         return view_func(request, *args, **kwargs)
@@ -119,10 +120,12 @@ def require_font(view_func):
     # @require_params(font_uid='str')
     def wrapper(request, *args, **kwargs):
         # build query filters
+        user = kwargs['user']
         params = kwargs['params']
         font_uid = params.get_uuid('font_uid')
         if not font_uid:
-            # actually this is used only for testing delete api (in postman tests) without knowing the font_uid.
+            # detect font_uid by font name
+            # used only for testing delete api (in postman tests) without knowing the font_uid.
             project_uid = params.get_uuid('project_uid')
             font_name = params.get_str('font_name')
             if project_uid and font_name:
@@ -135,10 +138,11 @@ def require_font(view_func):
             return ApiResponseBadRequest(
                 'Invalid or missing parameter \'{}font_uid\'.')
         try:
-            font_obj = Font.objects.get(uid=font_uid)
+            user_projects_ids = list(user.projects.values_list('id', flat=True))
+            font_obj = Font.objects.get(uid=font_uid, project_id__in=user_projects_ids)
         except Font.DoesNotExist:
             return ApiResponseNotFound(
-                'Font object with \'font_uid={}\' not found.'.format(font_uid))
+                'Font object with \'font_uid={}\' not found or the user have not the necessary permissions.'.format(font_uid))
         if not font_obj.available:
             return ApiResponseServiceUnavailableError(
                 'Font object with \'font_uid={}\' is temporary not available due to some maintenance.')
@@ -156,10 +160,13 @@ def require_glif_filters(view_func):
         user = kwargs['user']
         font = kwargs['font']
         params = kwargs['params']
+        is_locked_by_current_user = params.get_bool('is_locked_by_current_user', False)
+        updated_by_current_user = params.get_bool('updated_by_current_user', False)
         filters = benedict({
             'font_id': font.id,
             'status': params.get_str('status', None),
-            'locked_by_id': user.id if params.get_bool('is_locked_by_current_user', False) else None,
+            'locked_by_id': params.get_int('locked_by', user.id if is_locked_by_current_user else None),
+            'updated_by_id': params.get_int('updated_by', user.id if updated_by_current_user else None),
             'is_locked': params.get_bool('is_locked', None),
             'is_empty': params.get_bool('is_empty', None),
             'has_variation_axis': params.get_bool('has_variation_axis', None),

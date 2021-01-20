@@ -504,7 +504,10 @@ See [Glyphs Composition Get](#glyphs-composition-get) response.
 |---|---|---|
 | `font_uid` | `string` | yes |
 | `status` | `string` | no |
+| `updated_by_current_user` | `bool` | no |
+| `updated_by` | `int` | no |
 | `is_locked_by_current_user` | `bool` | no |
+| `is_locked_by` | `int` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -686,7 +689,10 @@ Unlock multiple glifs at once.
 |---|---|---|
 | `font_uid` | `string` | yes |
 | `status` | `string` | no |
+| `updated_by_current_user` | `bool` | no |
+| `updated_by` | `int` | no |
 | `is_locked_by_current_user` | `bool` | no |
+| `is_locked_by` | `int` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -1082,7 +1088,10 @@ See [Atomic Element Get](#atomic-element-get) response.
 |---|---|---|
 | `font_uid` | `string` | yes |
 | `status` | `string` | no |
+| `updated_by_current_user` | `bool` | no |
+| `updated_by` | `int` | no |
 | `is_locked_by_current_user` | `bool` | no |
+| `is_locked_by` | `int` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |
@@ -1373,7 +1382,10 @@ See [Deep Component Get](#deep-component-get) response.
 |---|---|---|
 | `font_uid` | `string` | yes |
 | `status` | `string` | no |
+| `updated_by_current_user` | `bool` | no |
+| `updated_by` | `int` | no |
 | `is_locked_by_current_user` | `bool` | no |
+| `is_locked_by` | `int` | no |
 | `is_locked` | `bool` | no |
 | `is_empty` | `bool` | no |
 | `has_variation_axis` | `bool` | no |

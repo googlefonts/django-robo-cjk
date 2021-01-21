@@ -49,6 +49,8 @@ class Client(object):
         Initialize a new Robo-CJK API client using the given credentials,
         then authentication is automatically managed by the client, no need to do anything.
         """
+        if host.endswith('/'):
+            host = host[:-1]
         self._host = host
         self._username = username
         self._password = password

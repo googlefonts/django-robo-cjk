@@ -3,7 +3,7 @@
 from django.urls import path
 
 from robocjk.api.views import (
-    auth_token, auth_refresh_token,
+    ping, auth_token, auth_refresh_token,
     user_list, user_me,
     project_list, project_get, project_create, project_delete,
     font_list, font_get, font_create, font_update, font_delete,
@@ -25,6 +25,9 @@ from robocjk.api.views import (
 
 
 urlpatterns = [
+
+    # Ping
+    path('api/ping/', ping, name='ping'),
 
     # Auth (jwt token)
     path('api/auth/token/', auth_token, name='auth_token'),

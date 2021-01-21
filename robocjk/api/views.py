@@ -57,6 +57,11 @@ def _get_glif_serialization_options(params):
 
 
 @api_view
+def ping(request, params, *args, **kwargs):
+    return ApiResponseSuccess('pong')
+
+
+@api_view
 def auth_token(request, params, *args, **kwargs):
     username = params.get_str('username')
     password = params.get_str('password')

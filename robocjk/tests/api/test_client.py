@@ -66,6 +66,22 @@ class ClientTestCase(TestCase):
     def assert_response_service_unavailable_error(self, response):
         self.assert_response_error(response, 503)
 
+    def test_client_with_invalid_host(self):
+        with self.assertRaises(ValueError):
+            client = Client(
+                host='http://invalid-robocjk.black-foundry.com/',
+                username='admin',
+                password='admin'
+            )
+
+    def test_client_with_valid_host_without_api_installed(self):
+        with self.assertRaises(ValueError):
+            client = Client(
+                host='https://www.google.com/',
+                username='admin',
+                password='admin'
+            )
+
     def test_auth_token(self):
         response = self._client.auth_token()
         # print(response)

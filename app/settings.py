@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_json_widget',
     'robocjk',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'

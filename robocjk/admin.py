@@ -128,7 +128,7 @@ class FontImportAdmin(admin.ModelAdmin):
     list_select_related = ()
     list_display = ('filename', 'status', 'created_at', 'updated_at', )
     list_filter = (FontFilter, 'status', )
-    readonly_fields = ('id', 'status', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
+    readonly_fields = ('id', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse',),

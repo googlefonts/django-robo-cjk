@@ -151,6 +151,26 @@ class Command(BaseCommand):
                 for name, match in self._import_groups[item['group_name']]:
                     item['import_func'](font_obj, self._zipfile_read(file, name), match)
 
+        # update deep-components relations with atomic-elements
+        glif_objs = font_obj.deep_components.filter(has_components=True)
+        glif_objs_counter = 0
+        glif_objs_total = len(glif_objs)
+        self.stdout.write('Updating {} DeepComponent relations...'.format(glif_objs_total))
+        for glif_obj in glif_objs:
+            glif_obj.save()
+            # self.stdout.write('Updated DeepComponent relations - {} of {}'.format(glif_objs_counter, glif_objs_total))
+        self.stdout.write('Updated {} DeepComponent relations.'.format(glif_objs_total))
+
+        # update character-glyphs relations with deep-components
+        glif_objs = font_obj.character_glyphs.filter(has_components=True)
+        glif_objs_counter = 0
+        glif_objs_total = len(glif_objs)
+        self.stdout.write('Updating {} CharacterGlyphs relations...'.format(glif_objs_total))
+        for glif_obj in glif_objs:
+            glif_obj.save()
+            # self.stdout.write('Updated CharacterGlyph relations - {} of {}'.format(glif_objs_counter, glif_objs_total))
+        self.stdout.write('Updated {} CharacterGlyphs relations.'.format(glif_objs_total))
+
         font_obj.available = True
         font_obj.save()
 

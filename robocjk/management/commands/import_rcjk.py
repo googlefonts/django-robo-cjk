@@ -26,11 +26,11 @@ class Command(BaseCommand):
         self._font_pattern = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
         self._fontlib_pattern = r'^{}?fontLib\.json$'.format(self._font_pattern)
         self._features_pattern = r'^{}?features\.fea$'.format(self._font_pattern)
-        self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_\.]+)\/(?P<glif_name>[\w\-\_\.]+)\.glif$'.format(self._font_pattern)
+        self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
+        self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.\+]+)\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
+        self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
+        self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
+        self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_\.\+]+)\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
 
         self._import_mappings = [
             {

@@ -30,6 +30,7 @@ class ClientTestCase(TestCase):
         pass
 
     def assert_response_ok(self, response):
+        self.assertNotEqual(response, None)
         try:
             self.assertEqual(response['status'], 200)
         except AssertionError as error:

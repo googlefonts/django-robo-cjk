@@ -61,8 +61,11 @@ repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 def run_commands(*args):
     cmds = args
-    cmd = ' && '.join(cmds)
-    os.system(cmd)
+    # cmd = ' && '.join(cmds)
+    # print('---\nrun command: {}'.format(cmd))
+    for cmd in cmds:
+        print('---\nrun command: {}'.format(cmd))
+        os.system(cmd)
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
@@ -102,13 +105,20 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
     def save_to_file_system(self):
         path = self.path()
         fsutil.make_dirs(path)
-        fsutil.remove_dir_content(path)
-        # init and pull from git repository
-        run_commands(
-            'cd {}'.format(path),
-            'git init',
-            'git remote add origin {}'.format(self.repo_url),
-            'git pull --rebase origin master')
+        repo_path = fsutil.join_path(path, '.git')
+        if not fsutil.exists(repo_path):
+            # repository doesn't exist, initialize it
+            run_commands(
+                'cd {}'.format(path),
+                'git init',
+                'git remote add origin {}'.format(self.repo_url),
+                'git pull origin master')
+        else:
+            # repository exist
+            run_commands(
+                'cd {}'.format(path),
+                'git pull origin master',
+                'git clean -df')
         # save all project fonts to file.system
         fonts_qs = self.fonts.prefetch_related(
             'character_glyphs',
@@ -128,9 +138,9 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         # add all changed files, commit and push to the git repository
         run_commands(
             'cd {}'.format(path),
-            'git add .',
+            'git add --all',
             'git commit -m "{}"'.format('Updated project.'),
-            'git push -u origin master')
+            'git push origin master')
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)

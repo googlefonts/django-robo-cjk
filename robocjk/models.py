@@ -62,7 +62,6 @@ repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 def run_commands(*args):
     cmds = args
     cmd = ' && '.join(cmds)
-    print('---\nrun command: {}'.format(cmd))
     os.system(cmd)
 
 
@@ -115,6 +114,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             # repository exist
             run_commands(
                 'cd {}'.format(path),
+                'git reset --hard origin/master',
                 'git pull origin master',
                 'git clean -df')
         # save all project fonts to file.system

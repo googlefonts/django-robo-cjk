@@ -61,11 +61,9 @@ repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 def run_commands(*args):
     cmds = args
-    # cmd = ' && '.join(cmds)
-    # print('---\nrun command: {}'.format(cmd))
-    for cmd in cmds:
-        print('---\nrun command: {}'.format(cmd))
-        os.system(cmd)
+    cmd = ' && '.join(cmds)
+    print('---\nrun command: {}'.format(cmd))
+    os.system(cmd)
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):

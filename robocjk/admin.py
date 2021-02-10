@@ -17,7 +17,7 @@ from robocjk.models import (
     CharacterGlyph, CharacterGlyphLayer,
     DeepComponent,
     AtomicElement, AtomicElementLayer,
-    Proof,
+    Proof, StatusModel,
 )
 from robocjk.utils import unicode_to_char
 
@@ -162,8 +162,78 @@ class FontAdmin(admin.ModelAdmin):
                     font.num_atomic_elements())
         return mark_safe(html)
 
+    def progress(self, font, *args, **kwargs):
+
+        tot = 0
+        tot_wip = 0
+        tot_checking_1 = 0
+        tot_checking_2 = 0
+        tot_checking_3 = 0
+        tot_done = 0
+
+        for cls in [CharacterGlyph, DeepComponent, AtomicElement]:
+            manager = cls.objects
+            tot += manager.filter(font=font).count()
+            tot_wip += manager.filter(font=font, status=cls.STATUS_WIP).count()
+            tot_checking_1 += manager.filter(font=font, status=cls.STATUS_CHECKING_1).count()
+            tot_checking_2 += manager.filter(font=font, status=cls.STATUS_CHECKING_2).count()
+            tot_checking_3 += manager.filter(font=font, status=cls.STATUS_CHECKING_3).count()
+            tot_done += manager.filter(font=font, status=cls.STATUS_DONE).count()
+
+        perc_wip = 0
+        perc_checking_1 = 0
+        perc_checking_2 = 0
+        perc_checking_3 = 0
+        perc_done = 0
+
+        if tot > 0:
+            perc_wip = ((tot_wip * 100) / tot)
+            perc_checking_1 = ((tot_checking_1 * 100) / tot)
+            perc_checking_2 = ((tot_checking_2 * 100) / tot)
+            perc_checking_3 = ((tot_checking_3 * 100) / tot)
+            perc_done = ((tot_done * 100) / tot)
+
+        color_wip = StatusModel.STATUS_COLOR_WIP
+        color_checking_1 = StatusModel.STATUS_COLOR_CHECKING_1
+        color_checking_2 = StatusModel.STATUS_COLOR_CHECKING_2
+        color_checking_3 = StatusModel.STATUS_COLOR_CHECKING_3
+        color_done = StatusModel.STATUS_COLOR_DONE
+
+        title_wip = '{}: {}%'.format(
+            StatusModel.STATUS_DISPLAY_WIP,
+            round(perc_wip))
+        title_checking_1 = '{}: {}%'.format(
+            StatusModel.STATUS_DISPLAY_CHECKING_1,
+            round(perc_checking_1))
+        title_checking_2 = '{}: {}%'.format(
+            StatusModel.STATUS_DISPLAY_CHECKING_2,
+            round(perc_checking_2))
+        title_checking_3 = '{}: {}%'.format(
+            StatusModel.STATUS_DISPLAY_CHECKING_3,
+            round(perc_checking_3))
+        title_done = '{}: {}%'.format(
+            StatusModel.STATUS_DISPLAY_DONE,
+            round(perc_done))
+
+        html = """
+            <div style="display: block; width: 100%; min-width: 150px; height: 15px; position: relative; background-color: rgba(0,0,0,0.1);">
+                <span style="display: inline-block; float: left; width: {}%; height: 100%; background-color: {};" title="{}"></span>
+                <span style="display: inline-block; float: left; width: {}%; height: 100%; background-color: {};" title="{}"></span>
+                <span style="display: inline-block; float: left; width: {}%; height: 100%; background-color: {};" title="{}"></span>
+                <span style="display: inline-block; float: left; width: {}%; height: 100%; background-color: {};" title="{}"></span>
+                <span style="display: inline-block; float: left; width: {}%; height: 100%; background-color: {};" title="{}"></span>
+            </div>
+            """.format(
+                perc_wip, color_wip, title_wip,
+                perc_checking_1, color_checking_1, title_checking_1,
+                perc_checking_2, color_checking_2, title_checking_2,
+                perc_checking_3, color_checking_3, title_checking_3,
+                perc_done, color_done, title_done,
+            )
+        return mark_safe(html)
+
     list_select_related = ()
-    list_display = ('name', 'slug', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', )
+    list_display = ('name', 'uid', 'hashid', 'info', 'progress', 'available', 'created_at', 'updated_at', 'updated_by', )
     list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )

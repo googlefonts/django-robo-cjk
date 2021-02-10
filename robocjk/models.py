@@ -406,12 +406,19 @@ class StatusModel(models.Model):
     STATUS_CHECKING_2 = 'checking-2'
     STATUS_CHECKING_3 = 'checking-3'
     STATUS_DONE = 'done'
+
+    STATUS_DISPLAY_WIP = _('Wip')
+    STATUS_DISPLAY_CHECKING_1 = _('Checking 1')
+    STATUS_DISPLAY_CHECKING_2 = _('Checking 2')
+    STATUS_DISPLAY_CHECKING_3 = _('Checking 3')
+    STATUS_DISPLAY_DONE = _('Done')
+
     STATUS_CHOICES = (
-        (STATUS_WIP, _('Wip'), ),
-        (STATUS_CHECKING_1, _('Checking 1'), ),
-        (STATUS_CHECKING_2, _('Checking 2'), ),
-        (STATUS_CHECKING_3, _('Checking 3'), ),
-        (STATUS_DONE, _('Done'), ),
+        (STATUS_WIP, STATUS_DISPLAY_WIP, ),
+        (STATUS_CHECKING_1, STATUS_DISPLAY_CHECKING_1, ),
+        (STATUS_CHECKING_2, STATUS_DISPLAY_CHECKING_2, ),
+        (STATUS_CHECKING_3, STATUS_DISPLAY_CHECKING_3, ),
+        (STATUS_DONE, STATUS_DISPLAY_DONE, ),
     )
     STATUS_CHOICES_VALUES_LIST = [
         STATUS_WIP,
@@ -420,12 +427,17 @@ class StatusModel(models.Model):
         STATUS_CHECKING_3,
         STATUS_DONE,
     ]
+    STATUS_COLOR_WIP = '#e74c3c'
+    STATUS_COLOR_CHECKING_1 = '#e67e22'
+    STATUS_COLOR_CHECKING_2 = '#f1c40f'
+    STATUS_COLOR_CHECKING_3 = '#2980b9'
+    STATUS_COLOR_DONE = '#27ae60'
     STATUS_COLORS = {
-        STATUS_WIP: '#e74c3c', # '#FF0000', # red
-        STATUS_CHECKING_1: '#e67e22', # '#FF8800', # orange
-        STATUS_CHECKING_2: '#f1c40f', # '#FFFF00', # yellow
-        STATUS_CHECKING_3: '#2980b9', # '#0088FF', # blue
-        STATUS_DONE: '#27ae60', # '#00FF88', # green
+        STATUS_WIP: STATUS_COLOR_WIP, # '#FF0000', # red
+        STATUS_CHECKING_1: STATUS_COLOR_CHECKING_1, # '#FF8800', # orange
+        STATUS_CHECKING_2: STATUS_COLOR_CHECKING_2, # '#FFFF00', # yellow
+        STATUS_CHECKING_3: STATUS_COLOR_CHECKING_3, # '#0088FF', # blue
+        STATUS_DONE: STATUS_COLOR_DONE, # '#00FF88', # green
     }
     STATUS_MARK_COLORS = {
         '1,0,0,1': STATUS_WIP,

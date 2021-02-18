@@ -138,9 +138,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             # add all changed files, commit and push to the git repository
             run_commands(
                 'cd {}'.format(path),
-                'git add --all',
+                'git add {}/* --all'.format(font.path()),
                 'git commit -m "{}"'.format(font.get_commit_message()),
                 'git push origin master')
+        run_commands(
+            'cd {}'.format(path),
+            'git add --all',
+            'git commit -m "{}"'.format('Updated project.'),
+            'git push origin master')
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)

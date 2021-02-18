@@ -71,6 +71,14 @@ class ModelsTestCase(TestCase):
         self.assertEqual(self._font1.num_atomic_elements(), 1)
         self.assertTrue(isinstance(self._font1.serialize(), dict))
 
+    def test_font_get_commit_message(self):
+        message = self._font1.get_commit_message()
+        self.assertEqual(message, 'Updated My Font 1.')
+
+    def test_font_updated_by_users(self):
+        users = self._font1.updated_by_users()
+        self.assertEqual(list(users), [])
+
     def test_character_glyph(self):
         self.assertEqual(self._character_glyph.font, self._font1)
         self.assertEqual(self._character_glyph.name, 'uni4E25')

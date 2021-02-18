@@ -135,12 +135,12 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         # save all project fonts to the file system
         for font in fonts_list:
             font.save_to_file_system()
-        # add all changed files, commit and push to the git repository
-        run_commands(
-            'cd {}'.format(path),
-            'git add --all',
-            'git commit -m "{}"'.format('Updated project.'),
-            'git push origin master')
+            # add all changed files, commit and push to the git repository
+            run_commands(
+                'cd {}'.format(path),
+                'git add --all',
+                'git commit -m "{}"'.format(font.get_commit_message()),
+                'git push origin master')
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)
@@ -182,6 +182,21 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Features'))
 
     objects = FontManager()
+
+    def get_commit_message(self, minutes=10):
+        """
+        Get the commit message for the font combining the font name and
+        the list of users that worked on it in the latest 10 minutes
+        (actually the cronjob exports and push the font to git every 10 minutes).
+        """
+        users_qs = self.updated_by_users(minutes=minutes)
+        users_names = [user.get_full_name() for user in users_qs]
+        users_str = ', '.join(users_names)
+        # return 'Updated {}.'.format(self.name)
+        message = 'Updated {}'.format(self.name)
+        if users_str:
+            return '{} by: {}.'.format(message, users_str)
+        return '{}.'.format(message)
 
     def num_character_glyphs(self):
         return self.character_glyphs.count()
@@ -232,6 +247,56 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         # write all atomic-elements and relative layers
         for atomic_element in self.atomic_elements.all():
             atomic_element.save_to_file_system()
+
+    def updated_by_users(self, minutes=None, hours=None, days=None):
+        """
+        Get the list of users that have updated the font or any object that belongs to it.
+        If minutes, hours or days are specified, results will contain only users for the given time range.
+        """
+        now = dt.datetime.now()
+        if minutes and minutes > 0:
+            updated_after = now - dt.timedelta(minutes=minutes)
+        elif hours and hours > 0:
+            updated_after = now - dt.timedelta(hours=hours)
+        elif days and days > 0:
+            updated_after = now - dt.timedelta(days=days)
+        else:
+            updated_after = self.created_at
+
+        def get_updated_by_pks(queryset):
+            return queryset.filter(updated_at__gt=updated_after) \
+                .exclude(updated_by=None) \
+                .order_by('updated_by') \
+                .values_list('updated_by', flat=True) \
+                .distinct()
+
+        font = self
+        user_manager = get_user_model().objects
+        users_pks = []
+        users_pks += get_updated_by_pks(
+            Font.objects.filter(uid=font.uid))
+
+        users_pks += get_updated_by_pks(
+            GlyphsComposition.objects.filter(font=font))
+
+        users_pks += get_updated_by_pks(
+            CharacterGlyph.objects.filter(font=font))
+
+        users_pks += get_updated_by_pks(
+            CharacterGlyphLayer.objects.select_related('glif').filter(glif__font=font))
+
+        users_pks += get_updated_by_pks(
+            DeepComponent.objects.filter(font=font))
+
+        users_pks += get_updated_by_pks(
+            AtomicElement.objects.filter(font=font))
+
+        users_pks += get_updated_by_pks(
+            AtomicElementLayer.objects.select_related('glif').filter(glif__font=font))
+
+        users_pks = list(set(users_pks))
+        users_qs = user_manager.filter(pk__in=users_pks).order_by('first_name', 'last_name')
+        return users_qs
 
     def serialize(self, **kwargs):
         return serialize_font(self, **kwargs)

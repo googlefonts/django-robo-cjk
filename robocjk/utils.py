@@ -1,5 +1,19 @@
 # -*- coding: utf-8 -*-
 
+from fontTools.pens.recordingPen import RecordingPointPen
+from fontTools.ufoLib.glifLib import readGlyphFromString, writeGlyphToString
+
+
+class GlyphObject:
+    pass
+
+
+def format_glif(s):
+    glyph = GlyphObject()
+    recorder = RecordingPointPen()
+    readGlyphFromString(s, glyph, pointPen=recorder)
+    return writeGlyphToString(glyph.name, glyph, drawPointsFunc=recorder.replay)
+
 
 def char_to_unicode(s):
     return hex(ord(s))[2:].zfill(4).upper()

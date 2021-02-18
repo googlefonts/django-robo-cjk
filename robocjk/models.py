@@ -44,6 +44,7 @@ from robocjk.managers import (
     AtomicElementManager, AtomicElementLayerManager,
 )
 from robocjk.settings import GIT_SSH_REPOSITORY_URL_VALIDATOR
+from robocjk.utils import format_glif
 
 import datetime as dt
 import fsutil
@@ -116,7 +117,8 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
                 'cd {}'.format(path),
                 'git reset --hard origin/master',
                 'git pull origin master',
-                'git clean -df')
+                'git clean -df',
+                'git gc')
         # save all project fonts to file.system
         fonts_qs = self.fonts.prefetch_related(
             'character_glyphs',
@@ -591,7 +593,15 @@ class GlifDataModel(models.Model):
         self._update_components()
 
     def save_to_file_system(self):
-        fsutil.write_file(self.path(), self.data)
+        try:
+            data_formatted = format_glif(self.data)
+        except Exception as formatting_error:
+            data_formatted = self.data
+            message = 'save_to_file_system glif xml data formatting error - type: {}, id: {}, name: {}, error: {}'.format(
+                type(self), self.id, self.name, formatting_error)
+            # print(message)
+            logger.error(message)
+        fsutil.write_file(self.path(), data_formatted)
 
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):

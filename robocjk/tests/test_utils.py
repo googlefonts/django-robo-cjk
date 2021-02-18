@@ -2,12 +2,13 @@
 
 from django.test import TestCase
 
-from robocjk.utils import char_to_unicode, unicode_to_char, username_to_filename
+from robocjk.utils import format_glif, char_to_unicode, unicode_to_char, username_to_filename
 
 
 class UtilsTestCase(TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         pass
 
     def tearDown(self):
@@ -43,3 +44,61 @@ class UtilsTestCase(TestCase):
         self.assertEqual(f('CON'), 'C_O_N_')
         self.assertEqual(f('con.alt'), '_con.alt')
         self.assertEqual(f('alt.con'), 'alt._con')
+
+    def test_format_glif(self):
+        s = """<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni000A" format="2"> <advance width="1000" /> <unicode hex="000A" />
+<outline> </outline> <lib> <dict> <key>public.markColor</key> <string>1,0,0,1</string>
+<key>robocjk.axes</key> <array> <dict> <key>maxValue</key> <real>1.0</real>
+<key>minValue</key> <real>0.0</real> <key>name</key> <string>wght</string> </dict> </array> <key>robocjk.deepComponents</key> <array />
+<key>robocjk.variationGlyphs</key> <array> <dict> <key>deepComponents</key> <array /> <key>layerName</key>
+<string>wght</string> <key>location</key> <dict> <key>wght</key> <real>1.0</real> </dict> <key>on</key>
+<integer>1</integer> <key>sourceName</key> <string>wght</string> </dict> </array> </dict> </lib> </glyph>"""
+        result = format_glif(s)
+        expected_result = """<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni000A" format="2">
+  <advance width="1000"/>
+  <unicode hex="000A"/>
+  <outline>
+  </outline>
+  <lib>
+    <dict>
+      <key>public.markColor</key>
+      <string>1,0,0,1</string>
+      <key>robocjk.axes</key>
+      <array>
+        <dict>
+          <key>maxValue</key>
+          <real>1.0</real>
+          <key>minValue</key>
+          <real>0.0</real>
+          <key>name</key>
+          <string>wght</string>
+        </dict>
+      </array>
+      <key>robocjk.deepComponents</key>
+      <array/>
+      <key>robocjk.variationGlyphs</key>
+      <array>
+        <dict>
+          <key>deepComponents</key>
+          <array/>
+          <key>layerName</key>
+          <string>wght</string>
+          <key>location</key>
+          <dict>
+            <key>wght</key>
+            <real>1.0</real>
+          </dict>
+          <key>on</key>
+          <integer>1</integer>
+          <key>sourceName</key>
+          <string>wght</string>
+        </dict>
+      </array>
+    </dict>
+  </lib>
+</glyph>
+"""
+        self.assertEqual(result, expected_result)
+

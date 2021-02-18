@@ -133,19 +133,20 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
+        commands = ['cd {}'.format(path)]
         for font in fonts_list:
             font.save_to_file_system()
             # add all changed files, commit and push to the git repository
-            run_commands(
-                'cd {}'.format(path),
+            commands += [
                 'git add {}/*'.format(fsutil.get_filename(font.path())),
                 'git commit -m "{}"'.format(font.get_commit_message()),
-                'git push origin master')
-        run_commands(
-            'cd {}'.format(path),
+            ]
+        commands += [
             'git add --all',
             'git commit -m "{}"'.format('Updated project.'),
-            'git push origin master')
+            'git push origin master',
+        ]
+        run_commands(*commands)
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)

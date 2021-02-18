@@ -138,7 +138,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             # add all changed files, commit and push to the git repository
             run_commands(
                 'cd {}'.format(path),
-                'git add {}/* --all'.format(font.path()),
+                'git add {}/*'.format(fsutil.get_filename(font.path())),
                 'git commit -m "{}"'.format(font.get_commit_message()),
                 'git push origin master')
         run_commands(

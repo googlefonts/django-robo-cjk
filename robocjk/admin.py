@@ -109,13 +109,13 @@ class ProjectAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('hashid', 'uid', )
         }),
-        ('Metadata', {
-            'classes': ('collapse',),
-            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
-        }),
         ('Export', {
             'classes': ('collapse',),
             'fields': ('export_running', 'export_started_at', 'export_completed_at', )
+        }),
+        ('Metadata', {
+            'classes': ('collapse',),
+            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('name', 'slug', 'repo_url', 'designers', )
@@ -237,7 +237,7 @@ class FontAdmin(admin.ModelAdmin):
         return mark_safe(html)
 
     list_select_related = ()
-    list_display = ('name', 'uid', 'hashid', 'info', 'progress', 'available', 'created_at', 'updated_at', 'updated_by', )
+    list_display = ('name', 'uid', 'hashid', 'info', 'progress', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
     list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
@@ -245,6 +245,10 @@ class FontAdmin(admin.ModelAdmin):
         ('Identifiers', {
           'classes': ('collapse',),
           'fields': ('hashid', 'uid', )
+        }),
+        ('Export', {
+            'classes': ('collapse',),
+            'fields': ('export_running', 'export_started_at', 'export_completed_at', )
         }),
         ('Metadata', {
           'classes': ('collapse',),

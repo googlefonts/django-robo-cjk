@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
 from robocjk.abstract_models import (
-    UIDModel, HashidModel, NameSlugModel, TimestampModel,
+    UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel,
 )
 from robocjk.api.serializers import (
     serialize_project,
@@ -66,7 +66,7 @@ def run_commands(*args):
     os.system(cmd)
 
 
-class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
+class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
     """
     The Project model.
     """
@@ -83,20 +83,6 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
-    export_running = models.BooleanField(
-        default=False,
-        verbose_name=_('Export running'))
-
-    export_started_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('Export started at'))
-
-    export_completed_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('Export completed at'))
-
     designers = models.ManyToManyField(
         get_user_model(),
         blank=True,
@@ -104,19 +90,6 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Designers'))
 
     objects = ProjectManager()
-
-    def export(self):
-        if self.export_running:
-            return
-        self.export_running = True
-        self.export_started_at = dt.datetime.now()
-        self.save()
-
-        self.save_to_file_system()
-
-        self.export_running = False
-        self.export_completed_at = dt.datetime.now()
-        self.save()
 
     def num_designers(self):
         return self.designers.count()
@@ -159,20 +132,19 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
-        commands = ['cd {}'.format(path)]
         for font in fonts_list:
-            font.save_to_file_system()
+            font.export()
             # add all changed files, commit and push to the git repository
-            commands += [
-                'git add {}/*'.format(fsutil.get_filename(font.path())),
+            run_commands(
+                'cd {}'.format(path),
+                'git add ./{}'.format(fsutil.get_filename(font.path())),
                 'git commit -m "{}"'.format(font.get_commit_message()),
-            ]
-        commands += [
+                'git push origin master')
+        run_commands(
+            'cd {}'.format(path),
             'git add --all',
             'git commit -m "{}"'.format('Updated project.'),
-            'git push origin master',
-        ]
-        run_commands(*commands)
+            'git push origin master')
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)
@@ -182,7 +154,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             self.name))
 
 
-class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
+class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
     """
     The Font model.
     """
@@ -269,14 +241,23 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
             get_character_glyphs_path(self),
             get_deep_components_path(self),
             get_atomic_elements_path(self))
+        # load all character-glyphs and their layers
+        character_glyphs_qs = self.character_glyphs.prefetch_related('layers').all()
+        character_glyphs_list = list(character_glyphs_qs)
+        # load all deep-components
+        deep_components_qs = self.deep_components.all()
+        deep_components_list = list(deep_components_qs)
+        # load all atomic-elements and their layers
+        atomic_elements_qs = self.atomic_elements.prefetch_related('layers').all()
+        atomic_elements_list = list(atomic_elements_qs)
         # write all character-glyphs and relative layers
-        for character_glyph in self.character_glyphs.all():
+        for character_glyph in character_glyphs_list:
             character_glyph.save_to_file_system()
         # write all deep-components
-        for deep_component in self.deep_components.all():
+        for deep_component in deep_components_list:
             deep_component.save_to_file_system()
         # write all atomic-elements and relative layers
-        for atomic_element in self.atomic_elements.all():
+        for atomic_element in atomic_elements_list:
             atomic_element.save_to_file_system()
 
     def updated_by_users(self, minutes=None, hours=None, days=None):
@@ -292,13 +273,13 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         elif days and days > 0:
             updated_after = now - dt.timedelta(days=days)
         else:
-            # updated_after = self.created_at
-            updated_after = self.project.export_started_at
+            updated_after = self.export_completed_at
             if not updated_after:
-                updated_after = now - dt.timedelta(minutes=10)
+                updated_after = now - dt.timedelta(hours=1)
 
-        def get_updated_by_pks(queryset):
-            return queryset.filter(updated_at__gt=updated_after) \
+        def get_updated_by_pks(manager, **filters):
+            filters.setdefault('updated_at__gt', updated_after)
+            return manager.filter(**filters) \
                 .exclude(updated_by=None) \
                 .order_by('updated_by') \
                 .values_list('updated_by', flat=True) \
@@ -308,25 +289,32 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         user_manager = get_user_model().objects
         users_pks = []
         users_pks += get_updated_by_pks(
-            Font.objects.filter(uid=font.uid))
+            manager=Font.objects,
+            uid=font.uid)
 
         users_pks += get_updated_by_pks(
-            GlyphsComposition.objects.filter(font=font))
+            manager=GlyphsComposition.objects,
+            font=font)
 
         users_pks += get_updated_by_pks(
-            CharacterGlyph.objects.filter(font=font))
+            manager=CharacterGlyph.objects,
+            font=font)
 
         users_pks += get_updated_by_pks(
-            CharacterGlyphLayer.objects.select_related('glif').filter(glif__font=font))
+            manager=CharacterGlyphLayer.objects.select_related('glif'),
+            glif__font=font)
 
         users_pks += get_updated_by_pks(
-            DeepComponent.objects.filter(font=font))
+            manager=DeepComponent.objects,
+            font=font)
 
         users_pks += get_updated_by_pks(
-            AtomicElement.objects.filter(font=font))
+            manager=AtomicElement.objects,
+            font=font)
 
         users_pks += get_updated_by_pks(
-            AtomicElementLayer.objects.select_related('glif').filter(glif__font=font))
+            manager=AtomicElementLayer.objects.select_related('glif'),
+            glif__font=font)
 
         users_pks = list(set(users_pks))
         users_qs = user_manager.filter(pk__in=users_pks).order_by('first_name', 'last_name')

@@ -83,6 +83,20 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
+    export_running = models.BooleanField(
+        default=False,
+        verbose_name=_('Export running'))
+
+    export_started_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Export started at'))
+
+    export_completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Export completed at'))
+
     designers = models.ManyToManyField(
         get_user_model(),
         blank=True,
@@ -90,6 +104,19 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         verbose_name=_('Designers'))
 
     objects = ProjectManager()
+
+    def export(self):
+        if self.export_running:
+            return
+        self.export_running = True
+        self.export_started_at = dt.datetime.now()
+        self.save()
+
+        self.save_to_file_system()
+
+        self.export_running = False
+        self.export_completed_at = dt.datetime.now()
+        self.save()
 
     def num_designers(self):
         return self.designers.count()
@@ -117,8 +144,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel):
                 'cd {}'.format(path),
                 'git reset --hard origin/master',
                 'git pull origin master',
-                'git clean -df',
-                'git gc')
+                'git clean -df')
         # save all project fonts to file.system
         fonts_qs = self.fonts.prefetch_related(
             'character_glyphs',
@@ -189,13 +215,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
 
     objects = FontManager()
 
-    def get_commit_message(self, minutes=10):
+    def get_commit_message(self):
         """
         Get the commit message for the font combining the font name and
-        the list of users that worked on it in the latest 10 minutes
-        (actually the cronjob exports and push the font to git every 10 minutes).
+        the list of users that worked on it since the last project export).
         """
-        users_qs = self.updated_by_users(minutes=minutes)
+        users_qs = self.updated_by_users()
         users_names = [user.get_full_name() for user in users_qs]
         users_str = ', '.join(users_names)
         # return 'Updated {}.'.format(self.name)
@@ -267,7 +292,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel):
         elif days and days > 0:
             updated_after = now - dt.timedelta(days=days)
         else:
-            updated_after = self.created_at
+            # updated_after = self.created_at
+            updated_after = self.project.export_started_at
+            if not updated_after:
+                updated_after = now - dt.timedelta(minutes=10)
 
         def get_updated_by_pks(queryset):
             return queryset.filter(updated_at__gt=updated_after) \

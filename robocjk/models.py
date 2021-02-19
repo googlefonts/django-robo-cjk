@@ -124,7 +124,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             'character_glyphs__layers',
             'deep_components',
             'atomic_elements',
-            'atomic_elements__layers').filter(available=True)
+            'atomic_elements__layers').filter(available=True, exporting=False)
         fonts_list = list(fonts_qs)
         # cleanup - remove .rcjk projects that don't belong anymore to a project font
         fonts_rcjk_pulled_dirs = set(fsutil.search_dirs(path, '*.rcjk'))
@@ -133,12 +133,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
         for font in fonts_list:
+            font_dirpath = fsutil.get_filename(font.path())
+            font_commit_message = font.get_commit_message(since=font.export_started_at)
             font.export()
             # add all changed files, commit and push to the git repository
             run_commands(
                 'cd {}'.format(path),
-                'git add ./{}'.format(fsutil.get_filename(font.path())),
-                'git commit -m "{}"'.format(font.get_commit_message()),
+                'git add ./{}'.format(font_dirpath),
+                'git commit -m "{}"'.format(font_commit_message),
                 'git push origin master')
         run_commands(
             'cd {}'.format(path),
@@ -187,12 +189,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
     objects = FontManager()
 
-    def get_commit_message(self):
+    def get_commit_message(self, **options):
         """
         Get the commit message for the font combining the font name and
         the list of users that worked on it since the last project export).
         """
-        users_qs = self.updated_by_users()
+        users_qs = self.updated_by_users(**options)
         users_names = [user.get_full_name() for user in users_qs]
         users_str = ', '.join(users_names)
         # return 'Updated {}.'.format(self.name)
@@ -260,22 +262,25 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         for atomic_element in atomic_elements_list:
             atomic_element.save_to_file_system()
 
-    def updated_by_users(self, minutes=None, hours=None, days=None):
+    def updated_by_users(self, since=None, minutes=None, hours=None, days=None):
         """
         Get the list of users that have updated the font or any object that belongs to it.
         If minutes, hours or days are specified, results will contain only users for the given time range.
         """
-        now = dt.datetime.now()
-        if minutes and minutes > 0:
-            updated_after = now - dt.timedelta(minutes=minutes)
-        elif hours and hours > 0:
-            updated_after = now - dt.timedelta(hours=hours)
-        elif days and days > 0:
-            updated_after = now - dt.timedelta(days=days)
+        if since:
+            updated_after = since
         else:
-            updated_after = self.export_completed_at
-            if not updated_after:
-                updated_after = now - dt.timedelta(hours=1)
+            now = dt.datetime.now()
+            if minutes and minutes > 0:
+                updated_after = now - dt.timedelta(minutes=minutes)
+            elif hours and hours > 0:
+                updated_after = now - dt.timedelta(hours=hours)
+            elif days and days > 0:
+                updated_after = now - dt.timedelta(days=days)
+            else:
+                updated_after = self.export_started_at
+                if not updated_after:
+                    updated_after = now - dt.timedelta(hours=1)
 
         def get_updated_by_pks(manager, **filters):
             filters.setdefault('updated_at__gt', updated_after)

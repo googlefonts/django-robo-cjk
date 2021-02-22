@@ -139,12 +139,20 @@ TEMPLATES = [
     },
 ]
 
+# Security
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 60
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = True
 
 # Session
 # https://docs.djangoproject.com/en/dev/ref/settings/#sessions
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_COOKIE_AGE = (1209600 * 26) # (2 weeks * 26 = 52 weeks, in seconds)'
 # SESSION_COOKIE_DOMAIN = ''
+SESSION_COOKIE_SECURE = True
+
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 

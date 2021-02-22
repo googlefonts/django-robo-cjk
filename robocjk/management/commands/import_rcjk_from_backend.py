@@ -22,13 +22,17 @@ class Command(BaseCommand):
             self.stdout.write('There are already one or more fonts being loaded, retry later please.')
             return None
 
-        font_import_objs_qs = FontImport.objects.filter(status=FontImport.STATUS_WAITING)
+        font_import_objs_qs = FontImport.objects.select_related('font').filter(status=FontImport.STATUS_WAITING)
         font_import_objs = list(font_import_objs_qs)
         if not len(font_import_objs):
             self.stdout.write('There are no fonts (.rcjk) to import.')
             return None
 
         for font_import_obj in font_import_objs:
+            font = font_import_obj.font
+            if font.export_running:
+                self.stdout.write('There is an export running for "{}", the import will run on export complete.'.format(font.name))
+                continue
             font_import_obj.status = FontImport.STATUS_LOADING
             font_import_obj.save()
 

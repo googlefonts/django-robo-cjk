@@ -119,6 +119,13 @@ class Command(BaseCommand):
             self.stderr.write(message)
             raise CommandError(message)
 
+        self.stdout.write('Importing "{}"...'.format(font_obj.name))
+
+        if font_obj.export_running:
+            message = 'There is an export running for "{}", the import will run on export complete.'.format(font_obj.name)
+            self.stderr.write(message)
+            raise CommandError(message)
+
         font_obj.available = False
         font_obj.save()
 

@@ -140,7 +140,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         logger.info('Saving project "{}" fonts to file system...\n{}'.format(self.name, [font.name for font in fonts_list]))
         for font in fonts_list:
             font_dirpath = fsutil.get_filename(font.path())
-            font_commit_message = font.get_commit_message(since=font.export_started_at)
+            font_commit_message = font.get_commit_message()
             font.export()
             # add all changed files, commit and push to the git repository
             run_commands(
@@ -193,6 +193,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         blank=True,
         verbose_name=_('Features'))
 
+    designspace = models.JSONField(
+        blank=True,
+        null=True,
+        default=dict,
+        verbose_name=_('Designspace'))
+
     objects = FontManager()
 
     def get_commit_message(self, **options):
@@ -243,6 +249,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info('Saving font "{}" "features.fea" to file system...'.format(self.name))
         features_path = fsutil.join_path(path, 'features.fea')
         fsutil.write_file(features_path, self.features)
+        # write designspace.json file
+        logger.info('Saving font "{}" "designspace.json" to file system...'.format(self.name))
+        designspace_path = fsutil.join_path(path, 'designspace.json')
+        designspace_str = benedict(self.designspace, keypath_separator=None).dump()
+        fsutil.write_file(designspace_path, designspace_str)
         # write glyphsComposition.json file
         logger.info('Saving font "{}" "glyphsComposition.json" to file system...'.format(self.name))
         glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=self.id)
@@ -282,6 +293,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         Get the list of users that have updated the font or any object that belongs to it.
         If minutes, hours or days are specified, results will contain only users for the given time range.
         """
+        updated_after = None
         if since:
             updated_after = since
         else:
@@ -292,10 +304,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 updated_after = now - dt.timedelta(hours=hours)
             elif days and days > 0:
                 updated_after = now - dt.timedelta(days=days)
+            elif self.export_started_at and self.export_completed_at:
+                updated_after = max(self.export_started_at, self.export_completed_at)
             else:
-                updated_after = self.export_started_at
-                if not updated_after:
-                    updated_after = now - dt.timedelta(hours=1)
+                updated_after = now - dt.timedelta(hours=1)
 
         def get_updated_by_pks(manager, **filters):
             filters.setdefault('updated_at__gt', updated_after)

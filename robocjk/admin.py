@@ -255,7 +255,7 @@ class FontAdmin(admin.ModelAdmin):
           'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
-          'fields': ('project', 'name', 'slug', 'available', 'fontlib', 'features', )
+          'fields': ('project', 'name', 'slug', 'available', 'fontlib', 'features', 'designspace', )
         }),
     )
     inlines = [FontImportInline]

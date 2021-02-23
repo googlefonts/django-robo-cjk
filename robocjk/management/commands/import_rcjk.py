@@ -26,6 +26,7 @@ class Command(BaseCommand):
         self._font_pattern = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
         self._fontlib_pattern = r'^{}?fontLib\.json$'.format(self._font_pattern)
         self._features_pattern = r'^{}?features\.fea$'.format(self._font_pattern)
+        self._designspace_pattern = r'^{}?designspace\.json$'.format(self._font_pattern)
         self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
         self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.\+]+)\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
         self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
@@ -67,6 +68,11 @@ class Command(BaseCommand):
                 'pattern': self._features_pattern,
                 'group_name': 'features',
                 'import_func': self._import_features,
+            },
+            {
+                'pattern': self._designspace_pattern,
+                'group_name': 'designspace',
+                'import_func': self._import_designspace,
             },
         ]
 
@@ -190,6 +196,10 @@ class Command(BaseCommand):
 
     def _import_features(self, font, content, match):
         font.features = content
+        font.save()
+
+    def _import_designspace(self, font, content, match):
+        font.designspace = benedict.from_json(content, keypath_separator=None)
         font.save()
 
     def _import_glif(self, cls, font, content, match):

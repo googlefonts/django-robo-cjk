@@ -124,7 +124,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             'character_glyphs__layers',
             'deep_components',
             'atomic_elements',
-            'atomic_elements__layers').filter(available=True, exporting=False)
+            'atomic_elements__layers').filter(available=True, export_running=False)
         fonts_list = list(fonts_qs)
         # cleanup - remove .rcjk projects that don't belong anymore to a project font
         fonts_rcjk_pulled_dirs = set(fsutil.search_dirs(path, '*.rcjk'))

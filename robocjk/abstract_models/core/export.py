@@ -29,18 +29,32 @@ class ExportModel(models.Model):
 
     def export(self):
         if self.export_running:
-            logger.error('Skipped export because there is an export process that is still running.')
-            return False
+            logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
+            now = dt.datetime.now()
+            if (now - self.export_started_at) > dt.timedelta(minutes=30):
+                logger.warning('Abandoned unfinished export for "{}" to allow a new export to start.'.format(self))
+                self.export_running = False
+                self.save()
+            else:
+                return False
         # save export started status in the database
+        logger.info('Started export for "{}".'.format(self))
         self.export_running = True
         self.export_started_at = dt.datetime.now()
         self.save()
         # save model to the file system
-        self.save_to_file_system()
+        try:
+            self.save_to_file_system()
+        except Exception as export_error:
+            logger.error('Canceled export for "{}" due to an unexpected export error: {}'.format(self, export_error))
+            self.export_running = False
+            self.save()
+            return False
         # save export completed status in the database
         self.export_running = False
         self.export_completed_at = dt.datetime.now()
         self.save()
+        logger.info('Completed export for "{}".'.format(self))
         return True
 
     def save_to_file_system(self):

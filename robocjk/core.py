@@ -5,7 +5,7 @@
 from benedict import benedict
 from xml.etree import ElementTree
 
-from robocjk.debug import logger
+# from robocjk.debug import logger
 from robocjk.utils import username_to_filename
 
 

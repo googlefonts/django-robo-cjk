@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from robocjk.debug import logger
+# from robocjk.debug import logger
 from robocjk.io.decorators import threaded
 from robocjk.io.paths import (
     get_project_path,

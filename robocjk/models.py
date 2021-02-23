@@ -63,6 +63,7 @@ repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 def run_commands(*args):
     cmds = args
     cmd = ' && '.join(cmds)
+    logger.info('Run system commands: \n{}'.format(cmd))
     os.system(cmd)
 
 
@@ -101,11 +102,13 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         return get_project_path(self)
 
     def save_to_file_system(self):
+        logger.info('Saving project "{}" to file system...'.format(self.name))
         path = self.path()
         fsutil.make_dirs(path)
         repo_path = fsutil.join_path(path, '.git')
         if not fsutil.exists(repo_path):
             # repository doesn't exist, initialize it
+            logger.info('Repository for project "{}" doesn\'t exist, initialize it.'.format(self.name))
             run_commands(
                 'cd {}'.format(path),
                 'git init',
@@ -113,6 +116,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                 'git pull origin master')
         else:
             # repository exist
+            logger.info('Repository for project "{}" already exist, update it.'.format(self.name))
             run_commands(
                 'cd {}'.format(path),
                 'git reset --hard origin/master',
@@ -124,14 +128,16 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             'character_glyphs__layers',
             'deep_components',
             'atomic_elements',
-            'atomic_elements__layers').filter(available=True, export_running=False)
+            'atomic_elements__layers').filter()
         fonts_list = list(fonts_qs)
         # cleanup - remove .rcjk projects that don't belong anymore to a project font
         fonts_rcjk_pulled_dirs = set(fsutil.search_dirs(path, '*.rcjk'))
         fonts_rcjk_dirs = {font.path() for font in fonts_list}
         fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
+        logger.info('Deleting project "{}" old fonts from file system...\n{}'.format(self.name, fonts_rcjk_deleted_dirs))
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
+        logger.info('Saving project "{}" fonts to file system...\n{}'.format(self.name, [font.name for font in fonts_list]))
         for font in fonts_list:
             font_dirpath = fsutil.get_filename(font.path())
             font_commit_message = font.get_commit_message(since=font.export_started_at)
@@ -223,22 +229,28 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
     def save_to_file_system(self):
         if not self.available:
+            logger.info('Skipped font "{}" saving because it is not available (maybe there is an import running).'.format(self.name))
             return
+        logger.info('Saving font "{}" to file system...'.format(self.name))
         path = self.path()
         fsutil.make_dirs(path)
         # write fontLib.json file
+        logger.info('Saving font "{}" "fontLib.json" to file system...'.format(self.name))
         fontlib_path = fsutil.join_path(path, 'fontLib.json')
         fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write features.fea file
+        logger.info('Saving font "{}" "features.fea" to file system...'.format(self.name))
         features_path = fsutil.join_path(path, 'features.fea')
         fsutil.write_file(features_path, self.features)
         # write glyphsComposition.json file
+        logger.info('Saving font "{}" "glyphsComposition.json" to file system...'.format(self.name))
         glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=self.id)
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
         glyphs_composition_str = benedict(glyphs_composition_obj.serialize(), keypath_separator=None).dump()
         fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
         # delete existing character-glyphs, deep-components and atomic-elements directories
+        logger.info('Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(self.name))
         fsutil.remove_dirs(
             get_character_glyphs_path(self),
             get_deep_components_path(self),
@@ -253,12 +265,15 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         atomic_elements_qs = self.atomic_elements.prefetch_related('layers').all()
         atomic_elements_list = list(atomic_elements_qs)
         # write all character-glyphs and relative layers
+        logger.info('Saving font "{}" character-glyphs ({}) to file system...'.format(self.name, len(character_glyphs_list)))
         for character_glyph in character_glyphs_list:
             character_glyph.save_to_file_system()
         # write all deep-components
+        logger.info('Saving font "{}" deep-components ({}) to file system...'.format(self.name, len(deep_components_list)))
         for deep_component in deep_components_list:
             deep_component.save_to_file_system()
         # write all atomic-elements and relative layers
+        logger.info('Saving font "{}" atomic-elements ({}) to file system...'.format(self.name, len(atomic_elements_list)))
         for atomic_element in atomic_elements_list:
             atomic_element.save_to_file_system()
 
@@ -640,7 +655,7 @@ class GlifDataModel(models.Model):
             if gliph_data.ok:
                 return gliph_data
             else:
-                logger.debug('{} - parse data error: {}'.format(
+                logger.error('{} - parse data error: {}'.format(
                     self.__class__, gliph_data.error))
                 return None
         return None

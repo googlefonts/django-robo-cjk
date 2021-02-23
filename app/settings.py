@@ -313,22 +313,45 @@ LOGGING = {
         },
     },
     'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
         'debug_file': {
             'level': 'DEBUG',
             # 'class': 'logging.FileHandler',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-debug.log',
-            'maxBytes': 1024 * 1024 * 2, # 2 MB
-            'backupCount': 5,
-            'formatter':'simple',
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 0,
+            'formatter':'verbose',
+        },
+        'info_file': {
+            'level': 'INFO',
+            # 'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ENV_DIR + '/logs/django-info.log',
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 0,
+            'formatter': 'verbose',
+        },
+        'warning_file': {
+            'level': 'WARNING',
+            # 'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ENV_DIR + '/logs/django-warning.log',
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 0,
+            'formatter': 'verbose',
         },
         'error_file': {
             'level': 'ERROR',
             # 'class': 'logging.FileHandler',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': ENV_DIR + '/logs/django-errors.log',
-            'maxBytes': 1024 * 1024 * 2, # 2 MB
-            'backupCount': 5,
+            'filename': ENV_DIR + '/logs/django-error.log',
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 0,
             'formatter': 'verbose',
         },
         'mail_admins': {
@@ -340,17 +363,17 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['error_file', 'mail_admins'],
-            'level': 'ERROR',
+            'handlers': ['console', 'warning_file', 'error_file', 'mail_admins'],
+            'level': 'WARNING',
             'propagate': True,
         },
         'app': {
-            'handlers': ['debug_file'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'warning_file', 'error_file'],
+            'level': 'WARNING',
             'propagate': True,
         },
         'robocjk': {
-            'handlers': ['debug_file', 'error_file'],
+            'handlers': ['console', 'debug_file', 'info_file', 'warning_file', 'error_file'],
             'level': 'DEBUG',
             'propagate': True,
         },

@@ -15,7 +15,7 @@ from robocjk.api.http import (
     ApiResponseInternalServerError, ApiResponseServiceUnavailableError,
 )
 from robocjk.core import GlifData
-from robocjk.debug import logger
+# from robocjk.debug import logger
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, StatusModel,
@@ -42,16 +42,16 @@ def api_view(view_func):
             if settings.DEBUG:
                 raise internal_error
             response = ApiResponseInternalServerError(str(internal_error))
-        # logging
-        complete_time = time.time()
-        elapsed_time = (complete_time - start_time)
-        if elapsed_time >= rcjk_settings.API_RESPONSE_TIME_LIMIT:
-            logger.debug('API call slow {} ({} seconds): {} - params: {}'.format(
-                response.status_code, elapsed_time, request.get_full_path(), params))
-        if isinstance(response, ApiResponseError):
-            logger.error('API call error {} - {} - ({} seconds): {} - params: {}'.format(
-                response.status_code, response.error, elapsed_time, request.get_full_path(), params))
-        # end logging
+        # # logging
+        # complete_time = time.time()
+        # elapsed_time = (complete_time - start_time)
+        # if elapsed_time >= rcjk_settings.API_RESPONSE_TIME_LIMIT:
+        #     logger.debug('API call slow {} ({} seconds): {} - params: {}'.format(
+        #         response.status_code, elapsed_time, request.get_full_path(), params))
+        # if isinstance(response, ApiResponseError):
+        #     logger.error('API call error {} - {} - ({} seconds): {} - params: {}'.format(
+        #         response.status_code, response.error, elapsed_time, request.get_full_path(), params))
+        # # end logging
         return response
     wrapper.__dict__['api_view'] = True
     return wrapper

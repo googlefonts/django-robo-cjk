@@ -117,6 +117,22 @@ class ClientTestCase(TestCase):
         response = self._client.font_get(font_uid=self._font_uid)
         # print(response)
         self.assert_response_ok(response)
+        data = response['data']
+        self.assertTrue(isinstance(data.get('fontlib'), dict))
+        self.assertTrue(isinstance(data.get('designspace'), dict))
+
+    def test_font_update(self):
+        response = self._client.font_update(
+            font_uid=self._font_uid,
+            fontlib={'fontlib-test':'ok'},
+            features='features-test-ok',
+            designspace={'designspace-test':'ok'})
+        # print(response)
+        self.assert_response_ok(response)
+        data = response['data']
+        self.assertEqual(data.get('fontlib').get('fontlib-test'), 'ok')
+        self.assertEqual(data.get('features'), 'features-test-ok')
+        self.assertEqual(data.get('designspace').get('designspace-test'), 'ok')
 
     def test_glyphs_composition_get(self):
         response = self._client.glyphs_composition_get(font_uid=self._font_uid)

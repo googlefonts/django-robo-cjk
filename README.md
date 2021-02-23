@@ -313,30 +313,6 @@ See [Project Get](#project-get) response.
 {
     "data": [
         {
-            "fontlib": {
-                "CJKDesignFrameSettings": {
-                    "characterFace": 90,
-                    "customsFrames": [],
-                    "em_Dimension": [
-                        1000,
-                        1000
-                    ],
-                    "horizontalLine": 15,
-                    "overshoot": [
-                        20,
-                        20
-                    ],
-                    "type": "han",
-                    "verticalLine": 15
-                },
-                "com.typemytype.robofont.guideline.magnetic.bj4ZrgHhis": 5,
-                "com.typemytype.robofont.guideline.showMeasurements.bj4ZrgHhis": false,
-                "com.typemytype.robofont.segmentType": "curve",
-                "robocjk.defaultGlyphWidth": 1000,
-                "robocjk.fontVariations": [
-                    "wght"
-                ]
-            },
             "name": "Hanzi",
             "project_id": 1,
             "slug": "hanzi",
@@ -391,6 +367,18 @@ See [Project Get](#project-get) response.
                 "wght"
             ]
         },
+        "features": "...",
+        "designspace": {
+            "axes": [
+                {
+                    "name": "Weight",
+                    "tag": "wght",
+                    "minValue": 400,
+                    "defaultValue": 400,
+                    "maxValue": 700
+                }
+            ]
+        },
         "name": "Hanzi",
         "slug": "hanzi",
         "uid": "cbac1f2d-6b6c-46a4-a477-798d49042ff4"
@@ -416,6 +404,7 @@ See [Project Get](#project-get) response.
 | `name` | `string` | yes |
 | `fontlib` | `json` | no |
 | `features` | `string` | no |
+| `designspace` | `json` | no |
 
 ##### Response
 
@@ -436,6 +425,7 @@ See [Font Get](#font-get) response.
 | `font_uid` | `string` | yes |
 | `fontlib` | `json` | no |
 | `features` | `string` | no |
+| `designspace` | `json` | no |
 
 ##### Response
 

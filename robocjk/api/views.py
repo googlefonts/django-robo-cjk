@@ -175,6 +175,7 @@ def project_delete(request, params, user, project, *args, **kwargs):
 def font_list(request, params, user, project, *args, **kwargs):
     font_fields = set(FONT_FIELDS)
     font_fields.remove('fontlib')
+    font_fields.remove('designspace')
     font_fields = list(font_fields)
     data = list(project.fonts.values(*font_fields))
     return ApiResponseSuccess(data)
@@ -203,6 +204,7 @@ def font_create(request, params, user, *args, **kwargs):
     font.name = name
     font.fontlib = params.get_dict('fontlib')
     font.features = params.get_str('features')
+    font.designspace = params.get_dict('designspace')
     font.save_by(user)
     return ApiResponseSuccess(font.serialize())
 
@@ -220,6 +222,10 @@ def font_update(request, params, user, font, *args, **kwargs):
     features = params.get_str('features')
     if features:
         font.features = features
+        font_changed = True
+    designspace = params.get_dict('designspace')
+    if designspace:
+        font.designspace = designspace
         font_changed = True
     # font is changed, save it
     if font_changed:

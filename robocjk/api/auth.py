@@ -33,14 +33,19 @@ def decode_auth_token_in_header(request):
 def encode_auth_token(data):
     encoded = jwt.encode(
         data, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
-    return str(encoded, 'utf-8')
+    if isinstance(encoded, str):
+        return encoded
+    elif isinstance(encoded, bytes):
+        return str(encoded, 'utf-8')
+    else:
+        return None
 
 
 def generate_auth_token(expiration=None, data=None):
     exp_now = dt.datetime.utcnow()
     exp_options = expiration or { 'days':1 }
     exp_delta = dt.timedelta(**exp_options)
-    data = data or {}
+    data = data.copy() if data else {}
     data['exp'] = exp_now + exp_delta
     return encode_auth_token(data)
 

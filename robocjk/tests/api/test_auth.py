@@ -25,5 +25,6 @@ class AuthTestCase(TestCase):
 
     def test_generate_auth_token(self):
         data = { 'message':'Hello World' }
-        token = generate_auth_token({ 'days':5 }, data)
-        self.assertEqual(decode_auth_token(token), data)
+        token_encoded = generate_auth_token({ 'days':5 }, data)
+        token_decoded = decode_auth_token(token_encoded)
+        self.assertEqual(token_decoded['message'], data['message'])

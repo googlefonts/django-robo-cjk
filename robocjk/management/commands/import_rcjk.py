@@ -6,12 +6,18 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
 from robocjk.core import GlifData
+from robocjk.io.paths import (
+    FONTLIB_RE, FEATURES_RE, DESIGNSPACE_RE,
+    ATOMIC_ELEMENT_RE, ATOMIC_ELEMENT_LAYER_RE,
+    DEEP_COMPONENT_RE,
+    CHARACTER_GLYPH_RE, CHARACTER_GLYPH_LAYER_RE,
+)
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
-    AtomicElement, AtomicElementLayer, Proof, StatusModel, )
+    AtomicElement, AtomicElementLayer, Proof, StatusModel,
+)
 
 import fsutil
-import re
 import zipfile
 
 
@@ -23,61 +29,48 @@ class Command(BaseCommand):
 
         super(Command, self).__init__(*args, **kwargs)
 
-        self._font_pattern = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
-        self._fontlib_pattern = r'^{}?fontLib\.json$'.format(self._font_pattern)
-        self._features_pattern = r'^{}?features\.fea$'.format(self._font_pattern)
-        self._designspace_pattern = r'^{}?designspace\.json$'.format(self._font_pattern)
-        self._atomic_element_pattern = r'^{}?atomicElement\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
-        self._atomic_element_layer_pattern = r'^{}?atomicElement\/(?P<layer_name>[\w\-\_\.\+]+)\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
-        self._deep_component_pattern = r'^{}?deepComponent\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_pattern = r'^{}?characterGlyph\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
-        self._character_glyph_layer_pattern = r'^{}?characterGlyph\/(?P<layer_name>[\w\-\_\.\+]+)\/(?P<glif_name>[\w\-\_\.\+]+)\.glif$'.format(self._font_pattern)
-
         self._import_mappings = [
             {
-                'pattern': self._character_glyph_pattern,
+                'path_regex': CHARACTER_GLYPH_RE,
                 'group_name': 'character_glyphs',
                 'import_func': self._import_character_glyph,
             },
             {
-                'pattern': self._character_glyph_layer_pattern,
+                'path_regex': CHARACTER_GLYPH_LAYER_RE,
                 'group_name': 'character_glyphs_layers',
                 'import_func': self._import_character_glyph_layer,
             },
             {
-                'pattern': self._deep_component_pattern,
+                'path_regex': DEEP_COMPONENT_RE,
                 'group_name': 'deep_components',
                 'import_func': self._import_deep_component,
             },
             {
-                'pattern': self._atomic_element_pattern,
+                'path_regex': ATOMIC_ELEMENT_RE,
                 'group_name': 'atomic_elements',
                 'import_func': self._import_atomic_element,
             },
             {
-                'pattern': self._atomic_element_layer_pattern,
+                'path_regex': ATOMIC_ELEMENT_LAYER_RE,
                 'group_name': 'atomic_elements_layers',
                 'import_func': self._import_atomic_element_layer,
             },
             {
-                'pattern': self._fontlib_pattern,
+                'path_regex': FONTLIB_RE,
                 'group_name': 'fontlib',
                 'import_func': self._import_fontlib,
             },
             {
-                'pattern': self._features_pattern,
+                'path_regex': FEATURES_RE,
                 'group_name': 'features',
                 'import_func': self._import_features,
             },
             {
-                'pattern': self._designspace_pattern,
+                'path_regex': DESIGNSPACE_RE,
                 'group_name': 'designspace',
                 'import_func': self._import_designspace,
             },
         ]
-
-        for item in self._import_mappings:
-            item['pattern_re'] = re.compile(item['pattern'])
 
         self._import_groups = {
             item['group_name']:[] for item in self._import_mappings
@@ -150,7 +143,7 @@ class Command(BaseCommand):
 
             for name in names:
                 for item in self._import_mappings:
-                    match = item['pattern_re'].match(name)
+                    match = item['path_regex'].match(name)
                     if match:
                         self._import_groups[item['group_name']].append((name, match, ))
                         continue

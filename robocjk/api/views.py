@@ -39,11 +39,10 @@ from robocjk.api.serializers import (
 from robocjk.core import GlifData
 # from robocjk.debug import logger
 from robocjk.models import (
-    repo_ssh_url_validator,
     Project, Font, GlyphsComposition,
     CharacterGlyph, DeepComponent, AtomicElement,
 )
-from robocjk.settings import API_AUTH_TOKEN_EXPIRATION
+from robocjk.validators import GitSSHRepositoryURLValidator
 
 
 UserClass = get_user_model()
@@ -68,7 +67,8 @@ def auth_token(request, params, *args, **kwargs):
     if not username or not password:
         return ApiResponseBadRequest(
             'Unable to generate auth token, missing username and/or password parameters.')
-    token = get_auth_token(request, username, password, expiration=API_AUTH_TOKEN_EXPIRATION)
+    token_expiration = {'days':1 } if settings.DEBUG else {'minutes':5}
+    token = get_auth_token(request, username, password, expiration=token_expiration)
     if token is None:
         return ApiResponseBadRequest(
             'Unable to generate auth token, invalid credentials.')
@@ -126,6 +126,7 @@ def project_create(request, params, user, *args, **kwargs):
     name = params.get_str('name')
     repo_url = params.get_str('repo_url')
     try:
+        repo_ssh_url_validator = GitSSHRepositoryURLValidator()
         repo_ssh_url_validator(repo_url)
     except ValidationError as repo_url_error:
         return ApiResponseBadRequest(

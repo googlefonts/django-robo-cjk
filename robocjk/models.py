@@ -3,6 +3,7 @@
 from benedict import benedict
 from benedict.serializers import Base64Serializer
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -43,8 +44,8 @@ from robocjk.managers import (
     DeepComponentManager,
     AtomicElementManager, AtomicElementLayerManager,
 )
-from robocjk.settings import GIT_SSH_REPOSITORY_URL_VALIDATOR
 from robocjk.utils import format_glif
+from robocjk.validators import GitSSHRepositoryURLValidator
 
 import datetime as dt
 import fsutil
@@ -56,8 +57,6 @@ import os
 2. “deep components” contain only references to atomic elements, and do not contain outlines
 3. “character glyphs”, contain only references to deep components, not to atomic elements, and outlines
 """
-
-repo_ssh_url_validator = GIT_SSH_REPOSITORY_URL_VALIDATOR
 
 
 def run_commands(*args):
@@ -80,7 +79,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
     repo_url = models.CharField(
         unique=True,
         max_length=200,
-        validators=[repo_ssh_url_validator],
+        validators=[GitSSHRepositoryURLValidator()],
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
@@ -112,6 +111,8 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             run_commands(
                 'cd {}'.format(path),
                 'git init',
+                'git config --local --add "user.name" "{}"'.format(settings.GIT_USER_NAME),
+                'git config --local --add "user.email" "{}"'.format(settings.GIT_USER_EMAIL),
                 'git remote add origin {}'.format(self.repo_url),
                 'git pull origin master')
         else:

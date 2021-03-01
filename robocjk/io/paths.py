@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from robocjk.settings import GIT_REPOSITORIES_PATH
+from django.conf import settings
 
 import fsutil
 
 
 def get_project_path(instance, name=None):
     return fsutil.join_path(
-        GIT_REPOSITORIES_PATH,
+        settings.GIT_REPOSITORIES_PATH,
         (name or instance.slug))
 
 

@@ -20,7 +20,6 @@ from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, StatusModel,
 )
-from robocjk import settings as rcjk_settings
 
 import time
 
@@ -45,7 +44,8 @@ def api_view(view_func):
         # # logging
         # complete_time = time.time()
         # elapsed_time = (complete_time - start_time)
-        # if elapsed_time >= rcjk_settings.API_RESPONSE_TIME_LIMIT:
+        # maximum_time = 0.8 if settings.DEBUG else 0.4
+        # if elapsed_time >= maximum_time:
         #     logger.debug('API call slow {} ({} seconds): {} - params: {}'.format(
         #         response.status_code, elapsed_time, request.get_full_path(), params))
         # if isinstance(response, ApiResponseError):

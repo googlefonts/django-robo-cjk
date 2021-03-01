@@ -54,6 +54,10 @@ ENV_DIR = os.path.dirname(BASE_DIR)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
+GIT_REPOSITORIES_PATH = env('GIT_REPOSITORIES_PATH')
+GIT_USER_EMAIL = env('GIT_USER_EMAIL')
+GIT_USER_NAME = env('GIT_USER_NAME')
+
 JWT_SECRET = env('JWT_SECRET')
 JWT_ALGORITHM = 'HS256'
 

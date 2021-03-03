@@ -328,7 +328,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-debug.log',
             'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 0,
+            'backupCount': 1,
             'formatter':'verbose',
         },
         'info_file': {
@@ -337,7 +337,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-info.log',
             'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 0,
+            'backupCount': 1,
             'formatter': 'verbose',
         },
         'warning_file': {
@@ -346,7 +346,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-warning.log',
             'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 0,
+            'backupCount': 1,
             'formatter': 'verbose',
         },
         'error_file': {
@@ -355,7 +355,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': ENV_DIR + '/logs/django-error.log',
             'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 0,
+            'backupCount': 1,
             'formatter': 'verbose',
         },
         'mail_admins': {

@@ -25,7 +25,7 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
-from robocjk.executors import BoundedProcessPoolExecutor
+# from robocjk.executors import BoundedProcessPoolExecutor
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
@@ -285,7 +285,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             deep_components_path,
             atomic_elements_path)
 
-        logger.info('Loading font "{}" glifs.'.format(font.name))
+        logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
         per_page = 1000
 
@@ -322,17 +322,21 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         # async solution with native multiprocessing
         # processes = max(1, (multiprocessing.cpu_count() - 1))
-        # with multiprocessing.Pool(processes=processes) as pool:
-        #     result = pool.map (save_glif_to_file_system_async, glifs_list)
-
-        # async solution with semaphore to preserve ram usage
         processes = multiprocessing.cpu_count()
-        with BoundedProcessPoolExecutor(processes) as pool:
+        with multiprocessing.Pool(processes=processes) as pool:
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
                     glifs_list = glifs_page.object_list
-                    for glif_obj in glifs_list:
-                       pool.submit(save_glif_to_file_system_async, glif=glif_obj)
+                    result = pool.map(save_glif_to_file_system_async, glifs_list)
+
+#         # async solution with semaphore to preserve ram usage
+#         processes = multiprocessing.cpu_count()
+#         with BoundedProcessPoolExecutor(processes) as pool:
+#             for glifs_paginator in glifs_paginators:
+#                 for glifs_page in glifs_paginator:
+#                     glifs_list = glifs_page.object_list
+#                     for glif_obj in glifs_list:
+#                        pool.submit(save_glif_to_file_system_async, glif=glif_obj)
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 

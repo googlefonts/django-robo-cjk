@@ -5,6 +5,7 @@ from benedict.serializers import Base64Serializer
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -286,16 +287,28 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Loading font "{}" glifs.'.format(font.name))
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
-        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
-        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
+        per_page = 1000
 
-        glifs_qs_list = [character_glyphs_qs, character_glyphs_layers_qs, deep_components_qs, atomic_elements_qs, atomic_elements_layers_qs]
-        glifs_list = []
-        for glifs_qs in glifs_qs_list:
-            glifs_list += list(glifs_qs)
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
+        character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
+
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
+        character_glyphs_layers_paginator = Paginator(character_glyphs_layers_qs, per_page)
+
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
+        deep_components_paginator = Paginator(deep_components_qs, per_page)
+
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
+        atomic_elements_paginator = Paginator(atomic_elements_qs, per_page)
+
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
+        atomic_elements_layers_paginator = Paginator(atomic_elements_layers_qs, per_page)
+
+        glifs_paginators = [
+            character_glyphs_paginator, character_glyphs_layers_paginator,
+            deep_components_paginator,
+            atomic_elements_paginator, atomic_elements_layers_paginator,
+        ]
 
         logger.info('Saving font "{}" glifs to file system.'.format(font.name))
 
@@ -310,13 +323,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         # async solution with native multiprocessing
         # processes = max(1, (multiprocessing.cpu_count() - 1))
         # with multiprocessing.Pool(processes=processes) as pool:
-        #     result = pool.map(save_glif_to_file_system_async, glifs_list)
+        #     result = pool.map (save_glif_to_file_system_async, glifs_list)
 
         # async solution with semaphore to preserve ram usage
         processes = multiprocessing.cpu_count()
         with BoundedProcessPoolExecutor(processes) as pool:
-            for glif_obj in glifs_list:
-                pool.submit(save_glif_to_file_system_async, glif=glif_obj)
+            for glifs_paginator in glifs_paginators:
+                for glifs_page in glifs_paginator:
+                    glifs_list = glifs_page.object_list
+                    for glif_obj in glifs_list:
+                       pool.submit(save_glif_to_file_system_async, glif=glif_obj)
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 
@@ -337,7 +353,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             elif days and days > 0:
                 updated_after = now - dt.timedelta(days=days)
             elif self.export_started_at and self.export_completed_at:
-                updated_after = max(self.export_started_at, self.export_completed_at)
+                updated_after = self.export_started_at # max(self.export_started_at, self.export_completed_at)
             else:
                 updated_after = now - dt.timedelta(hours=1)
 

@@ -24,6 +24,7 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
+from robocjk.executors import BoundedProcessPoolExecutor
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
@@ -323,8 +324,15 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 #             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
 
         # async solution with native multiprocessing
-        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
-            result = pool.map(save_glif_to_file_system_async, glifs_list)
+        # processes = max(1, (multiprocessing.cpu_count() - 1))
+        # with multiprocessing.Pool(processes=processes) as pool:
+        #     result = pool.map(save_glif_to_file_system_async, glifs_list)
+
+        # async solution with semaphore to preserve ram usage
+        processes = multiprocessing.cpu_count()
+        with BoundedProcessPoolExecutor(processes) as pool:
+            for glif_obj in glifs_list:
+                pool.submit(save_glif_to_file_system_async, glif=glif_obj)
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 

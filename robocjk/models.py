@@ -49,7 +49,9 @@ from robocjk.validators import GitSSHRepositoryURLValidator
 
 import datetime as dt
 import fsutil
+import multiprocessing
 import os
+import time
 
 
 """
@@ -163,6 +165,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             self.name))
 
 
+def save_glif_to_file_system_async(glif):
+    """
+    Worker function for saving glif files to file-system asyncronously.
+    """
+    # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
+    glif.save_to_file_system()
+
+
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
     """
     The Font model.
@@ -235,59 +245,88 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         return get_font_path(self)
 
     def save_to_file_system(self):
-        if not self.available:
-            logger.info('Skipped font "{}" saving because it is not available (maybe there is an import running).'.format(self.name))
+        font = self
+        if not font.available:
+            logger.info('Skipped font "{}" saving because it is not available (maybe there is an import running).'.format(font.name))
             return
-        logger.info('Saving font "{}" to file system...'.format(self.name))
-        path = self.path()
+        logger.info('Saving font "{}" to file system...'.format(font.name))
+        path = font.path()
         fsutil.make_dirs(path)
         # write fontLib.json file
-        logger.info('Saving font "{}" "fontLib.json" to file system...'.format(self.name))
+        logger.info('Saving font "{}" "fontLib.json" to file system...'.format(font.name))
         fontlib_path = fsutil.join_path(path, 'fontLib.json')
-        fontlib_str = benedict(self.fontlib, keypath_separator=None).dump()
+        fontlib_str = benedict(font.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write features.fea file
-        logger.info('Saving font "{}" "features.fea" to file system...'.format(self.name))
+        logger.info('Saving font "{}" "features.fea" to file system...'.format(font.name))
         features_path = fsutil.join_path(path, 'features.fea')
-        fsutil.write_file(features_path, self.features)
+        fsutil.write_file(features_path, font.features)
         # write designspace.json file
-        logger.info('Saving font "{}" "designspace.json" to file system...'.format(self.name))
+        logger.info('Saving font "{}" "designspace.json" to file system...'.format(font.name))
         designspace_path = fsutil.join_path(path, 'designspace.json')
-        designspace_str = benedict(self.designspace, keypath_separator=None).dump()
+        designspace_str = benedict(font.designspace, keypath_separator=None).dump()
         fsutil.write_file(designspace_path, designspace_str)
         # write glyphsComposition.json file
-        logger.info('Saving font "{}" "glyphsComposition.json" to file system...'.format(self.name))
-        glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=self.id)
+        logger.info('Saving font "{}" "glyphsComposition.json" to file system...'.format(font.name))
+        glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=font.id)
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
         glyphs_composition_str = benedict(glyphs_composition_obj.serialize(), keypath_separator=None).dump()
         fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
         # delete existing character-glyphs, deep-components and atomic-elements directories
-        logger.info('Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(self.name))
+        logger.info('Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(font.name))
+
+        character_glyphs_path = get_character_glyphs_path(font)
+        deep_components_path = get_deep_components_path(font)
+        atomic_elements_path = get_atomic_elements_path(font)
         fsutil.remove_dirs(
-            get_character_glyphs_path(self),
-            get_deep_components_path(self),
-            get_atomic_elements_path(self))
-        # load all character-glyphs and their layers
-        character_glyphs_qs = self.character_glyphs.prefetch_related('layers').all()
+            character_glyphs_path,
+            deep_components_path,
+            atomic_elements_path)
+
+        logger.info('Loading font "{}" glif objects in memory...'.format(font.name))
+        t = time.time()
+        # load all character-glyphs
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_list = list(character_glyphs_qs)
+        # load all character-glyphs-layers
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif__font', 'glif__font__project').filter(glif__font=font)
+        character_glyphs_layers_list = list(character_glyphs_layers_qs)
         # load all deep-components
-        deep_components_qs = self.deep_components.all()
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
         deep_components_list = list(deep_components_qs)
-        # load all atomic-elements and their layers
-        atomic_elements_qs = self.atomic_elements.prefetch_related('layers').all()
+        # load all atomic-elements
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
         atomic_elements_list = list(atomic_elements_qs)
-        # write all character-glyphs and relative layers
-        logger.info('Saving font "{}" character-glyphs ({}) to file system...'.format(self.name, len(character_glyphs_list)))
-        for character_glyph in character_glyphs_list:
-            character_glyph.save_to_file_system()
-        # write all deep-components
-        logger.info('Saving font "{}" deep-components ({}) to file system...'.format(self.name, len(deep_components_list)))
-        for deep_component in deep_components_list:
-            deep_component.save_to_file_system()
-        # write all atomic-elements and relative layers
-        logger.info('Saving font "{}" atomic-elements ({}) to file system...'.format(self.name, len(atomic_elements_list)))
-        for atomic_element in atomic_elements_list:
-            atomic_element.save_to_file_system()
+        # load all atomic-elements-layers
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif__font', 'glif__font__project').filter(glif__font=font)
+        atomic_elements_layers_list = list(atomic_elements_layers_qs)
+        # load complete
+        logger.info('Loaded font "{}" glif objects in memory in {} seconds.'.format(font, time.time() - t))
+
+        logger.info('Saving font "{}" ({} character glyphs, {} character glyphs layers, {} deep components, {} atomic elements, {} atomic elements layers) to file system...'.format(
+            font.name,
+            len(character_glyphs_list),
+            len(character_glyphs_layers_list),
+            len(deep_components_list),
+            len(atomic_elements_list),
+            len(atomic_elements_layers_list)
+        ))
+
+        glifs_list = character_glyphs_list + character_glyphs_layers_list + deep_components_list + atomic_elements_list + atomic_elements_layers_list
+
+#         # sync solution
+#         glif_counter = 0
+#         glif_count = len(glifs_list)
+#         for glif_obj in glifs_list:
+#             glif_obj.save_to_file_system()
+#             glif_counter += 1
+#             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
+
+        # async solution with native multiprocessing
+        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+            result = pool.map(save_glif_to_file_system_async, glifs_list)
+
+        logger.info('Saved font "{}" to file system.'.format(font.name))
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):
         """
@@ -760,11 +799,6 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def path(self):
         return get_character_glyph_path(self)
 
-    def save_to_file_system(self):
-        super(CharacterGlyph, self).save_to_file_system()
-        for layer in self.layers.all():
-            layer.save_to_file_system()
-
     def serialize(self, **kwargs):
         return serialize_character_glyph(self, **kwargs)
 
@@ -873,11 +907,6 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     def path(self):
         return get_atomic_element_path(self)
-
-    def save_to_file_system(self):
-        super(AtomicElement, self).save_to_file_system()
-        for layer in self.layers.all():
-            layer.save_to_file_system()
 
     def serialize(self, **kwargs):
         return serialize_atomic_element(self, **kwargs)

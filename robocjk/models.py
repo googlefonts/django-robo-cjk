@@ -284,37 +284,20 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             deep_components_path,
             atomic_elements_path)
 
-        t = time.time()
-
-        logger.info('Calculating font "{}" glifs to save to file system.'.format(font.name))
+        logger.info('Loading font "{}" glifs.'.format(font.name))
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
-        character_glyphs_count = character_glyphs_qs.count()
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif__font', 'glif__font__project').filter(glif__font=font)
-        character_glyphs_layers_count = character_glyphs_layers_qs.count()
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
-        deep_components_count = deep_components_qs.count()
         atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
-        atomic_elements_count = atomic_elements_qs.count()
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif__font', 'glif__font__project').filter(glif__font=font)
-        atomic_elements_layers_count = atomic_elements_layers_qs.count()
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
 
-        logger.info('Saving font "{}" ({} character glyphs, {} character glyphs layers, {} deep components, {} atomic elements, {} atomic elements layers) to file system...'.format(
-            font.name,
-            character_glyphs_count,
-            character_glyphs_layers_count,
-            deep_components_count,
-            atomic_elements_count,
-            atomic_elements_layers_count
-        ))
+        glifs_qs_list = [character_glyphs_qs, character_glyphs_layers_qs, deep_components_qs, atomic_elements_qs, atomic_elements_layers_qs]
+        glifs_list = []
+        for glifs_qs in glifs_qs_list:
+            glifs_list += list(glifs_qs)
 
-        glifs_qs_list = [
-            character_glyphs_qs,
-            character_glyphs_layers_qs,
-            deep_components_qs,
-            atomic_elements_qs,
-            atomic_elements_layers_qs
-        ]
+        logger.info('Saving font "{}" glifs to file system.'.format(font.name))
 
 #         # sync solution
 #         glif_counter = 0
@@ -332,9 +315,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         # async solution with semaphore to preserve ram usage
         processes = multiprocessing.cpu_count()
         with BoundedProcessPoolExecutor(processes) as pool:
-            for glifs_qs in glifs_qs_list:
-                for glif_obj in glifs_qs:
-                    pool.submit(save_glif_to_file_system_async, glif=glif_obj)
+            for glif_obj in glifs_list:
+                pool.submit(save_glif_to_file_system_async, glif=glif_obj)
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 

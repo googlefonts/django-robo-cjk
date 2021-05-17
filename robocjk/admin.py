@@ -99,7 +99,7 @@ class GlifFontFilter(FontFilter):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
 
-    list_select_related = ()
+    list_select_related = ('updated_by', )
     list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'num_designers', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
     # list_filter = ('updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
@@ -124,6 +124,13 @@ class ProjectAdmin(admin.ModelAdmin):
     filter_horizontal = ('designers', )
     save_on_top = True
     show_full_result_count = False
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            num_fonts=Count('fonts', distinct=True),
+            num_designers=Count('designers', distinct=True))
+        return qs
 
 
 @admin.register(FontImport)
@@ -236,8 +243,9 @@ class FontAdmin(admin.ModelAdmin):
             )
         return mark_safe(html)
 
-    list_select_related = ()
-    list_display = ('name', 'uid', 'hashid', 'info', 'progress', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_select_related = ('project', 'updated_by', ) #'info', 'progress',
+    list_display = ('project', 'name', 'uid', 'hashid', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_display_links = ('name', )
     list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
@@ -261,6 +269,18 @@ class FontAdmin(admin.ModelAdmin):
     inlines = [FontImportInline]
     save_on_top = True
     show_full_result_count = False
+
+    # def get_queryset(self, request):
+#         qs = super().get_queryset(request)
+#         qs = qs.annotate(
+#                 num_atomic_elements=Count('atomic_elements', distinct=True)
+#             ).annotate(
+#                 num_deep_components=Count('deep_components', distinct=True)
+#             ).annotate(
+#                 num_character_glyphs=Count('character_glyphs', distinct=True)
+#             )
+#         return qs
+
     formfield_overrides = {
         models.JSONField: {
             'widget': JSONEditorWidget(width='100%', height='350px'),
@@ -271,7 +291,7 @@ class FontAdmin(admin.ModelAdmin):
 @admin.register(GlyphsComposition)
 class GlyphsCompositionAdmin(admin.ModelAdmin):
 
-    list_select_related = ()
+    list_select_related = ('font', 'updated_by', )
     list_display = ('font', 'created_at', 'updated_at', 'updated_by', )
     list_filter = (FontFilter, 'updated_by', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
@@ -313,7 +333,7 @@ class GlifAdmin(admin.ModelAdmin):
     status_display.short_description = _('Status')
     status_display.allow_tags = True
 
-    list_select_related = ()
+    list_select_related = ('updated_by', )
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('name', )
     list_filter = (FontFilter, 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
@@ -338,7 +358,7 @@ class GlifAdmin(admin.ModelAdmin):
 
 class GlifLayerAdmin(admin.ModelAdmin):
 
-    list_select_related = ()
+    list_select_related = ('updated_by', )
     list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('group_name', )
     list_filter = (GlifFontFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )

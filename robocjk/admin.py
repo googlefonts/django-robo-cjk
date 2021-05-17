@@ -169,8 +169,8 @@ class FontAdmin(admin.ModelAdmin):
                '<span style="white-space: nowrap;">Deep Components: <strong>{}</strong></span><br>'\
                '<span style="white-space: nowrap;">Atomic Elements: <strong>{}</strong></span>'.format(
                     font.num_character_glyphs(),
-                    font.num_deep_components(),
-                    font.num_atomic_elements())
+                    font.num_deep_components,
+                    font.num_atomic_elements)
         return mark_safe(html)
 
     def progress(self, font, *args, **kwargs):
@@ -244,7 +244,7 @@ class FontAdmin(admin.ModelAdmin):
         return mark_safe(html)
 
     list_select_related = ('project', 'updated_by', ) #'info', 'progress',
-    list_display = ('project', 'name', 'uid', 'hashid', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_display = ('project', 'name', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
     list_display_links = ('name', )
     list_filter = ('project', 'available', 'updated_by', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
@@ -270,16 +270,13 @@ class FontAdmin(admin.ModelAdmin):
     save_on_top = True
     show_full_result_count = False
 
-    # def get_queryset(self, request):
-#         qs = super().get_queryset(request)
-#         qs = qs.annotate(
-#                 num_atomic_elements=Count('atomic_elements', distinct=True)
-#             ).annotate(
-#                 num_deep_components=Count('deep_components', distinct=True)
-#             ).annotate(
-#                 num_character_glyphs=Count('character_glyphs', distinct=True)
-#             )
-#         return qs
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            # num_character_glyphs=Count('character_glyphs', distinct=True),
+            num_deep_components=Count('deep_components', distinct=True),
+            num_atomic_elements=Count('atomic_elements', distinct=True))
+        return qs
 
     formfield_overrides = {
         models.JSONField: {

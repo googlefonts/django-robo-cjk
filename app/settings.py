@@ -177,6 +177,10 @@ DATABASES = {
         'PASSWORD': env('DATABASE_PASSWORD'),
         'HOST': '',
         'PORT': '',
+#         'CONN_MAX_AGE': 0,
+#         'OPTIONS': {
+#             'connect_timeout': 60,
+#         }
     },
 }
 
@@ -214,7 +218,8 @@ LANGUAGES = (
 )
 MULTILANGUAGE = len(LANGUAGES) > 1
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 USE_I18N = False
 USE_L10N = False
 USE_TZ = False

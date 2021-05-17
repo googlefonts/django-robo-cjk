@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.core.validators import FileExtensionValidator
+from django.db import close_old_connections
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
@@ -325,6 +326,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         processes = multiprocessing.cpu_count()
         with multiprocessing.Pool(processes=processes) as pool:
             for glifs_paginator in glifs_paginators:
+                # close old database connection to prevent OperationalError(s)
+                # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
+                # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
+                close_old_connections()
                 for glifs_page in glifs_paginator:
                     glifs_list = glifs_page.object_list
                     result = pool.map(save_glif_to_file_system_async, glifs_list)

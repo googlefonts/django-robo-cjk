@@ -169,8 +169,8 @@ class FontAdmin(admin.ModelAdmin):
                '<span style="white-space: nowrap;">Deep Components: <strong>{}</strong></span><br>'\
                '<span style="white-space: nowrap;">Atomic Elements: <strong>{}</strong></span>'.format(
                     font.num_character_glyphs(),
-                    font.num_deep_components,
-                    font.num_atomic_elements)
+                    font.num_deep_components(),
+                    font.num_atomic_elements())
         return mark_safe(html)
 
     def progress(self, font, *args, **kwargs):
@@ -272,10 +272,10 @@ class FontAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.annotate(
-            # num_character_glyphs=Count('character_glyphs', distinct=True),
-            num_deep_components=Count('deep_components', distinct=True),
-            num_atomic_elements=Count('atomic_elements', distinct=True))
+#         qs = qs.annotate(
+#             # num_character_glyphs=Count('character_glyphs', distinct=True),
+#             num_deep_components=Count('deep_components', distinct=True),
+#             num_atomic_elements=Count('atomic_elements', distinct=True))
         return qs
 
     formfield_overrides = {

@@ -322,8 +322,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 #             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
 
         # async solution with native multiprocessing
-        # processes = max(1, (multiprocessing.cpu_count() - 1))
-        processes = multiprocessing.cpu_count()
+        processes = max(1, (multiprocessing.cpu_count() - 1))
         with multiprocessing.Pool(processes=processes) as pool:
             for glifs_paginator in glifs_paginators:
                 # close old database connection to prevent OperationalError(s)

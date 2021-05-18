@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.db import close_old_connections
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -28,6 +29,7 @@ class ExportModel(models.Model):
         verbose_name=_('Export completed at'))
 
     def export(self):
+        close_old_connections()
         if self.export_running:
             logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
             now = dt.datetime.now()
@@ -47,6 +49,7 @@ class ExportModel(models.Model):
             self.save_to_file_system()
         except Exception as export_error:
             logger.error('Canceled export for "{}" due to an unexpected export error: {}'.format(self, export_error))
+            close_old_connections()
             self.export_running = False
             self.save()
             return False

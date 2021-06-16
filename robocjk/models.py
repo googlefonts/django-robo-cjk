@@ -299,16 +299,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         def remove_trash_dirs():
             # remove temp trash directories
-            fsutil.remove_dirs(
-                character_glyphs_trash_path,
-                deep_components_trash_path,
-                atomic_elements_trash_path)
+            # fsutil.remove_dirs(
+            #     character_glyphs_trash_path,
+            #     deep_components_trash_path,
+            #     atomic_elements_trash_path)
 
             # remove dirs using system command
-            # run_commands(
-            #     'rm -rf {}'.format(character_glyphs_trash_path),
-            #     'rm -rf {}'.format(deep_components_trash_path),
-            #     'rm -rf {}'.format(atomic_elements_trash_path))
+            run_commands(
+                'rm -rf {}'.format(character_glyphs_trash_path),
+                'rm -rf {}'.format(deep_components_trash_path),
+                'rm -rf {}'.format(atomic_elements_trash_path))
 
             # force wait until dirs have been removed (in case dirs are removed asynchronously)
             while fsutil.exists(character_glyphs_trash_path) or fsutil.exists(deep_components_trash_path) or fsutil.exists(atomic_elements_trash_path):

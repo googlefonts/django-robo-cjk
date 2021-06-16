@@ -143,6 +143,7 @@ class ClientTestCase(TestCase):
         response = self._client.glyphs_composition_update(font_uid=self._font_uid, data={'Glyphs-Composition-Test':'ok'})
         # print(response)
         self.assert_response_ok(response)
+        self.assertEqual(response['data'], { 'Glyphs-Composition-Test':'ok' })
 
     def test_font_glif_list(self):
         response = self._client.glif_list(font_uid=self._font_uid)

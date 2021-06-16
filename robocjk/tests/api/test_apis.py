@@ -202,6 +202,7 @@ class APIsTestCase(TestCase):
         }
         response, data = self.get_response('/api/glyphs-composition/update/', payload=payload)
         self.assert_response_ok(response)
+        self.assertEqual(data, { 'Glyphs-Composition-Test':'ok' })
 
     def test_0045_glif_list(self):
         # print('test_0045_glif_list')

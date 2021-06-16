@@ -31,11 +31,14 @@ from robocjk.io.paths import (
     get_project_path,
     get_font_path,
     get_character_glyphs_path,
+    get_character_glyphs_trash_path,
     get_character_glyph_path,
     get_character_glyph_layer_path,
     get_deep_components_path,
+    get_deep_components_trash_path,
     get_deep_component_path,
     get_atomic_elements_path,
+    get_atomic_elements_trash_path,
     get_atomic_element_path,
     get_atomic_element_layer_path,
     get_proof_path,
@@ -275,20 +278,54 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         glyphs_composition_path = fsutil.join_path(path, 'glyphsComposition.json')
         glyphs_composition_str = benedict(glyphs_composition_obj.serialize(), keypath_separator=None).dump()
         fsutil.write_file(glyphs_composition_path, glyphs_composition_str)
+
         # delete existing character-glyphs, deep-components and atomic-elements directories
         logger.info('Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(font.name))
 
         character_glyphs_path = get_character_glyphs_path(font)
+        character_glyphs_trash_path = get_character_glyphs_trash_path(font)
+
         deep_components_path = get_deep_components_path(font)
+        deep_components_trash_path = get_deep_components_trash_path(font)
+
         atomic_elements_path = get_atomic_elements_path(font)
-        fsutil.remove_dirs(
-            character_glyphs_path,
-            deep_components_path,
-            atomic_elements_path)
+        atomic_elements_trash_path = get_atomic_elements_trash_path(font)
+
+        # rename dirs with temp names before removing them to avoid files being deleted
+        # asynchronously after export completed and consequent files deletion committed to git.
+        fsutil.make_dirs(character_glyphs_path)
+        fsutil.make_dirs(deep_components_path)
+        fsutil.make_dirs(atomic_elements_path)
+
+        def remove_trash_dirs():
+            # remove temp trash directories
+            fsutil.remove_dirs(
+                character_glyphs_trash_path,
+                deep_components_trash_path,
+                atomic_elements_trash_path)
+
+            # remove dirs using system command
+            # run_commands(
+            #     'rm -rf {}'.format(character_glyphs_trash_path),
+            #     'rm -rf {}'.format(deep_components_trash_path),
+            #     'rm -rf {}'.format(atomic_elements_trash_path))
+
+            # force wait until dirs have been removed (in case dirs are removed asynchronously)
+            while fsutil.exists(character_glyphs_trash_path) or fsutil.exists(deep_components_trash_path) or fsutil.exists(atomic_elements_trash_path):
+                time.sleep(1)
+
+        remove_trash_dirs()
+
+        fsutil.rename_dir(character_glyphs_path, fsutil.split_path(character_glyphs_trash_path)[-1])
+        fsutil.rename_dir(deep_components_path, fsutil.split_path(deep_components_trash_path)[-1])
+        fsutil.rename_dir(atomic_elements_path, fsutil.split_path(atomic_elements_trash_path)[-1])
+
+        remove_trash_dirs()
+
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 1000
+        per_page = 500 if settings.DEBUG else 1000
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)

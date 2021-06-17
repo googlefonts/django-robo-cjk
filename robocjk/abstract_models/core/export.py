@@ -33,7 +33,7 @@ class ExportModel(models.Model):
         if self.export_running:
             logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
             now = dt.datetime.now()
-            if (now - self.export_started_at) > dt.timedelta(minutes=30):
+            if (now - self.export_started_at) > dt.timedelta(minutes=90):
                 logger.warning('Abandoned unfinished export for "{}" to allow a new export to start.'.format(self))
                 self.export_running = False
                 self.save()

@@ -57,6 +57,7 @@ import datetime as dt
 import fsutil
 import multiprocessing
 import os
+import subprocess
 import time
 
 
@@ -72,6 +73,8 @@ def run_commands(*args):
     cmd = ' && '.join(cmds)
     logger.info('Run system commands: \n{}'.format(cmd))
     os.system(cmd)
+    # cmd_process = subprocess.Popen(cmd, shell=True)
+    # cmd_process.wait()
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -291,41 +294,41 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         atomic_elements_path = get_atomic_elements_path(font)
         atomic_elements_trash_path = get_atomic_elements_trash_path(font)
 
-        # rename dirs with temp names before removing them to avoid files being deleted
-        # asynchronously after export completed and consequent files deletion committed to git.
+        def remove_trash_dirs():
+            # remove temp trash directories
+            fsutil.remove_dirs(
+                character_glyphs_trash_path,
+                deep_components_trash_path,
+                atomic_elements_trash_path)
+
+            # force wait until dirs have been removed (in case dirs are removed asynchronously)
+            wait = 0
+            while fsutil.exists(character_glyphs_trash_path) or fsutil.exists(deep_components_trash_path) or fsutil.exists(atomic_elements_trash_path):
+                time.sleep(1)
+                wait += 1
+                logger.warning('Waited {} second(s) before dirs have been removed.'.format(wait))
+
+        # remove possible trash dirs from previously failed export
+        remove_trash_dirs()
+
+        # ensure that dirs exist
         fsutil.make_dirs(character_glyphs_path)
         fsutil.make_dirs(deep_components_path)
         fsutil.make_dirs(atomic_elements_path)
 
-        def remove_trash_dirs():
-            # remove temp trash directories
-            # fsutil.remove_dirs(
-            #     character_glyphs_trash_path,
-            #     deep_components_trash_path,
-            #     atomic_elements_trash_path)
-
-            # remove dirs using system command
-            run_commands(
-                'rm -rf {}'.format(character_glyphs_trash_path),
-                'rm -rf {}'.format(deep_components_trash_path),
-                'rm -rf {}'.format(atomic_elements_trash_path))
-
-            # force wait until dirs have been removed (in case dirs are removed asynchronously)
-            while fsutil.exists(character_glyphs_trash_path) or fsutil.exists(deep_components_trash_path) or fsutil.exists(atomic_elements_trash_path):
-                time.sleep(1)
-
-        remove_trash_dirs()
-
+        # rename dirs with temp names before removing them to avoid files being deleted
+        # asynchronously after export completed and consequent files deletion committed to git.
         fsutil.rename_dir(character_glyphs_path, fsutil.split_path(character_glyphs_trash_path)[-1])
         fsutil.rename_dir(deep_components_path, fsutil.split_path(deep_components_trash_path)[-1])
         fsutil.rename_dir(atomic_elements_path, fsutil.split_path(atomic_elements_trash_path)[-1])
 
+        # remove trash dirs
         remove_trash_dirs()
 
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 500 if settings.DEBUG else 1000
+        per_page = 500
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
@@ -358,7 +361,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 #             glif_counter += 1
 #             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
 
-        # async solution with native multiprocessing
+        # async solution with native multiprocessing and paginated queryset
         processes = max(1, (multiprocessing.cpu_count() - 1))
         with multiprocessing.Pool(processes=processes) as pool:
             for glifs_paginator in glifs_paginators:

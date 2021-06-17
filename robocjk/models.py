@@ -816,7 +816,9 @@ class GlifDataModel(models.Model):
                 type(self), self.id, self.name, formatting_error)
             # print(message)
             logger.error(message)
-        fsutil.write_file(self.path(), data_formatted)
+        filepath = self.path()
+        fsutil.write_file(filepath, data_formatted)
+        logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):

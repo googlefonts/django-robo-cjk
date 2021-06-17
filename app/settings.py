@@ -76,11 +76,11 @@ ALLOWED_HOSTS = [
 SITE_ID = 1
 
 ADMINS = [
-    ('Fabio Caccamo', 'fabio.caccamo@gmail.com', )
+    ('Fabio Caccamo', 'fabio.caccamo@black-foundry.com', )
 ]
 
 MANAGERS = [
-    ('Fabio Caccamo', 'fabio.caccamo@gmail.com', )
+    ('Fabio Caccamo', 'fabio.caccamo@black-foundry.com', )
 ]
 
 

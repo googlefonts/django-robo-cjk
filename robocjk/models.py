@@ -328,7 +328,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 500
+        per_page = 500 if settings.DEBUG else 2000
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)

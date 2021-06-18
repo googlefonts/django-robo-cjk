@@ -380,16 +380,15 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 #             glif_counter += 1
 #             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
 
-        # async solution with native multiprocessing and paginated queryset executed on main process
+        # close old database connection to prevent OperationalError(s)
+        # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
+        # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
+        close_old_connections()
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
-        for glifs_page in glifs_paginators:
-            glifs_list = list(glifs_page.object_list)
-            glifs_data = [(glif.data, glif.path(),) for glif in glifs_list]
-            # close old database connection to prevent OperationalError(s)
-            # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
-            # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
-            close_old_connections()
-            with multiprocessing.Pool(processes=num_processes) as pool:
+        with multiprocessing.Pool(processes=num_processes) as pool:
+            for glifs_page in glifs_paginators:
+                glifs_list = list(glifs_page.object_list)
+                glifs_data = [(glif.data, glif.path(),) for glif in glifs_list]
                 result = pool.map(save_glif_to_file_system_async, glifs_data)
 
 #         # async solution with native multiprocessing and paginated queryset

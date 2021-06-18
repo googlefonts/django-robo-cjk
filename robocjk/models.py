@@ -26,7 +26,7 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
-# from robocjk.executors import BoundedProcessPoolExecutor
+from robocjk.executors import BoundedProcessPoolExecutor
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
@@ -347,7 +347,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 500 if settings.DEBUG else 1000
+        per_page = 500 if settings.DEBUG else 2000
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
@@ -372,45 +372,17 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Saving font "{}" glifs to file system.'.format(font.name))
 
-#         # sync solution
-#         glif_counter = 0
-#         glif_count = len(glifs_list)
-#         for glif_obj in glifs_list:
-#             glif_obj.save_to_file_system()
-#             glif_counter += 1
-#             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
-
         # close old database connection to prevent OperationalError(s)
         # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
         # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
         close_old_connections()
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
         with multiprocessing.Pool(processes=num_processes) as pool:
-            for glifs_page in glifs_paginators:
-                glifs_list = list(glifs_page.object_list)
-                glifs_data = [(glif.data, glif.path(),) for glif in glifs_list]
-                result = pool.map(save_glif_to_file_system_async, glifs_data)
-
-#         # async solution with native multiprocessing and paginated queryset
-#         processes = max(1, (multiprocessing.cpu_count() - 1))
-#         with multiprocessing.Pool(processes=processes) as pool:
-#             for glifs_paginator in glifs_paginators:
-#                 # close old database connection to prevent OperationalError(s)
-#                 # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
-#                 # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
-#                 close_old_connections()
-#                 for glifs_page in glifs_paginator:
-#                     glifs_list = glifs_page.object_list
-#                     result = pool.map(save_glif_to_file_system_async, glifs_list)
-
-#         # async solution with semaphore to preserve ram usage
-#         processes = multiprocessing.cpu_count()
-#         with BoundedProcessPoolExecutor(processes) as pool:
-#             for glifs_paginator in glifs_paginators:
-#                 for glifs_page in glifs_paginator:
-#                     glifs_list = glifs_page.object_list
-#                     for glif_obj in glifs_list:
-#                        pool.submit(save_glif_to_file_system_async, glif=glif_obj)
+            for glifs_paginator in glifs_paginators:
+                for glifs_page in glifs_paginator:
+                    glifs_list = list(glifs_page.object_list)
+                    glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
+                    result = pool.map(save_glif_to_file_system_async, glifs_data)
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 

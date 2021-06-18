@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.db import close_old_connections
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -33,7 +34,7 @@ class ExportModel(models.Model):
         if self.export_running:
             logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
             now = dt.datetime.now()
-            if (now - self.export_started_at) > dt.timedelta(minutes=90):
+            if (now - self.export_started_at) > dt.timedelta(minutes=settings.ROBOCJK_EXPORT_CANCEL_TIMEOUT):
                 logger.warning('Abandoned unfinished export for "{}" to allow a new export to start.'.format(self))
                 self.export_running = False
                 self.save()

@@ -20,6 +20,8 @@ import os
 env = environ.Env(
     DEBUG=(bool, False),
     DEBUG_TOOLBAR_SHOW=(bool, False),
+    ROBOCJK_EXPORT_CANCEL_TIMEOUT=(int, 120),
+    ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT=(int, 500),
 )
 env_root = (environ.Path(__file__) - 3) # get root of the project
 env_path = env_root() + '/conf/env_settings'
@@ -60,6 +62,9 @@ GIT_USER_NAME = env('GIT_USER_NAME')
 
 JWT_SECRET = env('JWT_SECRET')
 JWT_ALGORITHM = 'HS256'
+
+ROBOCJK_EXPORT_CANCEL_TIMEOUT = env('ROBOCJK_EXPORT_CANCEL_TIMEOUT')
+ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT = env('ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT')
 
 TEST_API_HOST = env('TEST_API_HOST')
 TEST_API_USERNAME = env('TEST_API_USERNAME')

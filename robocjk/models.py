@@ -350,7 +350,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 500 if settings.DEBUG else 1000
+        per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
@@ -379,15 +379,27 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
         # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
         close_old_connections()
-        num_processes = max(1, (multiprocessing.cpu_count() - 1))
-        with multiprocessing.Pool(processes=num_processes) as pool:
-            for glifs_paginator in glifs_paginators:
-                for glifs_page in glifs_paginator:
-                    glifs_list = list(glifs_page.object_list)
-                    glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
-                    glifs_files_exists = pool.map(save_glif_to_file_system_async, glifs_data)
-                    if not all(glifs_files_exists):
-                        logger.error('Some files were not written to disk.')
+
+        # sync export
+        for glifs_paginator in glifs_paginators:
+            for glifs_page in glifs_paginator:
+                glifs_list = list(glifs_page.object_list)
+                glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
+                glifs_files_exists = map(save_glif_to_file_system_async, glifs_data)
+                if not all(glifs_files_exists):
+                    logger.error('Some files were not written to disk.')
+
+#         # async export
+#         num_processes = max(1, (multiprocessing.cpu_count() - 1))
+#         with multiprocessing.Pool(processes=num_processes) as pool:
+#             for glifs_paginator in glifs_paginators:
+#                 for glifs_page in glifs_paginator:
+#                     glifs_list = list(glifs_page.object_list)
+#                     glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
+#                     glifs_files_exists = pool.map(save_glif_to_file_system_async, glifs_data)
+#                     if not all(glifs_files_exists):
+#                         logger.error('Some files were not written to disk.')
+
         logger.info('Saved font "{}" to file system.'.format(font.name))
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):

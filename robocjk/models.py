@@ -153,13 +153,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         for font in fonts_list:
             font_dirpath = fsutil.get_filename(font.path())
             font_commit_message = font.get_commit_message()
-            font.export()
-            # add all changed files, commit and push to the git repository
-            run_commands(
-                'cd {}'.format(path),
-                'git add ./{}'.format(font_dirpath),
-                'git commit -m "{}"'.format(font_commit_message),
-                'git push origin master')
+            font_export_success = font.export()
+            if font_export_success:
+                # add all changed files, commit and push to the git repository
+                run_commands(
+                    'cd {}'.format(path),
+                    'git add ./{}'.format(font_dirpath),
+                    'git commit -m "{}"'.format(font_commit_message),
+                    'git push origin master')
         run_commands(
             'cd {}'.format(path),
             'git add --all',
@@ -381,7 +382,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         # async solution with native multiprocessing and paginated queryset executed on main process
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
-        for glifs_page in glifs_paginator:
+        for glifs_page in glifs_paginators:
             glifs_list = list(glifs_page.object_list)
             glifs_data = [(glif.data, glif.path(),) for glif in glifs_list]
             # close old database connection to prevent OperationalError(s)

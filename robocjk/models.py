@@ -198,7 +198,10 @@ def save_glif_to_file_system_async(glif_data):
         # print(message)
         logger.error(message)
     fsutil.write_file(filepath, data_formatted)
-    # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
+    file_exists = fsutil.exists(filepath)
+    if not file_exists:
+        logger.error('save_glif_to_file_system_async error file doesn\'t exist at filepath: {}'.format(filepath))
+    return file_exists
 
 
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -347,7 +350,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
-        per_page = 500 if settings.DEBUG else 2000
+        per_page = 500 if settings.DEBUG else 1000
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
@@ -382,8 +385,9 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 for glifs_page in glifs_paginator:
                     glifs_list = list(glifs_page.object_list)
                     glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
-                    result = pool.map(save_glif_to_file_system_async, glifs_data)
-
+                    glifs_files_exists = pool.map(save_glif_to_file_system_async, glifs_data)
+                    if not all(glifs_files_exists):
+                        logger.error('Some files were not written to disk.')
         logger.info('Saved font "{}" to file system.'.format(font.name))
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):

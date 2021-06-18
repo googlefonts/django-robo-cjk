@@ -174,12 +174,30 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             self.name))
 
 
-def save_glif_to_file_system_async(glif):
+# def save_glif_to_file_system_async(glif):
+#     """
+#     Worker function for saving glif files to file-system asyncronously.
+#     """
+#     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
+#     glif.save_to_file_system()
+
+
+def save_glif_to_file_system_async(glif_data):
     """
     Worker function for saving glif files to file-system asyncronously.
     """
     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
-    glif.save_to_file_system()
+    data, filepath = glif_data
+    try:
+        data_formatted = format_glif(data)
+    except Exception as formatting_error:
+        data_formatted = data
+        message = 'save_to_file_system glif xml data formatting error - filepath: {}, error: {}'.format(
+            filepath, formatting_error)
+        # print(message)
+        logger.error(message)
+    fsutil.write_file(filepath, data_formatted)
+    # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -361,17 +379,29 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 #             glif_counter += 1
 #             # logger.debug('Saving font "{}" glif {} of {} to file system: {}'.format(font.name, glif_counter, glif_count, glif_obj.path()))
 
-        # async solution with native multiprocessing and paginated queryset
-        processes = max(1, (multiprocessing.cpu_count() - 1))
-        with multiprocessing.Pool(processes=processes) as pool:
-            for glifs_paginator in glifs_paginators:
-                # close old database connection to prevent OperationalError(s)
-                # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
-                # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
-                close_old_connections()
-                for glifs_page in glifs_paginator:
-                    glifs_list = glifs_page.object_list
-                    result = pool.map(save_glif_to_file_system_async, glifs_list)
+        # async solution with native multiprocessing and paginated queryset executed on main process
+        num_processes = max(1, (multiprocessing.cpu_count() - 1))
+        for glifs_page in glifs_paginator:
+            glifs_list = list(glifs_page.object_list)
+            glifs_data = [(glif.data, glif.path(),) for glif in glifs_list]
+            # close old database connection to prevent OperationalError(s)
+            # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
+            # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
+            close_old_connections()
+            with multiprocessing.Pool(processes=num_processes) as pool:
+                result = pool.map(save_glif_to_file_system_async, glifs_data)
+
+#         # async solution with native multiprocessing and paginated queryset
+#         processes = max(1, (multiprocessing.cpu_count() - 1))
+#         with multiprocessing.Pool(processes=processes) as pool:
+#             for glifs_paginator in glifs_paginators:
+#                 # close old database connection to prevent OperationalError(s)
+#                 # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
+#                 # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
+#                 close_old_connections()
+#                 for glifs_page in glifs_paginator:
+#                     glifs_list = glifs_page.object_list
+#                     result = pool.map(save_glif_to_file_system_async, glifs_list)
 
 #         # async solution with semaphore to preserve ram usage
 #         processes = multiprocessing.cpu_count()
@@ -818,7 +848,7 @@ class GlifDataModel(models.Model):
             logger.error(message)
         filepath = self.path()
         fsutil.write_file(filepath, data_formatted)
-        logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
+        # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):

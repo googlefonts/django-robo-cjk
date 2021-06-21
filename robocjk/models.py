@@ -71,10 +71,32 @@ import time
 def run_commands(*args):
     cmds = args
     cmd = ' && '.join(cmds)
-    logger.info('Run system commands: \n{}'.format(cmd))
-    os.system(cmd)
+    logger.info('Run commands: \n{}'.format(cmd))
+
+    # # Run commands using os.system
+    # os.system(cmd)
+
+    # # Run commands using Popen
     # cmd_process = subprocess.Popen(cmd, shell=True)
     # cmd_process.wait()
+
+    # Run commands using check_output
+    cmd_output = b''
+    try:
+        cmd_output = subprocess.check_output(cmd, shell=True)
+        cmd_output_str = cmd_output.decode('UTF-8')
+        logger.info('Command output: {}'.format(cmd_output_str))
+    except subprocess.CalledProcessError as error:
+        # print("error code", error.returncode, error.output)
+        if error.returncode == 1:
+            # Your branch is up to date with 'origin/master'.
+            # nothing to commit, working tree clean
+            pass
+        else:
+            cmd_output = error.output
+            cmd_output_str = cmd_output.decode('UTF-8')
+            logger.error('Command error: {}'.format(cmd_output_str))
+            raise error
 
 
 class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -175,32 +197,16 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             self.name))
 
 
-# def save_glif_to_file_system_async(glif):
-#     """
-#     Worker function for saving glif files to file-system asyncronously.
-#     """
-#     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
-#     glif.save_to_file_system()
-
-
-def save_glif_to_file_system_async(glif_data):
+def save_glif_to_file_system(glif_data):
     """
-    Worker function for saving glif files to file-system asyncronously.
+    Worker function for saving glif files to file-system.
     """
     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
-    data, filepath = glif_data
-    try:
-        data_formatted = format_glif(data)
-    except Exception as formatting_error:
-        data_formatted = data
-        message = 'save_to_file_system glif xml data formatting error - filepath: {}, error: {}'.format(
-            filepath, formatting_error)
-        # print(message)
-        logger.error(message)
-    fsutil.write_file(filepath, data_formatted)
+    filepath, content = glif_data
+    fsutil.write_file(filepath, content)
     file_exists = fsutil.exists(filepath)
     if not file_exists:
-        logger.error('save_glif_to_file_system_async error file doesn\'t exist at filepath: {}'.format(filepath))
+        logger.error('save_glif_to_file_system error file doesn\'t exist at filepath: {}'.format(filepath))
     return file_exists
 
 
@@ -354,70 +360,60 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
         character_glyphs_count = character_glyphs_qs.count()
-        character_glyphs_paginator = Paginator(character_glyphs_qs, per_page)
 
         character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         character_glyphs_layers_count = character_glyphs_layers_qs.count()
-        character_glyphs_layers_paginator = Paginator(character_glyphs_layers_qs, per_page)
 
         deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
         deep_components_count = deep_components_qs.count()
-        deep_components_paginator = Paginator(deep_components_qs, per_page)
 
         atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
         atomic_elements_count = atomic_elements_qs.count()
-        atomic_elements_paginator = Paginator(atomic_elements_qs, per_page)
 
         atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         atomic_elements_layers_count = atomic_elements_layers_qs.count()
-        atomic_elements_layers_paginator = Paginator(atomic_elements_layers_qs, per_page)
+
+        glifs_count = character_glyphs_count + character_glyphs_layers_count + deep_components_count + atomic_elements_count + atomic_elements_layers_count
+        glifs_progress = 0
+        glifs_progress_perc = 0
+
+        glifs_querysets = [
+            character_glyphs_qs, character_glyphs_layers_qs,
+            deep_components_qs,
+            atomic_elements_qs, atomic_elements_layers_qs,]
 
         glifs_paginators = [
-            character_glyphs_paginator, character_glyphs_layers_paginator,
-            deep_components_paginator,
-            atomic_elements_paginator, atomic_elements_layers_paginator,
-        ]
+            Paginator(glifs_queryset, per_page) for glifs_queryset in glifs_querysets]
 
-        logger.info('Saving font "{}" glifs to file system.'.format(font.name))
+        glifs_paths = []
 
         # close old database connection to prevent OperationalError(s)
         # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
         # https://developpaper.com/solution-to-the-lost-connection-problem-of-django-database/
-        close_old_connections()
+        # close_old_connections()
 
-#         # sync export
-#         for glifs_paginator in glifs_paginators:
-#             for glifs_page in glifs_paginator:
-#                 glifs_list = list(glifs_page.object_list)
-#                 glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
-#                 glifs_files_exists = map(save_glif_to_file_system_async, glifs_data)
-#                 if not all(glifs_files_exists):
-#                     logger.error('Some files were not written to disk.')
-
-        # async export
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
+
+        logger.info('Saving font "{}" - {} glifs to file system using {} process(es).'.format(
+            font.name, glifs_count, num_processes))
+        logger.info(' - {} character glyphs'.format(character_glyphs_count))
+        logger.info(' - {} character glyphs layers'.format(character_glyphs_layers_count))
+        logger.info(' - {} deep components'.format(deep_components_count))
+        logger.info(' - {} atomic elements'.format(atomic_elements_count))
+        logger.info(' - {} atomic elements layers'.format(atomic_elements_layers_count))
+
         with multiprocessing.Pool(processes=num_processes) as pool:
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
-                    glifs_list = list(glifs_page.object_list)
-                    glifs_data = ((glif.data, glif.path(),) for glif in glifs_list)
-                    glifs_files_exists = pool.map(save_glif_to_file_system_async, glifs_data)
+                    glifs_list = glifs_page.object_list
+                    glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
+                    glifs_files_exists = pool.map(save_glif_to_file_system, glifs_data)
                     if not all(glifs_files_exists):
                         logger.error('Some files were not written to disk.')
-
-#         def check_glifs_files_count(glifs_type_str, expected_count, dirpath):
-#             files_count = 0 # TODO: count files in dirpath
-#             # len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
-#             check_message = 'Check {} count: {} in the database / {} files.'.format(
-#                 glifs_type_str, expected_count, files_count)
-#             if files_count == expected_count:
-#                 logger.info(check_message)
-#             else:
-#                 logger.error(check_message)
-#
-#         check_glifs_files_count('[Character Glyphs]', deep_components_count, 'characterGlyph')
-#         check_glifs_files_count('[Deep Components]', deep_components_count, 'deepComponent')
-#         check_glifs_files_count('[Atomic Elements]', atomic_elements_count, 'atomicElement')
+                    glifs_progress += len(glifs_list)
+                    glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
+                    logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
+                            font.name, glifs_progress, glifs_count, glifs_progress_perc))
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 
@@ -726,6 +722,18 @@ class GlifDataModel(models.Model):
         verbose_name=_('Data'),
         help_text=_('(.glif xml data)'))
 
+    @property
+    def data_formatted(self):
+        try:
+            s = format_glif(self.data)
+        except Exception as formatting_error:
+            s = self.data
+            message = 'glif xml data formatting error - pk: {}, error: {}'.format(
+                self.pk, formatting_error)
+            # print(message)
+            logger.error(message)
+        return s
+
     name = models.CharField(
         blank=True,
         max_length=50,
@@ -846,16 +854,9 @@ class GlifDataModel(models.Model):
         self._update_components()
 
     def save_to_file_system(self):
-        try:
-            data_formatted = format_glif(self.data)
-        except Exception as formatting_error:
-            data_formatted = self.data
-            message = 'save_to_file_system glif xml data formatting error - type: {}, id: {}, name: {}, error: {}'.format(
-                type(self), self.id, self.name, formatting_error)
-            # print(message)
-            logger.error(message)
+        # this method is not actually used
         filepath = self.path()
-        fsutil.write_file(filepath, data_formatted)
+        fsutil.write_file(filepath, self.data_formatted)
         # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 

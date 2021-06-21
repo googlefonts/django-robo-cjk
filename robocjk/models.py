@@ -435,7 +435,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             elif days and days > 0:
                 updated_after = now - dt.timedelta(days=days)
             elif self.export_started_at and self.export_completed_at:
-                updated_after = self.export_started_at # max(self.export_started_at, self.export_completed_at)
+                updated_after = max(self.export_started_at, self.export_completed_at)
             else:
                 updated_after = now - dt.timedelta(hours=1)
 
@@ -910,7 +910,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
         app_label = 'robocjk'
         ordering = ['group_name']
         unique_together = [
-            ['glif_id', 'group_name', 'name'],
+            ['glif', 'group_name', 'name'],
         ]
         verbose_name = _('Character Glyph Layer')
         verbose_name_plural = _('Character Glyph Layers')
@@ -1019,7 +1019,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
         app_label = 'robocjk'
         ordering = ['group_name']
         unique_together = [
-            ['glif_id', 'group_name'],
+            ['glif', 'group_name', 'name'],
         ]
         verbose_name = _('Atomic Element Layer')
         verbose_name_plural = _('Atomic Element Layers')

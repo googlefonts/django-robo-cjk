@@ -51,11 +51,6 @@ def get_character_glyphs_path(font):
         get_font_path(font), 'characterGlyph')
 
 
-def get_character_glyphs_trash_path(font):
-    return fsutil.join_path(
-        get_font_path(font), 'characterGlyph-trash')
-
-
 def get_character_glyph_path(instance, name=None):
     return fsutil.join_path(
         get_character_glyphs_path(instance.font),
@@ -74,11 +69,6 @@ def get_deep_components_path(font):
         get_font_path(font), 'deepComponent')
 
 
-def get_deep_components_trash_path(font):
-    return fsutil.join_path(
-        get_font_path(font), 'deepComponent-trash')
-
-
 def get_deep_component_path(instance, name=None):
     return fsutil.join_path(
         get_deep_components_path(instance.font),
@@ -88,11 +78,6 @@ def get_deep_component_path(instance, name=None):
 def get_atomic_elements_path(font):
     return fsutil.join_path(
         get_font_path(font), 'atomicElement')
-
-
-def get_atomic_elements_trash_path(font):
-    return fsutil.join_path(
-        get_font_path(font), 'atomicElement-trash')
 
 
 def get_atomic_element_path(instance, name=None):

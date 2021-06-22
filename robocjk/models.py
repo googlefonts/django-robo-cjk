@@ -26,19 +26,15 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
-from robocjk.executors import BoundedProcessPoolExecutor
 from robocjk.io.paths import (
     get_project_path,
     get_font_path,
     get_character_glyphs_path,
-    get_character_glyphs_trash_path,
     get_character_glyph_path,
     get_character_glyph_layer_path,
     get_deep_components_path,
-    get_deep_components_trash_path,
     get_deep_component_path,
     get_atomic_elements_path,
-    get_atomic_elements_trash_path,
     get_atomic_element_path,
     get_atomic_element_layer_path,
     get_proof_path,
@@ -56,16 +52,9 @@ from robocjk.validators import GitSSHRepositoryURLValidator
 import datetime as dt
 import fsutil
 import multiprocessing
-import os
+# import os
 import subprocess
-import time
-
-
-"""
-1. “atomic elements” contain only outlines, not references to other atomic elements
-2. “deep components” contain only references to atomic elements, and do not contain outlines
-3. “character glyphs”, contain only references to deep components, not to atomic elements, and outlines
-"""
+# import time
 
 
 def run_commands(*args):
@@ -203,10 +192,13 @@ def save_glif_to_file_system(glif_data):
     """
     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
     filepath, content = glif_data
+    file_exists = fsutil.exists(filepath)
+    if file_exists:
+        logger.error('save_glif_to_file_system error - file already exists at filepath: {}'.format(filepath))
     fsutil.write_file(filepath, content)
     file_exists = fsutil.exists(filepath)
     if not file_exists:
-        logger.error('save_glif_to_file_system error file doesn\'t exist at filepath: {}'.format(filepath))
+        logger.error('save_glif_to_file_system error - file doesn\'t exist at filepath: {}'.format(filepath))
     return file_exists
 
 
@@ -314,63 +306,37 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info('Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(font.name))
 
         character_glyphs_path = get_character_glyphs_path(font)
-        character_glyphs_trash_path = get_character_glyphs_trash_path(font)
-
         deep_components_path = get_deep_components_path(font)
-        deep_components_trash_path = get_deep_components_trash_path(font)
-
         atomic_elements_path = get_atomic_elements_path(font)
-        atomic_elements_trash_path = get_atomic_elements_trash_path(font)
 
-        def remove_trash_dirs():
-            # remove temp trash directories
-            fsutil.remove_dirs(
-                character_glyphs_trash_path,
-                deep_components_trash_path,
-                atomic_elements_trash_path)
+        # remove existing glifs dirs
+        fsutil.remove_dirs(
+            character_glyphs_path,
+            deep_components_path,
+            atomic_elements_path)
 
-            # force wait until dirs have been removed (in case dirs are removed asynchronously)
-            wait = 0
-            while fsutil.exists(character_glyphs_trash_path) or fsutil.exists(deep_components_trash_path) or fsutil.exists(atomic_elements_trash_path):
-                time.sleep(1)
-                wait += 1
-                logger.warning('Waited {} second(s) before dirs have been removed.'.format(wait))
-
-        # remove possible trash dirs from previously failed export
-        remove_trash_dirs()
-
-        # ensure that dirs exist
+        # create empty dirs to avoid errors in fonts that have not all entities
         fsutil.make_dirs(character_glyphs_path)
         fsutil.make_dirs(deep_components_path)
         fsutil.make_dirs(atomic_elements_path)
-
-        # rename dirs with temp names before removing them to avoid files being deleted
-        # asynchronously after export completed and consequent files deletion committed to git.
-        fsutil.rename_dir(character_glyphs_path, fsutil.split_path(character_glyphs_trash_path)[-1])
-        fsutil.rename_dir(deep_components_path, fsutil.split_path(deep_components_trash_path)[-1])
-        fsutil.rename_dir(atomic_elements_path, fsutil.split_path(atomic_elements_trash_path)[-1])
-
-        # remove trash dirs
-        remove_trash_dirs()
-
 
         logger.info('Loading font "{}" glifs from database.'.format(font.name))
 
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font) # select_related('font', 'font__project')
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
         character_glyphs_count = character_glyphs_qs.count()
 
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font).order_by('pk')
         character_glyphs_layers_count = character_glyphs_layers_qs.count()
 
-        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
         deep_components_count = deep_components_qs.count()
 
-        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
         atomic_elements_count = atomic_elements_qs.count()
 
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font).order_by('pk')
         atomic_elements_layers_count = atomic_elements_layers_qs.count()
 
         glifs_count = character_glyphs_count + character_glyphs_layers_count + deep_components_count + atomic_elements_count + atomic_elements_layers_count
@@ -384,8 +350,6 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         glifs_paginators = [
             Paginator(glifs_queryset, per_page) for glifs_queryset in glifs_querysets]
-
-        glifs_paths = []
 
         # close old database connection to prevent OperationalError(s)
         # (2006, ‘MySQL server has gone away’) and (2013, ‘Lost connection to MySQL server during query’)
@@ -402,7 +366,13 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info(' - {} atomic elements'.format(atomic_elements_count))
         logger.info(' - {} atomic elements layers'.format(atomic_elements_layers_count))
 
+        for glifs_paginator in glifs_paginators:
+            for glifs_page in glifs_paginator:
+                glifs_list = glifs_page.object_list
+                glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
+
         with multiprocessing.Pool(processes=num_processes) as pool:
+
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
                     glifs_list = glifs_page.object_list
@@ -414,6 +384,44 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
                     logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
                             font.name, glifs_progress, glifs_count, glifs_progress_perc))
+
+#             for glifs_queryset in glifs_querysets:
+#                 glifs_list = list(glifs_queryset)
+#                 glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
+#                 glifs_files_exists = pool.map(save_glif_to_file_system, glifs_data)
+#                 if not all(glifs_files_exists):
+#                     logger.error('Some files were not written to disk.')
+#                 glifs_progress += len(glifs_list)
+#                 glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
+#                 logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
+#                         font.name, glifs_progress, glifs_count, glifs_progress_perc))
+
+        logger.info('Verifying font "{}" - expected {} glifs exists on file system.'.format(
+            font.name, glifs_count))
+
+        glif_files_pattern = '*.glif'
+
+        def count_glif_files(dirpath):
+            return len(fsutil.search_files(dirpath, glif_files_pattern))
+
+        def count_glif_layers_files(dirpath):
+            layers_dirs = fsutil.list_dirs(dirpath)
+            layers_dirs_glif_files = [fsutil.search_files(layer_dir, glif_files_pattern) for layer_dir in layers_dirs]
+            return sum([len(layer_dir_files) for layer_dir_files in layers_dirs_glif_files])
+
+        def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
+            message = 'Expected {}, found {} {} .glif files on file-system.'.format(
+                glifs_expected_count, glifs_count, glifs_type_name)
+            if glifs_count == glifs_expected_count:
+                logger.info(message)
+            else:
+                logger.error(message)
+
+        verify_glifs_count(count_glif_files(character_glyphs_path), character_glyphs_count, 'character glyphs')
+        verify_glifs_count(count_glif_layers_files(character_glyphs_path), character_glyphs_layers_count, 'character glyphs layers')
+        verify_glifs_count(count_glif_files(deep_components_path), deep_components_count, 'deep components')
+        verify_glifs_count(count_glif_files(atomic_elements_path), atomic_elements_count, 'atomic elements')
+        verify_glifs_count(count_glif_layers_files(atomic_elements_path), atomic_elements_layers_count, 'atomic elements layers')
 
         logger.info('Saved font "{}" to file system.'.format(font.name))
 

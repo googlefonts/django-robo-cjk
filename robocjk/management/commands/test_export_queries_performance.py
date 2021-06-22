@@ -23,11 +23,11 @@ class Command(BaseCommand):
 
         font_id = 3
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font_id=font_id)
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font_id=font_id)
-        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font_id=font_id)
-        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font_id=font_id)
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font_id=font_id)
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font_id=font_id).order_by()
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font_id=font_id).order_by()
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font_id=font_id).order_by()
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font_id=font_id).order_by()
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font_id=font_id).order_by()
 
         all_glifs_qs = [
             character_glyphs_qs, character_glyphs_layers_qs,

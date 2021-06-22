@@ -193,12 +193,10 @@ def save_glif_to_file_system(glif_data):
     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
     filepath, content = glif_data
     file_exists = fsutil.exists(filepath)
-    if file_exists:
-        logger.error('save_glif_to_file_system error - file already exists at filepath: {}'.format(filepath))
+    assert not file_exists
     fsutil.write_file(filepath, content)
     file_exists = fsutil.exists(filepath)
-    if not file_exists:
-        logger.error('save_glif_to_file_system error - file doesn\'t exist at filepath: {}'.format(filepath))
+    assert file_exists
     return file_exists
 
 
@@ -366,35 +364,18 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info(' - {} atomic elements'.format(atomic_elements_count))
         logger.info(' - {} atomic elements layers'.format(atomic_elements_layers_count))
 
-        for glifs_paginator in glifs_paginators:
-            for glifs_page in glifs_paginator:
-                glifs_list = glifs_page.object_list
-                glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
-
         with multiprocessing.Pool(processes=num_processes) as pool:
-
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
                     glifs_list = glifs_page.object_list
                     glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
-                    glifs_files_exists = pool.map(save_glif_to_file_system, glifs_data)
-                    if not all(glifs_files_exists):
+                    glifs_files_written_on_disk = pool.map(save_glif_to_file_system, glifs_data)
+                    if not all(glifs_files_written_on_disk):
                         logger.error('Some files were not written to disk.')
                     glifs_progress += len(glifs_list)
                     glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
                     logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
                             font.name, glifs_progress, glifs_count, glifs_progress_perc))
-
-#             for glifs_queryset in glifs_querysets:
-#                 glifs_list = list(glifs_queryset)
-#                 glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
-#                 glifs_files_exists = pool.map(save_glif_to_file_system, glifs_data)
-#                 if not all(glifs_files_exists):
-#                     logger.error('Some files were not written to disk.')
-#                 glifs_progress += len(glifs_list)
-#                 glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
-#                 logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
-#                         font.name, glifs_progress, glifs_count, glifs_progress_perc))
 
         logger.info('Verifying font "{}" - expected {} glifs exists on file system.'.format(
             font.name, glifs_count))

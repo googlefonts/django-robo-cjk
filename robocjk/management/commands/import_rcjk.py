@@ -198,11 +198,18 @@ class Command(BaseCommand):
     def _import_glif(self, cls, font, content, match):
         data = GlifData()
         data.parse_string(content)
-        # parse status from mark color during import
-        status_color = data.status_color
+        # parse status during import
         status = None
-        if status_color:
-            status = StatusModel.STATUS_MARK_COLORS.get(status_color, None)
+        if status is None:
+            # new status format 2021/09: public.markColor -> robocjk.status
+            status_index = data.status
+            if status_index is not None:
+                status = StatusModel.STATUS_CHOICES[status_index][0]
+        if status is None:
+            # old status format fallback
+            status_color = data.status_color
+            if status_color:
+                status = StatusModel.STATUS_MARK_COLORS.get(status_color, None)
         if status is None:
             status = StatusModel.STATUS_WIP
         obj, created = cls.objects.update_or_create(

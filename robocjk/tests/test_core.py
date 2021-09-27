@@ -114,7 +114,16 @@ class CoreTestCase(TestCase):
         self.assertFalse(glif_data.has_variation_axis)
         self.assertTrue(glif_data.is_empty)
 
-    def test_glyph_data_marker_color(self):
+    def test_glyph_data_status_color(self):
+        # old format
         glif_data = self._read_glif_data('test_core_data/characterGlyph/cieuc.glif')
         # print(glif_data.status_color)
+        self.assertEqual(glif_data.status, None)
         self.assertEqual(glif_data.status_color, '1,0,0,1')
+
+    def test_glyph_data_status(self):
+        # new format: public.markColor -> robocjk.status
+        glif_data = self._read_glif_data('test_core_data/characterGlyph/uni20086.glif')
+        # print(glif_data.status)
+        self.assertEqual(glif_data.status, 4)
+        self.assertEqual(glif_data.status_color, None)

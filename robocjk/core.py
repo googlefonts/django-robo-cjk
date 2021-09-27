@@ -26,6 +26,7 @@ class GlifData(object):
     _has_variation_axis = False
     _is_empty = True
     _status_color = None
+    _status = None
     _ok = False
 
     def __init__(self, *args):
@@ -86,7 +87,10 @@ class GlifData(object):
             # parse lib as plist
             self._lib = benedict.from_plist(lib_str, keypath_separator='/')
 
-            # parse status color
+            # parse status color new format 2021/09: public.markColor -> robocjk.status
+            self._status = self._lib.get('robocjk.status', None)
+
+            # parse status color old format fallback
             self._status_color = self._lib.get('public.markColor', None)
 
             # parse components list
@@ -163,6 +167,10 @@ class GlifData(object):
     @property
     def is_empty(self):
         return self._is_empty
+
+    @property
+    def status(self):
+        return self._status
 
     @property
     def status_color(self):

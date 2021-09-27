@@ -84,7 +84,7 @@ def run_commands(*args):
         else:
             cmd_output = error.output
             cmd_output_str = cmd_output.decode('UTF-8')
-            logger.error('Command error: {}'.format(cmd_output_str))
+            logger.exception('Command error: {}'.format(cmd_output_str))
             raise error
 
 
@@ -371,7 +371,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     glifs_data = ((glif.path(), glif.data_formatted,) for glif in glifs_list)
                     glifs_files_written_on_disk = pool.map(save_glif_to_file_system, glifs_data)
                     if not all(glifs_files_written_on_disk):
-                        logger.error('Some files were not written to disk.')
+                        logger.exception('Some files were not written to disk.')
                     glifs_progress += len(glifs_list)
                     glifs_progress_perc = int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
                     logger.info('Saving font "{}" - {} of {} total glifs - {}%'.format(
@@ -393,10 +393,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
             message = 'Expected {}, found {} {} .glif files on file-system.'.format(
                 glifs_expected_count, glifs_count, glifs_type_name)
-            if glifs_count == glifs_expected_count:
-                logger.info(message)
-            else:
+            if glifs_count < glifs_expected_count:
                 logger.error(message)
+            elif glifs_count == glifs_expected_count:
+                logger.info(message)
+            elif glifs_count > glifs_expected_count:
+                if (abs(glifs_expected_count - glifs_count) < 10):
+                    message = '{} (some files have been created in the meanwhile)'.format(message)
+                    logger.info(message)
+                else:
+                    logger.error(message)
 
         verify_glifs_count(count_glif_files(character_glyphs_path), character_glyphs_count, 'character glyphs')
         verify_glifs_count(count_glif_layers_files(character_glyphs_path), character_glyphs_layers_count, 'character glyphs layers')
@@ -720,7 +726,7 @@ class GlifDataModel(models.Model):
             message = 'glif xml data formatting error - pk: {}, error: {}'.format(
                 self.pk, formatting_error)
             # print(message)
-            logger.error(message)
+            logger.exception(message)
         return s
 
     name = models.CharField(
@@ -798,7 +804,7 @@ class GlifDataModel(models.Model):
             if gliph_data.ok:
                 return gliph_data
             else:
-                logger.error('{} - parse data error: {}'.format(
+                logger.exception('{} - parse data error: {}'.format(
                     self.__class__, gliph_data.error))
                 return None
         return None

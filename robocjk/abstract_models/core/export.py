@@ -49,7 +49,7 @@ class ExportModel(models.Model):
         try:
             self.save_to_file_system()
         except Exception as export_error:
-            logger.error('Canceled export for "{}" due to an unexpected "{}": {}'.format(
+            logger.exception('Canceled export for "{}" due to an unexpected "{}": {}'.format(
                 self, type(export_error).__name__, export_error))
             close_old_connections()
             self.export_running = False

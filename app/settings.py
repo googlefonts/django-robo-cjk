@@ -32,6 +32,7 @@ environ.Env.read_env(env_path)
 # sentry - https://sentry.io/black-foundry/
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import ignore_logger as sentry_sdk_ignore_logger
 
 sentry_sdk.init(
     dsn=env('SENTRY_DSN'),
@@ -41,7 +42,7 @@ sentry_sdk.init(
     # django.contrib.auth) you may enable sending PII data.
     send_default_pii=True
 )
-
+sentry_sdk_ignore_logger('django.security.DisallowedHost')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -316,6 +317,7 @@ CACHES = {
 # logger = logging.getLogger('app')
 # logger.debug('message')
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -351,6 +353,9 @@ LOGGING = {
             'backupCount': 1,
             'formatter': 'verbose',
         },
+        'null': {
+            'class': 'logging.NullHandler',
+        },
         'warning_file': {
             'level': 'WARNING',
             # 'class': 'logging.FileHandler',
@@ -381,6 +386,10 @@ LOGGING = {
             'handlers': ['console', 'warning_file', 'error_file', 'mail_admins'],
             'level': 'WARNING',
             'propagate': True,
+        },
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False,
         },
         'app': {
             'handlers': ['console', 'warning_file', 'error_file'],

@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
 from robocjk.models import (
+    StatusModel,
     CharacterGlyph,
     CharacterGlyphLayer,
     DeepComponent,
@@ -29,12 +30,7 @@ class Command(BaseCommand):
             for glif_obj in glif_objs:
                 glif_data = glif_obj._parse_data()
                 if glif_data:
-                    status_color = glif_data.status_color
-                    status = None
-                    if status_color:
-                        status = glif_model.STATUS_MARK_COLORS.get(status_color, None)
-                    if status is None:
-                        status = glif_model.STATUS_WIP
+                    status = StatusModel.get_status_from_data(data=glif_data)
                     if status != glif_obj.status:
                         glif_model.objects.filter(pk=glif_obj.pk).update(status=status)
                 glif_objs_counter += 1

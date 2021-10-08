@@ -15,6 +15,10 @@ class ExportModel(models.Model):
     class Meta:
         abstract = True
 
+    export_enabled = models.BooleanField(
+        default=True,
+        verbose_name=_('Export enabled'))
+
     export_running = models.BooleanField(
         default=False,
         verbose_name=_('Export running'))
@@ -31,6 +35,11 @@ class ExportModel(models.Model):
 
     def export(self):
         close_old_connections()
+
+        if not self.export_enabled:
+            logger.info('Skipped export for "{}" because it is disabled.'.format(self))
+            return False
+
         if self.export_running:
             logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
             now = dt.datetime.now()

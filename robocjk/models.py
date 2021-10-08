@@ -876,7 +876,7 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     class Meta:
         app_label = 'robocjk'
-        ordering = ['name']
+        # ordering = ['name']
         unique_together = [
             ['font', 'name'],
         ]
@@ -920,7 +920,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     class Meta:
         app_label = 'robocjk'
-        ordering = ['group_name']
+        # ordering = ['group_name']
         unique_together = [
             ['glif', 'group_name', 'name'],
         ]
@@ -955,7 +955,7 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     class Meta:
         app_label = 'robocjk'
-        ordering = ['name']
+        # ordering = ['name']
         unique_together = [
             ['font', 'name'],
         ]
@@ -999,7 +999,7 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     class Meta:
         app_label = 'robocjk'
-        ordering = ['name']
+        # ordering = ['name']
         unique_together = [
             ['font', 'name'],
         ]
@@ -1029,7 +1029,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     class Meta:
         app_label = 'robocjk'
-        ordering = ['group_name']
+        # ordering = ['group_name']
         unique_together = [
             ['glif', 'group_name', 'name'],
         ]

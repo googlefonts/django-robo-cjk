@@ -100,8 +100,9 @@ class GlifFontFilter(FontFilter):
 class ProjectAdmin(admin.ModelAdmin):
 
     list_select_related = ('updated_by', )
-    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'num_designers', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'num_designers', 'created_at', 'updated_at', 'updated_by', 'export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
     # list_filter = ('updated_by', )
+    list_filter = ('export_enabled', 'export_running', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (
@@ -244,9 +245,9 @@ class FontAdmin(admin.ModelAdmin):
         return mark_safe(html)
 
     list_select_related = ('project', 'updated_by', ) #'info', 'progress',
-    list_display = ('project', 'name', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_display = ('project', 'name', 'uid', 'hashid', 'info', 'available', 'created_at', 'updated_at', 'updated_by', 'export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
     list_display_links = ('name', )
-    list_filter = ('project', 'available', 'updated_by', )
+    list_filter = ('project', 'available', 'updated_by', 'export_enabled', 'export_running', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
     readonly_fields = ('id', 'hashid', 'uid', 'slug', 'available', 'created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
     fieldsets = (

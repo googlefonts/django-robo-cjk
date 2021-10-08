@@ -15,7 +15,7 @@ from robocjk.api.http import (
     ApiResponseInternalServerError, ApiResponseServiceUnavailableError,
 )
 from robocjk.core import GlifData
-# from robocjk.debug import logger
+from robocjk.debug import logger
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
     AtomicElement, AtomicElementLayer, Proof, StatusModel,
@@ -41,17 +41,19 @@ def api_view(view_func):
             if settings.DEBUG:
                 raise internal_error
             response = ApiResponseInternalServerError(str(internal_error))
-        # # logging
-        # complete_time = time.time()
-        # elapsed_time = (complete_time - start_time)
-        # maximum_time = 0.8 if settings.DEBUG else 0.4
-        # if elapsed_time >= maximum_time:
-        #     logger.debug('API call slow {} ({} seconds): {} - params: {}'.format(
-        #         response.status_code, elapsed_time, request.get_full_path(), params))
-        # if isinstance(response, ApiResponseError):
-        #     logger.error('API call error {} - {} - ({} seconds): {} - params: {}'.format(
-        #         response.status_code, response.error, elapsed_time, request.get_full_path(), params))
-        # # end logging
+#         complete_time = time.time()
+#         elapsed_time = (complete_time - start_time)
+#         logger.debug('API call - status {} ({} seconds): {} - params: {}'.format(
+#             response.status_code, elapsed_time, request.get_full_path(), params))
+#
+#.        maximum_time = 0.8 if settings.DEBUG else 0.4
+#         if elapsed_time >= maximum_time:
+#             logger.debug('API call slow {} ({} seconds): {} - params: {}'.format(
+#                 response.status_code, elapsed_time, request.get_full_path(), params))
+#         if isinstance(response, ApiResponseError):
+#             logger.error('API call error {} - {} - ({} seconds): {} - params: {}'.format(
+#                 response.status_code, response.error, elapsed_time, request.get_full_path(), params))
+        # end logging
         return response
     wrapper.__dict__['api_view'] = True
     return wrapper

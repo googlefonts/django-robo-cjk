@@ -71,7 +71,6 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    - [Atomic Element **Get**](#atomic-element-get)
    - [Atomic Element **Create**](#atomic-element-create)
    - [Atomic Element **Update**](#atomic-element-update)
-   - [Atomic Element **Update Status**](#atomic-element-update-status)
    - [Atomic Element **Delete**](#atomic-element-delete)
    - [Atomic Element **Lock**](#atomic-element-lock)
    - [Atomic Element **Unlock**](#atomic-element-unlock)
@@ -87,7 +86,6 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    - [Deep Component **Get**](#deep-component-get)
    - [Deep Component **Create**](#deep-component-create)
    - [Deep Component **Update**](#deep-component-update)
-   - [Deep Component **Update Status**](#deep-component-update-status)
    - [Deep Component **Delete**](#deep-component-delete)
    - [Deep Component **Lock**](#deep-component-lock)
    - [Deep Component **Unlock**](#deep-component-unlock)
@@ -97,7 +95,6 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    - [Character Glyph **Get**](#character-glyph-get)
    - [Character Glyph **Create**](#character-glyph-create)
    - [Character Glyph **Update**](#character-glyph-update)
-   - [Character Glyph **Update Status**](#character-glyph-update-status)
    - [Character Glyph **Delete**](#character-glyph-delete)
    - [Character Glyph **Lock**](#character-glyph-lock)
    - [Character Glyph **Unlock**](#character-glyph-unlock)
@@ -850,29 +847,6 @@ See [Atomic Element Get](#atomic-element-get) response.
 
 ---
 
-#### Atomic Element Update Status
-
-##### Request
-
-| URL | Method |
-|---|---|
-| `/api/atomic-element/update-status/` | `POST` |
-
-| Param | Type | Required |
-|---|---|---|
-| `font_uid` | `string` | yes |
-| `id` | `int` | yes `*` |
-| `name` | `string` | yes `*` |
-| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
-
-- `*` Atomic Element can be retrieved by `id` or by `name`, **only one of these parameters is required**.
-
-##### Response
-
-See [Atomic Element Get](#atomic-element-get) response.
-
----
-
 #### Atomic Element Delete
 
 ##### Request
@@ -1258,29 +1232,6 @@ See [Deep Component Get](#deep-component-get) response.
 
 ---
 
-#### Deep Component Update Status
-
-##### Request
-
-| URL | Method |
-|---|---|
-| `/api/deep-component/update-status/` | `POST` |
-
-| Param | Type | Required |
-|---|---|---|
-| `font_uid` | `string` | yes |
-| `id` | `int` | yes `*` |
-| `name` | `string` | yes `*` |
-| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
-
-- `*` Deep Component can be retrieved by `id` or by `name`, **only one of these parameters is required**.
-
-##### Response
-
-See [Deep Component Get](#deep-component-get) response.
-
----
-
 #### Deep Component Delete
 
 ##### Request
@@ -1533,29 +1484,6 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 - `*` Character Glyph can be retrieved by `id` or by `name`, **only one of these parameters is required**.
 - `data` is the Character Glyph `.glif` file data in `xml` format.
-
-##### Response
-
-See [Character Glyph Get](#character-glyph-get) response.
-
----
-
-#### Character Glyph Update Status
-
-##### Request
-
-| URL | Method |
-|---|---|
-| `/api/character-glyph/update-status/` | `POST` |
-
-| Param | Type | Required |
-|---|---|---|
-| `font_uid` | `string` | yes |
-| `id` | `int` | yes `*` |
-| `name` | `string` | yes `*` |
-| `status` | `string` (`wip` or `checking-1` or `checking-2` or `checking-3` or `done`) | yes |
-
-- `*` Character Glyph can be retrieved by `id` or by `name`, **only one of these parameters is required**.
 
 ##### Response
 

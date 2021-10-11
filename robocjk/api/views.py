@@ -417,16 +417,6 @@ def atomic_element_update(request, params, user, atomic_element, data, glif, *ar
 @api_view
 @require_user
 @require_atomic_element(check_locked=True)
-@require_status
-def atomic_element_update_status(request, params, user, atomic_element, status, *args, **kwargs):
-    atomic_element.status = status
-    atomic_element.save_by(user)
-    return ApiResponseSuccess(atomic_element.serialize(**_get_glif_serialization_options(params)))
-
-
-@api_view
-@require_user
-@require_atomic_element(check_locked=True)
 def atomic_element_delete(request, params, user, atomic_element, *args, **kwargs):
     return ApiResponseSuccess(atomic_element.delete())
 
@@ -554,16 +544,6 @@ def deep_component_update(request, params, user, deep_component, data, glif, *ar
 @api_view
 @require_user
 @require_deep_component(check_locked=True)
-@require_status
-def deep_component_update_status(request, params, user, deep_component, status, *args, **kwargs):
-    deep_component.status = status
-    deep_component.save_by(user)
-    return ApiResponseSuccess(deep_component.serialize(**_get_glif_serialization_options(params)))
-
-
-@api_view
-@require_user
-@require_deep_component(check_locked=True)
 def deep_component_delete(request, params, user, deep_component, *args, **kwargs):
     return ApiResponseSuccess(deep_component.delete())
 
@@ -627,16 +607,6 @@ def character_glyph_create(request, params, user, font, data, glif, *args, **kwa
 @require_data
 def character_glyph_update(request, params, user, character_glyph, data, glif, *args, **kwargs):
     character_glyph.data = data
-    character_glyph.save_by(user)
-    return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
-
-
-@api_view
-@require_user
-@require_character_glyph(check_locked=True)
-@require_status
-def character_glyph_update_status(request, params, user, character_glyph, status, *args, **kwargs):
-    character_glyph.status = status
     character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize(**_get_glif_serialization_options(params)))
 

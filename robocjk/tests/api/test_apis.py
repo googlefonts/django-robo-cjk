@@ -98,9 +98,14 @@ class APIsTestCase(TestCase):
             'headers': headers,
             'files': files,
             'verify': False,
+            'timeout': 10,
         }
         response = requests.post(absolute_url, **options)
+        # try:
         data = response.json()
+        # except Exception as e:
+        #    print(e)
+            # print(response.text)
         return (response, data['data'], )
 
     def test_0000_auth_token(self):
@@ -344,45 +349,6 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/atomic-element/update/', payload=payload)
         self.assert_response_bad_request(response)
 
-    def test_0100_atomic_element_update_status_missing_status(self):
-        # print('test_0100_atomic_element_update_status_missing_status')
-        payload = {
-           'font_uid': self.get_font_uid(),
-           'name': 'hengpietest',
-        }
-        response, data = self.get_response('/api/atomic-element/update-status/', payload=payload)
-        self.assert_response_bad_request(response)
-
-    def test_0105_atomic_element_update_status_invalid_status(self):
-        # print('test_0105_atomic_element_update_status_invalid_status')
-        payload = {
-           'font_uid': self.get_font_uid(),
-           'name': 'hengpietest',
-           'status': 'ok',
-        }
-        response, data = self.get_response('/api/atomic-element/update-status/', payload=payload)
-        self.assert_response_bad_request(response)
-
-    def test_0110_atomic_element_update_status(self):
-        # print('test_0110_atomic_element_update_status')
-        payload = {
-           'font_uid': self.get_font_uid(),
-           'name': 'hengpietest',
-           'status': 'done',
-        }
-        response, data = self.get_response('/api/atomic-element/update-status/', payload=payload)
-        self.assert_response_ok(response)
-
-    def test_0115_atomic_element_update_status_revert(self):
-        # print('test_0115_atomic_element_update_status_revert')
-        payload = {
-           'font_uid': self.get_font_uid(),
-           'name': 'hengpietest',
-           'status': 'wip',
-        }
-        response, data = self.get_response('/api/atomic-element/update-status/', payload=payload)
-        self.assert_response_ok(response)
-
     def test_0120_atomic_element_unlock(self):
         # print('test_0120_atomic_element_unlock')
         payload = {
@@ -586,26 +552,6 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/deep-component/update/', payload=payload)
         self.assert_response_ok(response)
 
-    def test_0225_deep_component_update_status(self):
-        # print('test_0225_deep_component_update_status')
-        payload = {
-            'font_uid': self.get_font_uid(),
-            'name': 'DC_200CA_01test',
-            'status': 'done',
-        }
-        response, data = self.get_response('/api/deep-component/update-status/', payload=payload)
-        self.assert_response_ok(response)
-
-    def test_0230_deep_component_update_status_revert(self):
-        # print('test_0230_deep_component_update_status_revert')
-        payload = {
-            'font_uid': self.get_font_uid(),
-            'name': 'DC_200CA_01test',
-            'status': 'wip',
-        }
-        response, data = self.get_response('/api/deep-component/update-status/', payload=payload)
-        self.assert_response_ok(response)
-
     def test_0235_deep_component_unlock(self):
         # print('test_0235_deep_component_unlock')
         payload = {
@@ -694,26 +640,6 @@ class APIsTestCase(TestCase):
             'data': self.get_glif_data('character_glyph_update/uni200CA.glif'),
         }
         response, data = self.get_response('/api/character-glyph/update/', payload=payload)
-        self.assert_response_ok(response)
-
-    def test_0285_character_glyph_update_status(self):
-        # print('test_0285_character_glyph_update_status')
-        payload = {
-            'font_uid': self.get_font_uid(),
-            'name': 'uni200CAtest',
-            'status': 'checking-1',
-        }
-        response, data = self.get_response('/api/character-glyph/update-status/', payload=payload)
-        self.assert_response_ok(response)
-
-    def test_0285_character_glyph_update_status_revert(self):
-        # print('test_0285_character_glyph_update_status_revert')
-        payload = {
-            'font_uid': self.get_font_uid(),
-            'name': 'uni200CAtest',
-            'status': 'wip',
-        }
-        response, data = self.get_response('/api/character-glyph/update-status/', payload=payload)
         self.assert_response_ok(response)
 
     def test_0290_character_glyph_unlock(self):

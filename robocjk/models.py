@@ -192,12 +192,13 @@ def save_glif_to_file_system(glif_data):
     """
     # logger.debug('Saving glif "{}" to file system: {}'.format(glif, glif.path()))
     filepath, content = glif_data
-    file_exists = fsutil.exists(filepath)
-    assert not file_exists
+    # file_exists = fsutil.exists(filepath)
+    # assert not file_exists
     fsutil.write_file(filepath, content)
-    file_exists = fsutil.exists(filepath)
-    assert file_exists
-    return file_exists
+    # file_exists = fsutil.exists(filepath)
+    # assert file_exists
+    # return file_exists
+    return True
 
 
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):

@@ -112,7 +112,7 @@ class ProjectAdmin(admin.ModelAdmin):
         }),
         ('Export', {
             'classes': ('collapse',),
-            'fields': ('export_running', 'export_started_at', 'export_completed_at', )
+            'fields': ('export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
         }),
         ('Metadata', {
             'classes': ('collapse',),

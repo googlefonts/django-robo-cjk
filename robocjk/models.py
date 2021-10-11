@@ -11,6 +11,7 @@ from django.db import close_old_connections
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
+from django.utils.functional import cached_property
 
 from robocjk.abstract_models import (
     UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel,
@@ -146,12 +147,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                 'git pull origin master',
                 'git clean -df')
         # save all project fonts to file.system
-        fonts_qs = self.fonts.prefetch_related(
-            'character_glyphs',
-            'character_glyphs__layers',
-            'deep_components',
-            'atomic_elements',
-            'atomic_elements__layers').filter()
+        fonts_qs = self.fonts.all()
         fonts_list = list(fonts_qs)
         # cleanup - remove .rcjk projects that don't belong anymore to a project font
         fonts_rcjk_pulled_dirs = set(fsutil.search_dirs(path, '*.rcjk'))
@@ -323,19 +319,19 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font)
         character_glyphs_count = character_glyphs_qs.count()
 
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font).order_by('pk')
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         character_glyphs_layers_count = character_glyphs_layers_qs.count()
 
-        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
         deep_components_count = deep_components_qs.count()
 
-        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font).order_by('pk')
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
         atomic_elements_count = atomic_elements_qs.count()
 
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font).order_by('pk')
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         atomic_elements_layers_count = atomic_elements_layers_qs.count()
 
         glifs_count = character_glyphs_count + character_glyphs_layers_count + deep_components_count + atomic_elements_count + atomic_elements_layers_count
@@ -760,6 +756,10 @@ class GlifDataModel(models.Model):
         verbose_name=_('Filename'),
         help_text=_('(.glif xml output filename, autodetected from xml data)'))
 
+#     @cached_property
+#     def filepath(self):
+#         return self.path()
+
     unicode_hex = models.CharField(
         db_index=True,
         max_length=10,
@@ -860,6 +860,9 @@ class GlifDataModel(models.Model):
                 comp_set.clear()
             return True
         return False
+
+    def path(self):
+        raise NotImplementedError
 
     def save(self, *args, **kwargs):
         self._apply_data(self._parse_data())

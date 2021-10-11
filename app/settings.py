@@ -344,6 +344,15 @@ LOGGING = {
             'backupCount': 1,
             'formatter':'verbose',
         },
+        'debug_queries_file': {
+            'level': 'DEBUG',
+            # 'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ENV_DIR + '/logs/django-mysql-debug.log',
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 1,
+            'formatter':'verbose',
+        },
         'info_file': {
             'level': 'INFO',
             # 'class': 'logging.FileHandler',
@@ -387,6 +396,10 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': True,
         },
+#         'django.db.backends': {
+#             'handlers': ['debug_queries_file'],
+#             'level': 'DEBUG',
+#         },
         'django.security.DisallowedHost': {
             'handlers': ['null'],
             'propagate': False,

@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from django_json_widget.widgets import JSONEditorWidget
+from rangefilter.filters import DateTimeRangeFilter
 
 from robocjk.models import (
     Project,
@@ -334,7 +335,7 @@ class GlifAdmin(admin.ModelAdmin):
     list_select_related = ('updated_by', )
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('name', )
-    list_filter = (FontFilter, 'status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
+    list_filter = (FontFilter, 'status', ('status_changed_at', DateTimeRangeFilter, ), 'previous_status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     # raw_id_fields = ('font', )
@@ -343,10 +344,18 @@ class GlifAdmin(admin.ModelAdmin):
         return (
             ('Metadata', {
                 'classes': ('collapse', ),
-                'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'is_locked', 'locked_by', 'locked_at', )
+                'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', ),
+            }),
+            ('Locking', {
+                'classes': ('collapse', ),
+                'fields': ('is_locked', 'locked_by', 'locked_at', ),
+            }),
+            ('Status', {
+                'classes': ('collapse', ),
+                'fields': ('status', 'status_changed_at', 'previous_status', ),
             }),
             (None, {
-                'fields': ('font', 'status', 'data', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
+                'fields': ('font', 'data', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', ),
             }),
         )
 

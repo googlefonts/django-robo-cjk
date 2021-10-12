@@ -689,12 +689,26 @@ class StatusModel(models.Model):
         '0,0.5,1,1': STATUS_CHECKING_3,
         '0,1,0.5,1': STATUS_DONE,
     }
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default=STATUS_WIP,
         db_index=True,
         verbose_name=_('Status'))
+
+    status_changed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=None,
+        verbose_name=_('Status changed at'))
+
+    previous_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_WIP,
+        db_index=True,
+        verbose_name=_('Previous status'))
 
     @property
     def status_color(self):
@@ -704,16 +718,16 @@ class StatusModel(models.Model):
     @staticmethod
     def get_status_from_data(data):
         status = None
+        # new status format 2021/09: public.markColor -> robocjk.status
+        status_index = data.status
+        if status_index is not None:
+            status = StatusModel.STATUS_CHOICES[status_index][0]
+        # old status format fallback
         if status is None:
-            # new status format 2021/09: public.markColor -> robocjk.status
-            status_index = data.status
-            if status_index is not None:
-                status = StatusModel.STATUS_CHOICES[status_index][0]
-        if status is None:
-            # old status format fallback
             status_color = data.status_color
             if status_color:
                 status = StatusModel.STATUS_MARK_COLORS.get(status_color, None)
+        # default status fallback
         if status is None:
             status = StatusModel.STATUS_WIP
         return status
@@ -755,10 +769,6 @@ class GlifDataModel(models.Model):
         blank=True,
         verbose_name=_('Filename'),
         help_text=_('(.glif xml output filename, autodetected from xml data)'))
-
-#     @cached_property
-#     def filepath(self):
-#         return self.path()
 
     unicode_hex = models.CharField(
         db_index=True,
@@ -839,6 +849,11 @@ class GlifDataModel(models.Model):
             self.has_components = data.has_components
             self.has_unicode = data.has_unicode
             self.components = data.components_str
+            data_status = StatusModel.get_status_from_data(data)
+            if self.status != data_status:
+                self.previous_status = self.status
+                self.status = data_status
+                self.status_changed_at = dt.datetime.now()
 
     def _update_components(self):
         if self.has_components:

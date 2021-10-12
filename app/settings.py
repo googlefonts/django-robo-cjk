@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'django_json_widget',
+    'rangefilter',
     'robocjk',
     'django_cleanup.apps.CleanupConfig',
 ]

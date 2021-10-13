@@ -849,11 +849,17 @@ class GlifDataModel(models.Model):
             self.has_components = data.has_components
             self.has_unicode = data.has_unicode
             self.components = data.components_str
-            data_status = StatusModel.get_status_from_data(data)
-            if self.status != data_status:
-                self.previous_status = self.status
-                self.status = data_status
-                self.status_changed_at = dt.datetime.now()
+
+            try:
+                data_status = StatusModel.get_status_from_data(data)
+                # print(data_status)
+                if self.status != data_status:
+                    self.previous_status = self.status
+                    self.status = data_status
+                    self.status_changed_at = dt.datetime.now()
+            except AttributeError:
+                # it has not status attr, so it's a CharacterGlyphLayer or an AtomicElementLayer
+                pass
 
     def _update_components(self):
         if self.has_components:

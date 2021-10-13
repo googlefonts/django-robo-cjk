@@ -87,7 +87,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(list(self._character_glyph.layers.all()), [self._character_glyph_layer])
         self.assertEqual(list(self._character_glyph.deep_components.all()), [self._deep_component])
         self.assertTrue(isinstance(self._character_glyph.serialize(), dict))
-        self.assertEqual(self._character_glyph.status, StatusModel.STATUS_WIP)
+        self.assertEqual(self._character_glyph.status, StatusModel.STATUS_CHECKING_1)
 
     def test_character_glyph_layer(self):
         self.assertEqual(self._character_glyph_layer.glif, self._character_glyph)

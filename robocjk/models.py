@@ -710,6 +710,16 @@ class StatusModel(models.Model):
         db_index=True,
         verbose_name=_('Previous status'))
 
+    status_downgraded = models.BooleanField(
+        default=False,
+        verbose_name=_('Status downgraded'))
+
+    status_downgraded_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=None,
+        verbose_name=_('Status downgraded at'))
+
     @property
     def status_color(self):
         return StatusModel.STATUS_COLORS.get(
@@ -825,10 +835,14 @@ class GlifDataModel(models.Model):
         verbose_name=_('Has Unicode'),
         help_text=_('(autodetected from xml data)'))
 
-    def _parse_data(self):
-        if self.data:
+    def __init__(self, *args, **kwargs):
+        super(GlifDataModel, self).__init__(*args, **kwargs)
+        self._init_data = self.data
+
+    def _parse_data(self, data_str):
+        if data_str:
             gliph_data = GlifData()
-            gliph_data.parse_string(self.data)
+            gliph_data.parse_string(data_str)
             if gliph_data.ok:
                 return gliph_data
             else:
@@ -838,28 +852,71 @@ class GlifDataModel(models.Model):
         return None
 
     def _apply_data(self, data):
-        if data:
-            self.data = data.xml_string
-            self.name = data.name
-            self.filename = data.filename
-            self.unicode_hex = data.unicode_hex
-            self.is_empty = data.is_empty
-            self.has_variation_axis = data.has_variation_axis
-            self.has_outlines = data.has_outlines
-            self.has_components = data.has_components
-            self.has_unicode = data.has_unicode
-            self.components = data.components_str
+        if not data:
+            return
+        self.data = data.xml_string
+        self.name = data.name
+        self.filename = data.filename
+        self.unicode_hex = data.unicode_hex
+        self.is_empty = data.is_empty
+        self.has_variation_axis = data.has_variation_axis
+        self.has_outlines = data.has_outlines
+        self.has_components = data.has_components
+        self.has_unicode = data.has_unicode
+        self.components = data.components_str
 
-            try:
-                data_status = StatusModel.get_status_from_data(data)
-                # print(data_status)
-                if self.status != data_status:
-                    self.previous_status = self.status
-                    self.status = data_status
-                    self.status_changed_at = dt.datetime.now()
-            except AttributeError:
-                # it has not status attr, so it's a CharacterGlyphLayer or an AtomicElementLayer
-                pass
+    def _update_status(self, glif_data):
+
+        if not glif_data:
+            # invalid glif data
+            return
+
+        if not isinstance(self, (CharacterGlyph, DeepComponent, AtomicElement, )):
+            # glif layers have not status
+            return
+
+        if self.data == self._init_data:
+            # data is not changed
+            return
+
+        if self._init_data:
+            # it is not the first save/creation
+            init_glif_data = self._parse_data(self._init_data)
+            if init_glif_data:
+                any_status_downgraded = False
+                any_status_upgraded = False
+                if init_glif_data.status_with_variations != glif_data.status_with_variations:
+                    # some status changed, check if any status has been downgraded
+                    for key, val in glif_data.status_with_variations.items():
+                        init_val = init_glif_data.status_with_variations.get(key, 0) or 0
+                        # flag as downgraded when any source changes from done to a previous status
+                        if init_val == 4 and val < init_val:
+                            any_status_downgraded = True
+                        # deflag downgraded when any source changes to done
+                        if init_val < 4 and val == 4:
+                            any_status_upgraded = True
+
+                if any_status_downgraded:
+                    if not self.status_downgraded:
+                        self.status_downgraded = True
+                        self.status_downgraded_at = dt.datetime.now()
+                elif any_status_upgraded:
+                    if self.status_downgraded:
+                        self.status_downgraded = False
+                        self.status_downgraded_at = None
+
+        # update init data to avoid to re-compute downgrade/upgrade
+        # on possibile subsequent save calls on the same instance
+        self._init_data = self.data
+
+        # this should be removed because not useful for detecting variations downgrades
+        data_status = StatusModel.get_status_from_data(glif_data)
+        # print(data_status)
+        if self.status != data_status:
+            self.previous_status = self.status
+            self.status = data_status
+            self.status_changed_at = dt.datetime.now()
+
 
     def _update_components(self):
         if self.has_components:
@@ -886,7 +943,9 @@ class GlifDataModel(models.Model):
         raise NotImplementedError
 
     def save(self, *args, **kwargs):
-        self._apply_data(self._parse_data())
+        glif_data = self._parse_data(self.data)
+        self._apply_data(glif_data)
+        self._update_status(glif_data)
         super(GlifDataModel, self).save(*args, **kwargs)
         self._update_components()
 

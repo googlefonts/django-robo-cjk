@@ -127,3 +127,17 @@ class CoreTestCase(TestCase):
         # print(glif_data.status)
         self.assertEqual(glif_data.status, 4)
         self.assertEqual(glif_data.status_color, None)
+
+    def test_glyph_data_status_with_variations(self):
+        # new format: public.markColor -> robocjk.status
+        glif_data = self._read_glif_data('test_core_data/characterGlyph/uni27C_28.glif')
+        # print(glif_data.status)
+        self.assertEqual(glif_data.status, 4)
+        self.assertEqual(glif_data.status_color, None)
+        expected_value = {
+            'status': 4,
+            'status_os_bold': 1,
+            'status_os_reg': 1,
+            'status_wght': 4,
+        }
+        self.assertEqual(glif_data.status_with_variations, expected_value)

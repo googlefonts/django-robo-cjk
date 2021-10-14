@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 # from django.conf import settings
 
 from benedict import benedict
@@ -27,6 +29,7 @@ class GlifData(object):
     _is_empty = True
     _status_color = None
     _status = None
+    _status_dict = None # status and variation status
     _ok = False
 
     def __init__(self, *args):
@@ -89,6 +92,16 @@ class GlifData(object):
 
             # parse status color new format 2021/09: public.markColor -> robocjk.status
             self._status = self._lib.get('robocjk.status', None)
+            self._status_with_variations = {
+                'status': self._status,
+            }
+
+            var_status = {}
+            var_glyphs = self._lib.get('robocjk.variationGlyphs', [])
+            if var_glyphs:
+                for item in var_glyphs:
+                    item_key = 'status_{}'.format(item.get('sourceName', ''))
+                    self._status_with_variations[item_key] = item.get('status', '')
 
             # parse status color old format fallback
             self._status_color = self._lib.get('public.markColor', None)
@@ -169,12 +182,17 @@ class GlifData(object):
         return self._is_empty
 
     @property
+    def status_color(self):
+        # old property, deprecated
+        return self._status_color
+
+    @property
     def status(self):
         return self._status
 
     @property
-    def status_color(self):
-        return self._status_color
+    def status_with_variations(self):
+        return self._status_with_variations.copy()
 
     @property
     def ok(self):

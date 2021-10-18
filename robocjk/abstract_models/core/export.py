@@ -33,22 +33,41 @@ class ExportModel(models.Model):
         blank=True,
         verbose_name=_('Export completed at'))
 
+    @property
+    def export_cancelable(self):
+        if self.export_running:
+            now = dt.datetime.now()
+            if (now - self.export_started_at) > dt.timedelta(minutes=settings.ROBOCJK_EXPORT_CANCEL_TIMEOUT):
+                return True
+        return False
+
+    @property
+    def exportable(self):
+        return not self.export_running or self.export_cancelable
+
     def export(self):
         close_old_connections()
+
+        cls = self.__class__
+        exporting_objects = list(cls.objects.all())
+        exportable_objects = [obj.exportable for obj in exporting_objects]
+        if not all(exportable_objects):
+            logger.warning('Skipped export to avoid overlapping with other exports that are still running.')
+            return False
 
         if not self.export_enabled:
             logger.info('Skipped export for "{}" because it is disabled.'.format(self))
             return False
 
         if self.export_running:
-            logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
-            now = dt.datetime.now()
-            if (now - self.export_started_at) > dt.timedelta(minutes=settings.ROBOCJK_EXPORT_CANCEL_TIMEOUT):
-                logger.warning('Abandoned unfinished export for "{}" to allow a new export to start.'.format(self))
+            if self.export_cancelable:
+                logger.warning('Canceled unfinished export for "{}" to allow a new export to start.'.format(self))
                 self.export_running = False
                 self.save()
             else:
+                logger.info('Skipped export for "{}" because there is an export process that is still running.'.format(self))
                 return False
+
         # save export started status in the database
         logger.info('Started export for "{}".'.format(self))
         self.export_running = True

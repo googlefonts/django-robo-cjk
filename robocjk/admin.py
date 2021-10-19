@@ -101,7 +101,7 @@ class GlifFontFilter(FontFilter):
 class ProjectAdmin(admin.ModelAdmin):
 
     list_select_related = ('updated_by', )
-    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'num_fonts', 'num_designers', 'created_at', 'updated_at', 'updated_by', 'export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
+    list_display = ('name', 'slug', 'uid', 'hashid', 'repo_url', 'repo_branch', 'num_fonts', 'num_designers', 'created_at', 'updated_at', 'updated_by', 'export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
     # list_filter = ('updated_by', )
     list_filter = ('export_enabled', 'export_running', )
     search_fields = ('name', 'slug', 'uid', 'hashid', )
@@ -120,7 +120,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
         }),
         (None, {
-            'fields': ('name', 'slug', 'repo_url', 'designers', )
+            'fields': ('name', 'slug', 'repo_url', 'repo_branch', 'designers', )
         }),
     )
     filter_horizontal = ('designers', )

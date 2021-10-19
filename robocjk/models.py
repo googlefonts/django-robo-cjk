@@ -83,6 +83,9 @@ def run_commands(*args):
             # nothing to commit, working tree clean
             pass
         else:
+            if error.returncode == 128:
+                logger.error(
+                    'Command returned non-zero exit status 128, check if git repo and branch are correct.')
             cmd_output = error.output
             cmd_output_str = cmd_output.decode('UTF-8')
             logger.exception('Command error: {}'.format(cmd_output_str))
@@ -106,6 +109,11 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         verbose_name=_('Repo URL'),
         help_text=_('The .git repository SSH URL, eg. git@github.com:username/repository.git'))
 
+    repo_branch = models.CharField(
+        max_length=50,
+        default='master',
+        verbose_name=_('Repo branch'))
+
     designers = models.ManyToManyField(
         get_user_model(),
         blank=True,
@@ -128,6 +136,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         path = self.path()
         fsutil.make_dirs(path)
         repo_path = fsutil.join_path(path, '.git')
+        repo_branch = self.repo_branch or 'master'
         if not fsutil.exists(repo_path):
             # repository doesn't exist, initialize it
             logger.info('Repository for project "{}" doesn\'t exist, initialize it.'.format(self.name))
@@ -137,14 +146,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                 'git config --local --add "user.name" "{}"'.format(settings.GIT_USER_NAME),
                 'git config --local --add "user.email" "{}"'.format(settings.GIT_USER_EMAIL),
                 'git remote add origin {}'.format(self.repo_url),
-                'git pull origin master')
+                'git pull origin {}'.format(repo_branch))
         else:
             # repository exist
             logger.info('Repository for project "{}" already exist, update it.'.format(self.name))
             run_commands(
                 'cd {}'.format(path),
-                'git reset --hard origin/master',
-                'git pull origin master',
+                'git reset --hard origin/{}'.format(repo_branch),
+                'git pull origin {}'.format(repo_branch),
                 'git clean -df')
         # save all project fonts to file.system
         fonts_qs = self.fonts.all()
@@ -170,12 +179,12 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                     'cd {}'.format(path),
                     'git add ./{}'.format(font_dirpath),
                     'git commit -m "{}"'.format(font_commit_message),
-                    'git push origin master')
+                    'git push origin {}'.format(repo_branch))
         run_commands(
             'cd {}'.format(path),
             'git add --all',
             'git commit -m "{}"'.format('Updated project.'),
-            'git push origin master')
+            'git push origin {}'.format(repo_branch))
 
     def serialize(self, **kwargs):
         return serialize_project(self, **kwargs)

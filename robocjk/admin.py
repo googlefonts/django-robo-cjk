@@ -113,7 +113,7 @@ class ProjectAdmin(admin.ModelAdmin):
         }),
         ('Export', {
             'classes': ('collapse',),
-            'fields': ('export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
+            'fields': ('export_enabled', 'export_running', 'export_started_at', 'export_completed_at', 'last_full_export_at', )
         }),
         ('Metadata', {
             'classes': ('collapse',),
@@ -258,7 +258,7 @@ class FontAdmin(admin.ModelAdmin):
         }),
         ('Export', {
             'classes': ('collapse',),
-            'fields': ('export_running', 'export_started_at', 'export_completed_at', )
+            'fields': ('export_enabled', 'export_running', 'export_started_at', 'export_completed_at', 'last_full_export_at', )
         }),
         ('Metadata', {
           'classes': ('collapse',),

@@ -33,6 +33,22 @@ class ExportModel(models.Model):
         blank=True,
         verbose_name=_('Export completed at'))
 
+    last_full_export_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last full export at'))
+
+    @property
+    def full_export_needed(self):
+        last_full_export_at = self.last_full_export_at # dt.datetime(year=2021, month=10, day=18, hour=23, minute=59)
+        if not last_full_export_at:
+            return True
+        now = dt.datetime.now()
+        last_full_export_older_than_24h = ((now - last_full_export_at) >= dt.timedelta(hours=24))
+        last_full_export_day_before = ((now.day - last_full_export_at.day) > 0)
+        # print(last_full_export_older_than_24h, last_full_export_day_before)
+        return last_full_export_older_than_24h or last_full_export_day_before
+
     @property
     def export_cancelable(self):
         if self.export_running:
@@ -45,10 +61,11 @@ class ExportModel(models.Model):
     def exportable(self):
         return not self.export_running or self.export_cancelable
 
-    def export(self):
+    def export(self, full=None):
         close_old_connections()
 
         cls = self.__class__
+
         exporting_objects = list(cls.objects.all())
         exportable_objects = [obj.exportable for obj in exporting_objects]
         if not all(exportable_objects):
@@ -73,9 +90,13 @@ class ExportModel(models.Model):
         self.export_running = True
         self.export_started_at = dt.datetime.now()
         self.save()
+
+        # if full argument is provided use it, otherwise use the automated check
+        full_export = full if isinstance(full, bool) else self.full_export_needed
+
         # save model to the file system
         try:
-            self.save_to_file_system()
+            self.save_to_file_system(full_export)
         except Exception as export_error:
             logger.exception('Canceled export for "{}" due to an unexpected "{}": {}'.format(
                 self, type(export_error).__name__, export_error))
@@ -83,13 +104,18 @@ class ExportModel(models.Model):
             self.export_running = False
             self.save()
             return False
+
         # save export completed status in the database
         self.export_running = False
         self.export_completed_at = dt.datetime.now()
+
+        if full_export:
+            self.last_full_export_at = dt.datetime.now()
+
         self.save()
         logger.info('Completed export for "{}".'.format(self))
         return True
 
-    def save_to_file_system(self):
+    def save_to_file_system(self, full_export):
         raise NotImplementedError()
 

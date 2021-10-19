@@ -22,6 +22,7 @@ class Command(BaseCommand):
         projects_qs = Project.objects.prefetch_related('fonts')
         for project in projects_qs:
             project.export()
+            # project.export(full=True)
 
         logger.info('Complete export - pid: {} - thread: {}'.format(
             os.getpid(), threading.current_thread().name))

@@ -123,7 +123,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
     def path(self):
         return get_project_path(self)
 
-    def save_to_file_system(self):
+    def save_to_file_system(self, full_export=False):
         logger.info('Saving project "{}" to file system...'.format(self.name))
         path = self.path()
         fsutil.make_dirs(path)
@@ -156,11 +156,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         logger.info('Deleting project "{}" old fonts from file system...\n{}'.format(self.name, fonts_rcjk_deleted_dirs))
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
-        logger.info('Saving project "{}" fonts to file system...\n{}'.format(self.name, [font.name for font in fonts_list]))
+        logger.info('Saving project "{}" fonts ({} export) to file system...\n{}'.format(
+            self.name, 'full' if full_export else 'incremental', [font.name for font in fonts_list]))
+
         for font in fonts_list:
             font_dirpath = fsutil.get_filename(font.path())
             font_commit_message = font.get_commit_message()
-            font_export_success = font.export()
+            font_full_export = True if full_export else None
+            font_export_success = font.export(full=font_full_export)
             if font_export_success:
                 # add all changed files, commit and push to the git repository
                 run_commands(
@@ -268,7 +271,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
     def path(self):
         return get_font_path(self)
 
-    def save_to_file_system(self):
+    def save_to_file_system(self, full_export=False):
         font = self
         if not font.available:
             logger.info('Skipped font "{}" saving because it is not available (maybe there is an import running).'.format(font.name))
@@ -304,11 +307,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         deep_components_path = get_deep_components_path(font)
         atomic_elements_path = get_atomic_elements_path(font)
 
-        # remove existing glifs dirs
-        fsutil.remove_dirs(
-            character_glyphs_path,
-            deep_components_path,
-            atomic_elements_path)
+        if full_export:
+            # remove existing glifs dirs
+            fsutil.remove_dirs(
+                character_glyphs_path,
+                deep_components_path,
+                atomic_elements_path)
 
         # create empty dirs to avoid errors in fonts that have not all entities
         fsutil.make_dirs(character_glyphs_path)
@@ -319,19 +323,22 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font)
+        glifs_filters = {}
+        if not full_export:
+            if font.export_started_at and font.export_completed_at:
+                updated_after = min(font.export_started_at, font.export_completed_at)
+                glifs_filters['updated_at__gt'] = updated_after
+
+        character_glyphs_qs = CharacterGlyph.objects.select_related('font', 'font__project').filter(font=font, **glifs_filters)
+        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font, **glifs_filters)
+        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font, **glifs_filters)
+        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font, **glifs_filters)
+        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font, **glifs_filters)
+
         character_glyphs_count = character_glyphs_qs.count()
-
-        character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         character_glyphs_layers_count = character_glyphs_layers_qs.count()
-
-        deep_components_qs = DeepComponent.objects.select_related('font', 'font__project').filter(font=font)
         deep_components_count = deep_components_qs.count()
-
-        atomic_elements_qs = AtomicElement.objects.select_related('font', 'font__project').filter(font=font)
         atomic_elements_count = atomic_elements_qs.count()
-
-        atomic_elements_layers_qs = AtomicElementLayer.objects.select_related('glif', 'glif__font', 'glif__font__project').filter(glif__font=font)
         atomic_elements_layers_count = atomic_elements_layers_qs.count()
 
         glifs_count = character_glyphs_count + character_glyphs_layers_count + deep_components_count + atomic_elements_count + atomic_elements_layers_count
@@ -400,6 +407,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     logger.info(message)
                 else:
                     logger.error(message)
+
+        character_glyphs_count = CharacterGlyph.objects.filter(font=font).count()
+        character_glyphs_layers_count = CharacterGlyphLayer.objects.filter(glif__font=font).count()
+        deep_components_count = DeepComponent.objects.filter(font=font).count()
+        atomic_elements_count = AtomicElement.objects.filter(font=font).count()
+        atomic_elements_layers_count = AtomicElementLayer.objects.filter(glif__font=font).count()
 
         verify_glifs_count(count_glif_files(character_glyphs_path), character_glyphs_count, 'character glyphs')
         verify_glifs_count(count_glif_layers_files(character_glyphs_path), character_glyphs_layers_count, 'character glyphs layers')

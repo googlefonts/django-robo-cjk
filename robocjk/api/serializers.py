@@ -3,7 +3,7 @@
 
 USER_FIELDS = ['id', 'username', 'first_name', 'last_name', 'email']
 
-PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url']
+PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url', 'repo_branch']
 
 FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib', 'features', 'designspace']
 

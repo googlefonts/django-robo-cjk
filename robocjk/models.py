@@ -131,6 +131,10 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
     def path(self):
         return get_project_path(self)
 
+    def save_by(self, user):
+        super(Project, self).save_by(user)
+        self.designers.add(user)
+
     def save_to_file_system(self, full_export=False):
         logger.info('Saving project "{}" to file system...'.format(self.name))
         path = self.path()

@@ -125,6 +125,7 @@ def project_get(request, params, user, project, *args, **kwargs):
 def project_create(request, params, user, *args, **kwargs):
     name = params.get_str('name')
     repo_url = params.get_str('repo_url')
+    repo_branch = params.get_str('repo_branch', 'master')
     try:
         repo_ssh_url_validator = GitSSHRepositoryURLValidator()
         repo_ssh_url_validator(repo_url)
@@ -142,6 +143,7 @@ def project_create(request, params, user, *args, **kwargs):
     project = Project()
     project.name = name
     project.repo_url = repo_url
+    project.repo_branch = repo_branch
     project.save_by(user)
     return ApiResponseSuccess(project.serialize())
 

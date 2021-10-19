@@ -249,13 +249,14 @@ class Client(object):
         return self._api_call('project_get', params)
 
 
-    def project_create(self, name, repo_url):
+    def project_create(self, name, repo_url, repo_branch='master'):
         """
         Create a new Project with the specified name and repository url.
         """
         params = {
             'name': name,
             'repo_url': repo_url,
+            'repo_branch': repo_branch,
         }
         return self._api_call('project_create', params)
 

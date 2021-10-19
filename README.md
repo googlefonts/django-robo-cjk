@@ -231,6 +231,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
         {
             "name": "GS",
             "repo_url": "https://github.com/BlackFoundryCom/gs-cjk-rcjk",
+            "repo_branch": "master",
             "slug": "gs",
             "uid": "fde4fc80-c136-4e2f-a9be-c80e18b9f213"
         }
@@ -261,6 +262,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
     "data": {
         "name": "GS",
         "repo_url": "https://github.com/BlackFoundryCom/gs-cjk-rcjk",
+        "repo_branch": "master",
         "slug": "gs",
         "uid": "fde4fc80-c136-4e2f-a9be-c80e18b9f213"
     },
@@ -283,6 +285,7 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
 |---|---|---|
 | `name` | `string` | yes |
 | `repo_url` | `string` | yes |
+| `repo_branch` | `string` | no |
 
 ##### Response
 

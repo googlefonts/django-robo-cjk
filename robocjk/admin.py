@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django_json_widget.widgets import JSONEditorWidget
 from rangefilter.filters import DateTimeRangeFilter
 
+from robocjk.actions import export_as_csv
 from robocjk.models import (
     Project,
     Font, FontImport,
@@ -331,6 +332,8 @@ class GlifAdmin(admin.ModelAdmin):
 
     status_display.short_description = _('Status')
     status_display.allow_tags = True
+
+    actions = [export_as_csv('Export as CSV', fields=['name'])]
 
     list_select_related = ('updated_by', )
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )

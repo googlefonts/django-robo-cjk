@@ -92,7 +92,7 @@ class ExportModel(models.Model):
         self.save()
 
         # if full argument is provided use it, otherwise use the automated check
-        full_export = full if isinstance(full, bool) else self.full_export_needed
+        full_export = full or self.full_export_needed
 
         # save model to the file system
         try:

@@ -171,8 +171,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         for font in fonts_list:
             font_dirpath = fsutil.get_filename(font.path())
             font_commit_message = font.get_commit_message()
-            font_full_export = True if full_export else None
-            font_export_success = font.export(full=font_full_export)
+            font_export_success = font.export(full=full_export)
             if font_export_success:
                 # add all changed files, commit and push to the git repository
                 run_commands(

@@ -64,6 +64,7 @@ class Client(object):
         self._username = username
         self._password = password
         self._auth_token = None
+        self._session = requests.Session()
 
         try:
             # check if there are robocjk apis available at the given host
@@ -107,7 +108,7 @@ class Client(object):
             # 'verify': self._host.startswith('https://'),
         }
         # send post request
-        response = requests.post(url, **options)
+        response = self._session.post(url, **options)
         if response.status_code == 401:
             # unauthorized - request a new auth token
             self.auth_token()

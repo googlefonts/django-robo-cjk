@@ -7,6 +7,10 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+class HTTPError(Exception):
+    pass
+
+
 class Client(object):
 
     """
@@ -107,6 +111,9 @@ class Client(object):
                 return self._api_call(view_name, params)
         # read response json data and return dict
         response_data = response.json()
+        if response.status_code != 200:
+            raise HTTPError(f"{response.status_code} {response_data['error']}")
+
         return response_data
 
 

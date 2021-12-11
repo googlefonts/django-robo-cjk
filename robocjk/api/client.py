@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import urllib3
-
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class HTTPError(Exception):
@@ -71,7 +67,9 @@ class Client(object):
 
     def _connect(self):
         import requests
+        import urllib3
 
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._session = requests.Session()
 
         try:

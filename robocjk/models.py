@@ -821,12 +821,10 @@ class GlifDataModel(models.Model):
     def components_names(self):
         return list(filter(None, self.components.split(',')))
 
-    @property
-    def components_cls(self):
+    def get_components_cls(self):
         return None
 
-    @property
-    def components_set(self):
+    def get_components_set(self):
         return None
 
     # empty means that there is no deep components instance inside, and no contours and not flat components
@@ -945,10 +943,10 @@ class GlifDataModel(models.Model):
 
     def _update_components(self):
         if self.has_components:
-            comp_cls = self.components_cls
+            comp_cls = self.get_components_cls()
             if not comp_cls:
                 return False
-            comp_set = self.components_set
+            comp_set = self.get_components_set()
             if not comp_set:
                 return False
             comp_names = self.components_names
@@ -1012,12 +1010,10 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     objects = CharacterGlyphManager()
 
-    @GlifDataModel.components_cls.getter
-    def components_cls(self):
+    def get_components_cls(self):
         return DeepComponent
 
-    @GlifDataModel.components_set.getter
-    def components_set(self):
+    def get_components_set(self):
         return self.deep_components
 
     def path(self):
@@ -1091,12 +1087,10 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     objects = DeepComponentManager()
 
-    @GlifDataModel.components_cls.getter
-    def components_cls(self):
+    def get_components_cls(self):
         return AtomicElement
 
-    @GlifDataModel.components_set.getter
-    def components_set(self):
+    def get_components_set(self):
         return self.atomic_elements
 
     def path(self):

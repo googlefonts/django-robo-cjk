@@ -420,7 +420,7 @@ class CharacterGlyphAdmin(GlifAdmin):
         f[-1][-1]['fields'] += ('deep_components', )
         return f
 
-    filter_horizontal = ['deep_components']
+    filter_horizontal = ['character_glyphs', 'deep_components']
     inlines = [CharacterGlyphLayerInline]
 
 

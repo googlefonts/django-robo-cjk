@@ -998,6 +998,12 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         related_name='character_glyphs',
         verbose_name=_('Font'))
 
+    character_glyphs = models.ManyToManyField(
+        'robocjk.CharacterGlyph',
+        blank=True,
+        related_name='used_by_character_glyphs',
+        verbose_name=_('Character Glyphs'))
+
     deep_components = models.ManyToManyField(
         'robocjk.DeepComponent',
         blank=True,

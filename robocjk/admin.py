@@ -417,9 +417,19 @@ class CharacterGlyphAdmin(GlifAdmin):
 
     def get_fieldsets(self, request, obj=None):
         f = super(CharacterGlyphAdmin, self).get_fieldsets(request, obj)
-        f[-1][-1]['fields'] += ('deep_components', )
+        f[-1][-1]['fields'] += ('character_glyphs', 'deep_components', )
         return f
 
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        instance = getattr(self, 'instance', None)
+        if instance:
+            if db_field.name == 'character_glyphs':
+                kwargs['queryset'] = CharacterGlyph.objects.filter(font=instance.font)
+            elif db_field.name == 'deep_components':
+                kwargs['queryset'] = DeepComponent.objects.filter(font=instance.font)
+        return super().formfield_for_manytomany(db_field, request=request, **kwargs)
+
+    autocomplete_fields = ['character_glyphs', 'deep_components']
     filter_horizontal = ['character_glyphs', 'deep_components']
     inlines = [CharacterGlyphLayerInline]
 

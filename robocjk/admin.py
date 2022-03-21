@@ -335,7 +335,7 @@ class GlifAdmin(admin.ModelAdmin):
 
     actions = [export_as_csv('Export as CSV', fields=['name'])]
 
-    list_select_related = ('updated_by', )
+    list_select_related = ('locked_by', 'updated_by', )
     list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
     list_display_links = ('name', )
     list_filter = (FontFilter, 'status', 'status_downgraded', ('status_downgraded_at', DateTimeRangeFilter, ), ('status_changed_at', DateTimeRangeFilter, ), 'previous_status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
@@ -362,10 +362,11 @@ class GlifAdmin(admin.ModelAdmin):
             }),
         )
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.defer('data')
-        return qs
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     # causes n+1 queries
+    #     # qs = qs.defer('data')
+    #     return qs
 
     save_on_top = True
     show_full_result_count = False

@@ -821,10 +821,7 @@ class GlifDataModel(models.Model):
     def components_names(self):
         return list(filter(None, self.components.split(',')))
 
-    def get_components_cls(self):
-        return None
-
-    def get_components_set(self):
+    def get_components_managers(self):
         return None
 
     # empty means that there is no deep components instance inside, and no contours and not flat components
@@ -940,25 +937,24 @@ class GlifDataModel(models.Model):
             self.status = data_status
             self.status_changed_at = dt.datetime.now()
 
-
     def _update_components(self):
         if self.has_components:
-            comp_cls = self.get_components_cls()
-            if not comp_cls:
+            comp_managers = self.get_components_managers()
+            if not comp_managers:
                 return False
-            comp_set = self.get_components_set()
-            if not comp_set:
-                return False
-            comp_names = self.components_names
-            # logger.debug(comp_names)
-            if comp_names:
-                comp_set.clear()
-                comp_objs = comp_cls.objects.filter(
-                    font_id=self.font_id, name__in=comp_names)
-                # logger.debug(comp_objs)
-                comp_set.add(*comp_objs)
-            else:
-                comp_set.clear()
+            for comp_manager in comp_managers:
+                comp_set = comp_manager[0]
+                comp_cls = comp_manager[1]
+                comp_names = self.components_names
+                # logger.debug(comp_names)
+                if comp_names:
+                    comp_set.clear()
+                    comp_objs = comp_cls.objects.filter(
+                        font_id=self.font_id, name__in=comp_names)
+                    # logger.debug(comp_objs)
+                    comp_set.add(*comp_objs)
+                else:
+                    comp_set.clear()
             return True
         return False
 
@@ -970,6 +966,7 @@ class GlifDataModel(models.Model):
         self._apply_data(glif_data)
         self._update_status(glif_data)
         super(GlifDataModel, self).save(*args, **kwargs)
+        # update many-to-many relations after the instance has been saved
         self._update_components()
 
     def save_to_file_system(self):
@@ -1010,11 +1007,11 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     objects = CharacterGlyphManager()
 
-    def get_components_cls(self):
-        return DeepComponent
-
-    def get_components_set(self):
-        return self.deep_components
+    def get_components_managers(self):
+        return (
+            (self.character_glyphs, CharacterGlyph, ),
+            (self.deep_components, DeepComponent, ),
+        )
 
     def path(self):
         return get_character_glyph_path(self)
@@ -1087,11 +1084,10 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
 
     objects = DeepComponentManager()
 
-    def get_components_cls(self):
-        return AtomicElement
-
-    def get_components_set(self):
-        return self.atomic_elements
+    def get_components_managers(self):
+        return (
+            (self.atomic_elements, AtomicElement, ),
+        )
 
     def path(self):
         return get_deep_component_path(self)

@@ -98,7 +98,6 @@ class CoreTestCase(TestCase):
         self.assertFalse(glif_data.has_variation_axis)
         self.assertFalse(glif_data.is_empty)
 
-
     def test_glyph_data_with_character_glyph_empty(self):
         glif_data = self._read_glif_data('test_core_data/characterGlyph/uni3413.glif')
         self.assertTrue(glif_data.ok)

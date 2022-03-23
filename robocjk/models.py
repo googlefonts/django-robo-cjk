@@ -414,10 +414,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             elif glifs_count == glifs_expected_count:
                 logger.info(message)
             elif glifs_count > glifs_expected_count:
-                if (abs(glifs_expected_count - glifs_count) < 10):
+                if (abs(glifs_expected_count - glifs_count) < 50):
                     message = '{} (some files have been created in the meanwhile)'.format(message)
                     logger.info(message)
-                else:
+                elif glifs_expected_count > 0:
                     logger.error(message)
 
         character_glyphs_count = CharacterGlyph.objects.filter(font=font).count()

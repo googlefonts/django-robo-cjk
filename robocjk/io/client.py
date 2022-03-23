@@ -81,48 +81,58 @@ def create_or_update_font(instance, created, **kwargs):
 # #                 new_filepath = os.path.split(get_character_glyph_path(instance, filename=instance.filename))[-1]
 # #                 fileutil.rename_file(old_filepath, name=new_filepath)
 #     fileutil.write_file(instance.path(), instance.data)
-#
-#
+
+
+@threaded
+def delete_character_glyph(instance, **kwargs):
+    fileutil.delete_file(instance.path())
+
+
 # @threaded
-# def delete_character_glyph(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
-#
-#
 # def create_or_update_character_glyph_layer(instance, created, **kwargs):
 #     fileutil.write_file(instance.path(), instance.data)
-#
-#
-# def delete_character_glyph_layer(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
-#
-#
+
+
+@threaded
+def delete_character_glyph_layer(instance, **kwargs):
+    fileutil.delete_file(instance.path())
+
+
+# @threaded
 # def create_or_update_deep_component(instance, created, **kwargs):
 #     fileutil.write_file(instance.path(), instance.data)
-#
-#
-# def delete_deep_component(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
-#
-#
+
+
+@threaded
+def delete_deep_component(instance, **kwargs):
+    fileutil.delete_file(instance.path())
+
+
+# @threaded
 # def create_or_update_atomic_element(instance, created, **kwargs):
 #     fileutil.write_file(instance.path(), instance.data)
-#
-#
-# def delete_atomic_element(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
-#
-#
+
+
+@threaded
+def delete_atomic_element(instance, **kwargs):
+    fileutil.delete_file(instance.path())
+
+
+# @threaded
 # def create_or_update_atomic_element_layer(instance, created, **kwargs):
 #     fileutil.write_file(instance.path(), instance.data)
-#
-#
-# def delete_atomic_element_layer(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
-#
-#
+
+
+@threaded
+def delete_atomic_element_layer(instance, **kwargs):
+    fileutil.delete_file(instance.path())
+
+
+# @threaded
 # def create_or_update_proof(instance, created, **kwargs):
 #     fileutil.write_file(instance.path(), instance.data)
 #
 #
+# @threaded
 # def delete_proof(instance, **kwargs):
 #     fileutil.delete_file(instance.path())

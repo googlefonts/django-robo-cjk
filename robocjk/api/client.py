@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
-import urllib3
 
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+class HTTPError(Exception):
+    pass
 
 
 class Client(object):
@@ -64,6 +63,13 @@ class Client(object):
         self._username = username
         self._password = password
         self._auth_token = None
+        self._connect()
+
+    def _connect(self):
+        import requests
+        import urllib3
+
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._session = requests.Session()
 
         try:
@@ -84,21 +90,7 @@ class Client(object):
         """
         Call an API method by its 'view-name' passing the given params.
         """
-        # get api absolute url
-        url = self._api_url(view_name)
-        # clean request post data (remove empty entries)
-        data = params or {}
-        keys = list(data.keys())
-        for key in keys:
-            val = data.get(key, None)
-            if val is None or val == '' or val == [] or val == {}:
-                del data[key]
-        # build request headers
-        headers = {}
-        if self._auth_token:
-            headers['Authorization'] = 'Bearer {}'.format(self._auth_token)
-        headers['Cache-Control'] = 'no-cache'
-        headers['Pragma'] = 'no-cache'
+        url, data, headers = self._prepare_request(view_name, params)
         # request options
         options = {
             'data': data,
@@ -117,7 +109,29 @@ class Client(object):
                 return self._api_call(view_name, params)
         # read response json data and return dict
         response_data = response.json()
+        if response.status_code != 200:
+            raise HTTPError(f"{response.status_code} {response_data['error']}")
+
         return response_data
+
+
+    def _prepare_request(self, view_name, params):
+        # get api absolute url
+        url = self._api_url(view_name)
+        # clean request post data (remove empty entries)
+        data = params or {}
+        keys = list(data.keys())
+        for key in keys:
+            val = data.get(key, None)
+            if val is None or val == '' or val == [] or val == {}:
+                del data[key]
+        # build request headers
+        headers = {}
+        if self._auth_token:
+            headers['Authorization'] = 'Bearer {}'.format(self._auth_token)
+        headers['Cache-Control'] = 'no-cache'
+        headers['Pragma'] = 'no-cache'
+        return url, data, headers
 
 
     def _api_url(self, view_name):

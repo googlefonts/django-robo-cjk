@@ -457,12 +457,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 updated_after = now - dt.timedelta(hours=1)
 
         def get_updated_by_pks(manager, **filters):
-            filters.setdefault('updated_at__gt', updated_after)
-            return manager.filter(**filters) \
-                .exclude(updated_by=None) \
-                .order_by('updated_by') \
-                .values_list('updated_by', flat=True) \
-                .distinct()
+            return manager.exclude(updated_by=None).filter(**filters).order_by('updated_by').values_list('updated_by', flat=True).distinct()
 
         font = self
         user_manager = get_user_model().objects
@@ -473,27 +468,39 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         users_pks += get_updated_by_pks(
             manager=GlyphsComposition.objects,
-            font=font)
+            font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks += get_updated_by_pks(
             manager=CharacterGlyph.objects,
-            font=font)
+            font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks += get_updated_by_pks(
             manager=CharacterGlyphLayer.objects.select_related('glif'),
-            glif__font=font)
+            glif__font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks += get_updated_by_pks(
             manager=DeepComponent.objects,
-            font=font)
+            font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks += get_updated_by_pks(
             manager=AtomicElement.objects,
-            font=font)
+            font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks += get_updated_by_pks(
             manager=AtomicElementLayer.objects.select_related('glif'),
-            glif__font=font)
+            glif__font=font,
+            updated_at__gt=updated_after
+        )
 
         users_pks = list(set(users_pks))
         users_qs = user_manager.filter(pk__in=users_pks).order_by('first_name', 'last_name')

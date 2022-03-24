@@ -156,7 +156,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             logger.info('Repository for project "{}" already exist, update it.'.format(self.name))
             run_commands(
                 'cd {}'.format(path),
-                'git reset --hard origin/{}'.format(repo_branch),
+                'git reset --hard',
                 'git pull origin {}'.format(repo_branch),
                 'git clean -df')
         # save all project fonts to file.system

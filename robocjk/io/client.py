@@ -35,9 +35,9 @@ def create_or_update_project(instance, created, **kwargs):
             fsutil.rename_dir(old_path, new_name)
     # init git repository if needed
 #     path = instance.path()
-#     fileutil.ensure_dirpath(path)
+#     fsutil.ensure_dirpath(path)
 #     git_repo_path = os.path.join(path, '.git')
-#     if not fileutil.exists(git_repo_path):
+#     if not fsutil.exists(git_repo_path):
 #         run_system_commands(
 #             'cd {}'.format(path),
 #             'git init',
@@ -48,7 +48,7 @@ def create_or_update_project(instance, created, **kwargs):
 
 # @threaded
 # def delete_project(instance, **kwargs):
-#     fileutil.delete_dir(instance.path())
+#     fsutil.delete_dir(instance.path())
 
 
 @threaded
@@ -62,12 +62,12 @@ def create_or_update_font(instance, created, **kwargs):
         if fsutil.exists(old_path):
             new_name = os.path.split(get_font_path(instance, name=instance.slug))[-1]
             fsutil.rename_dir(old_path, new_name)
-    # fileutil.ensure_dirpath(instance.path())
+    # fsutil.ensure_dirpath(instance.path())
 
 
 # @threaded
 # def delete_font(instance, **kwargs):
-#     fileutil.delete_dir(instance.path())
+#     fsutil.delete_dir(instance.path())
 #
 #
 # @threaded
@@ -77,62 +77,62 @@ def create_or_update_font(instance, created, **kwargs):
 # #         if instance.filename and instance.initial_filename and instance.filename != instance.initial_filename:
 # #             old_filename = instance.initial_filename
 # #             old_filepath = get_character_glyph_path(instance, filename=old_filename)
-# #             if fileutil.exists(old_filepath):
+# #             if fsutil.exists(old_filepath):
 # #                 new_filepath = os.path.split(get_character_glyph_path(instance, filename=instance.filename))[-1]
-# #                 fileutil.rename_file(old_filepath, name=new_filepath)
-#     fileutil.write_file(instance.path(), instance.data)
+# #                 fsutil.rename_file(old_filepath, name=new_filepath)
+#     fsutil.write_file(instance.path(), instance.data)
 
 
 @threaded
 def delete_character_glyph(instance, **kwargs):
-    fileutil.delete_file(instance.path())
+    fsutil.delete_file(instance.path())
 
 
 # @threaded
 # def create_or_update_character_glyph_layer(instance, created, **kwargs):
-#     fileutil.write_file(instance.path(), instance.data)
+#     fsutil.write_file(instance.path(), instance.data)
 
 
 @threaded
 def delete_character_glyph_layer(instance, **kwargs):
-    fileutil.delete_file(instance.path())
+    fsutil.delete_file(instance.path())
 
 
 # @threaded
 # def create_or_update_deep_component(instance, created, **kwargs):
-#     fileutil.write_file(instance.path(), instance.data)
+#     fsutil.write_file(instance.path(), instance.data)
 
 
 @threaded
 def delete_deep_component(instance, **kwargs):
-    fileutil.delete_file(instance.path())
+    fsutil.delete_file(instance.path())
 
 
 # @threaded
 # def create_or_update_atomic_element(instance, created, **kwargs):
-#     fileutil.write_file(instance.path(), instance.data)
+#     fsutil.write_file(instance.path(), instance.data)
 
 
 @threaded
 def delete_atomic_element(instance, **kwargs):
-    fileutil.delete_file(instance.path())
+    fsutil.delete_file(instance.path())
 
 
 # @threaded
 # def create_or_update_atomic_element_layer(instance, created, **kwargs):
-#     fileutil.write_file(instance.path(), instance.data)
+#     fsutil.write_file(instance.path(), instance.data)
 
 
 @threaded
 def delete_atomic_element_layer(instance, **kwargs):
-    fileutil.delete_file(instance.path())
+    fsutil.delete_file(instance.path())
 
 
 # @threaded
 # def create_or_update_proof(instance, created, **kwargs):
-#     fileutil.write_file(instance.path(), instance.data)
+#     fsutil.write_file(instance.path(), instance.data)
 #
 #
 # @threaded
 # def delete_proof(instance, **kwargs):
-#     fileutil.delete_file(instance.path())
+#     fsutil.delete_file(instance.path())

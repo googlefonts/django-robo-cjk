@@ -10,7 +10,7 @@ Django==3.2.12
 django-admin-interface==0.19.0
 django-admin-rangefilter==0.8.1
 django-ckeditor==6.0.0
-django-cleanup==5.1.0
+django-cleanup==6.0.0
 django-colorfield==0.4.5
 django-compat==1.0.15
 django-cors-headers==3.7.0

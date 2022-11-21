@@ -16,7 +16,7 @@ class AuthTestCase(TestCase):
     def test_encode_auth_token(self):
         data = { 'message':'Hello World' }
         token = encode_auth_token(data)
-        self.assertEqual(token, 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXNzYWdlIjoiSGVsbG8gV29ybGQifQ.6YMHbUtNNnRwRn9L2Z6llQ28G5AZaLqwvzdtyhWBJP0')
+        self.assertEqual(token, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXNzYWdlIjoiSGVsbG8gV29ybGQifQ.S6tI1q5Y7FWrzmKoa07K4ZsnIyAcce8jeR_qOhdaMp8')
 
     def test_decode_auth_token(self):
         token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXNzYWdlIjoiSGVsbG8gV29ybGQifQ.6YMHbUtNNnRwRn9L2Z6llQ28G5AZaLqwvzdtyhWBJP0'

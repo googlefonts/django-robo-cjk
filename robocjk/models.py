@@ -1067,7 +1067,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     def save(self, *args, **kwargs):
         super(CharacterGlyphLayer, self).save(*args, **kwargs)
-        self.update_glif_updated_at()
+        self.update_glif_layers_updated_at()
 
     def serialize(self, **kwargs):
         return serialize_character_glyph_layer(self, **kwargs)
@@ -1187,7 +1187,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     def save(self, *args, **kwargs):
         super(AtomicElementLayer, self).save(*args, **kwargs)
-        self.update_glif_updated_at()
+        self.update_glif_layers_updated_at()
 
     def serialize(self, **kwargs):
         return serialize_atomic_element_layer(self, **kwargs)

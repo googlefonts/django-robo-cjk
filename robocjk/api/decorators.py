@@ -175,6 +175,7 @@ def require_glif_filters(view_func):
             'has_outlines': params.get_bool('has_outlines', None),
             'has_components': params.get_bool('has_components', None),
             'has_unicode': params.get_bool('has_unicode', None),
+            'updated_since': params.get_datetime('updated_since', None),
         })
         filters.clean()
         kwargs['glif_filters'] = filters

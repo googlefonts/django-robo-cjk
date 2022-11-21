@@ -269,6 +269,9 @@ def glyphs_composition_update(request, params, user, font, *args, **kwargs):
 @require_font
 @require_glif_filters
 def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
+    updated_since = glif_filters.pop('updated_since', None)
+    if updated_since:
+        glif_filters['updated_at__gte'] = updated_since
     data = {
         'atomic_elements': list(font.atomic_elements.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)),
         'deep_components': list(font.deep_components.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)),

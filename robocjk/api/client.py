@@ -347,7 +347,7 @@ class Client(object):
 
     def glif_list(self,
             font_uid, status=None,
-            updated_by_current_user=None, updated_by=None,
+            updated_by_current_user=None, updated_by=None, updated_since=None,
             is_locked_by_current_user=None, is_locked_by=None, is_locked=None, is_empty=None,
             has_variation_axis=None, has_outlines=None, has_components=None, has_unicode=None):
         """
@@ -358,6 +358,7 @@ class Client(object):
             'status': status,
             'updated_by_current_user': updated_by_current_user,
             'updated_by': updated_by,
+            'updated_since': updated_since,
             'is_locked_by_current_user': is_locked_by_current_user,
             'is_locked_by': is_locked_by,
             'is_locked': is_locked,

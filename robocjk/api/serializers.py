@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 
 
-USER_FIELDS = ['id', 'username', 'first_name', 'last_name', 'email']
+USER_FIELDS = [
+    'id', 'username', 'first_name', 'last_name', 'email',
+]
 
-PROJECT_FIELDS = ['uid', 'name', 'slug', 'repo_url', 'repo_branch']
+PROJECT_FIELDS = [
+    'uid', 'name', 'slug', 'repo_url', 'repo_branch',
+]
 
-FONT_FIELDS = ['uid', 'name', 'slug', 'available', 'fontlib', 'features', 'designspace']
+FONT_FIELDS = [
+    'uid', 'name', 'slug', 'available', 'fontlib', 'features', 'designspace',
+]
 
-ATOMIC_ELEMENT_ID_FIELDS = ['id', 'name']
-DEEP_COMPONENT_ID_FIELDS = ['id', 'name']
-CHARACTER_GLYPH_ID_FIELDS = ['id', 'name', 'unicode_hex']
+ATOMIC_ELEMENT_ID_FIELDS = [
+    'id', 'name',
+]
+DEEP_COMPONENT_ID_FIELDS = [
+    'id', 'name',
+]
+CHARACTER_GLYPH_ID_FIELDS = [
+    'id', 'name', 'unicode_hex',
+]
 
 GLIF_FIELDS = [
     'id', 'data', 'name', 'filename', 'unicode_hex',

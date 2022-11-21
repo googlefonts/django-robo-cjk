@@ -35,7 +35,7 @@ mailchecker==4.0.3
 mysqlclient==2.0.3
 phonenumbers==8.12.18
 pip-chill==1.0.1
-pipdeptree==2.0.0
+pipdeptree==2.3.3
 pycparser==2.20
 PyJWT==2.6.0
 pyOpenSSL==20.0.1

@@ -13,16 +13,6 @@ FONT_FIELDS = [
     'uid', 'name', 'slug', 'available', 'fontlib', 'features', 'designspace',
 ]
 
-ATOMIC_ELEMENT_ID_FIELDS = [
-    'id', 'name',
-]
-DEEP_COMPONENT_ID_FIELDS = [
-    'id', 'name',
-]
-CHARACTER_GLYPH_ID_FIELDS = [
-    'id', 'name', 'unicode_hex',
-]
-
 GLIF_FIELDS = [
     'id', 'data', 'name', 'filename', 'unicode_hex',
     'is_locked', 'locked_by_id', 'locked_at', 'status',
@@ -34,6 +24,36 @@ GLIF_LAYER_FIELDS = [
     'glif_id', 'id', 'data', 'group_name', 'name', 'filename',
     'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'has_unicode',
     'created_at', 'updated_at',
+]
+
+# glyphs fields
+ATOMIC_ELEMENT_FIELDS = GLIF_FIELDS.copy() + [
+    'layers_updated_at',
+]
+
+DEEP_COMPONENT_FIELDS = GLIF_FIELDS.copy() + [
+]
+
+CHARACTER_GLYPH_FIELDS = GLIF_FIELDS.copy() + [
+    'layers_updated_at',
+]
+
+# glyphs layers fields
+ATOMIC_ELEMENT_LAYER_FIELDS = GLIF_LAYER_FIELDS.copy() + [
+]
+
+CHARACTER_GLYPH_LAYER_FIELDS = GLIF_LAYER_FIELDS.copy() + [
+]
+
+# glyphs fields (minimal)
+ATOMIC_ELEMENT_ID_FIELDS = [
+    'id', 'name',
+]
+DEEP_COMPONENT_ID_FIELDS = [
+    'id', 'name',
+]
+CHARACTER_GLYPH_ID_FIELDS = [
+    'id', 'name', 'unicode_hex',
 ]
 
 
@@ -81,8 +101,7 @@ def serialize_atomic_element(obj, **kwargs):
     data['type'] = 'Atomic Element'
     data['type_code'] = 'AE'
     if return_layers:
-        data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
-        data['layers_updated_at'] = obj.layers_updated_at
+        data['layers'] = list(obj.layers.values(*ATOMIC_ELEMENT_LAYER_FIELDS))
     if return_related:
         data['made_of'] = []
         data['used_by'] = list(obj.deep_components.values(*DEEP_COMPONENT_ID_FIELDS))
@@ -101,7 +120,6 @@ def serialize_deep_component(obj, **kwargs):
     data['type_code'] = 'DC'
     if return_layers:
         data['layers'] = []
-        data['layers_updated_at'] = None
     if return_related:
         data['made_of'] = list([
             serialize_atomic_element(glif_obj, **kwargs) for glif_obj in obj.atomic_elements.all()
@@ -117,8 +135,7 @@ def serialize_character_glyph(obj, **kwargs):
     data['type'] = 'Character Glyph'
     data['type_code'] = 'CG'
     if return_layers:
-        data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
-        data['layers_updated_at'] = obj.layers_updated_at
+        data['layers'] = list(obj.layers.values(*CHARACTER_GLYPH_LAYER_FIELDS))
     if return_related:
         made_of_character_glyphs = []
         # create a set for storing character-glyphs ids to avoid possible circular references

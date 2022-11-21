@@ -496,6 +496,7 @@ See [Glyphs Composition Get](#glyphs-composition-get) response.
 | `status` | `string` | no |
 | `updated_by_current_user` | `bool` | no |
 | `updated_by` | `int` | no |
+| `updated_since` | `datetime` | no |
 | `is_locked_by_current_user` | `bool` | no |
 | `is_locked_by` | `int` | no |
 | `is_locked` | `bool` | no |

@@ -1012,6 +1012,13 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         related_name='character_glyphs',
         verbose_name=_('Deep Components'))
 
+    layers_updated_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        verbose_name=_('Layers updated at'))
+
     objects = CharacterGlyphManager()
 
     def get_components_managers(self):
@@ -1065,8 +1072,8 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
     def serialize(self, **kwargs):
         return serialize_character_glyph_layer(self, **kwargs)
 
-    def update_glif_updated_at(self):
-        CharacterGlyph.objects.filter(pk=self.glif_id).update(updated_at=self.updated_at)
+    def update_glif_layers_updated_at(self):
+        CharacterGlyph.objects.filter(pk=self.glif_id).update(layers_updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -1131,6 +1138,13 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         related_name='atomic_elements',
         verbose_name=_('Font'))
 
+    layers_updated_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        verbose_name=_('Layers updated at'))
+
     objects = AtomicElementManager()
 
     def path(self):
@@ -1178,8 +1192,8 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
     def serialize(self, **kwargs):
         return serialize_atomic_element_layer(self, **kwargs)
 
-    def update_glif_updated_at(self):
-        AtomicElement.objects.filter(pk=self.glif_id).update(updated_at=self.updated_at)
+    def update_glif_layers_updated_at(self):
+        AtomicElement.objects.filter(pk=self.glif_id).update(layers_updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(

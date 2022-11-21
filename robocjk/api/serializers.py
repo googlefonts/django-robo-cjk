@@ -82,6 +82,7 @@ def serialize_atomic_element(obj, **kwargs):
     data['type_code'] = 'AE'
     if return_layers:
         data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
+        data['layers_updated_at'] = obj.layers_updated_at
     if return_related:
         data['made_of'] = []
         data['used_by'] = list(obj.deep_components.values(*DEEP_COMPONENT_ID_FIELDS))
@@ -100,6 +101,7 @@ def serialize_deep_component(obj, **kwargs):
     data['type_code'] = 'DC'
     if return_layers:
         data['layers'] = []
+        data['layers_updated_at'] = None
     if return_related:
         data['made_of'] = list([
             serialize_atomic_element(glif_obj, **kwargs) for glif_obj in obj.atomic_elements.all()
@@ -116,6 +118,7 @@ def serialize_character_glyph(obj, **kwargs):
     data['type_code'] = 'CG'
     if return_layers:
         data['layers'] = list(obj.layers.values(*GLIF_LAYER_FIELDS))
+        data['layers_updated_at'] = obj.layers_updated_at
     if return_related:
         made_of_character_glyphs = []
         # create a set for storing character-glyphs ids to avoid possible circular references

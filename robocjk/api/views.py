@@ -270,12 +270,20 @@ def glyphs_composition_update(request, params, user, font, *args, **kwargs):
 @require_glif_filters
 def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
     updated_since = glif_filters.pop('updated_since', None)
+
+    atomic_elements_qs = font.atomic_elements.filter(**glif_filters)
+    deep_components_qs = font.deep_components.filter(**glif_filters)
+    character_glyphs_qs = font.character_glyphs.filter(**glif_filters)
+
     if updated_since:
-        glif_filters['updated_at__gte'] = updated_since
+        atomic_elements_qs = atomic_elements_qs.filter(Q(updated_at__gte=updated_since) | Q(layers_updated_at__gte=updated_since))
+        deep_components_qs = deep_components_qs.filter(updated_at__gte=updated_since)
+        character_glyphs_qs = character_glyphs_qs.filter(Q(updated_at__gte=updated_since) | Q(layers_updated_at__gte=updated_since))
+
     data = {
-        'atomic_elements': list(font.atomic_elements.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)),
-        'deep_components': list(font.deep_components.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)),
-        'character_glyphs': list(font.character_glyphs.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS)),
+        'atomic_elements': list(atomic_elements_qs.values(*ATOMIC_ELEMENT_ID_FIELDS)),
+        'deep_components': list(deep_components_qs.values(*DEEP_COMPONENT_ID_FIELDS)),
+        'character_glyphs': list(character_glyphs_qs.values(*CHARACTER_GLYPH_ID_FIELDS)),
     }
     return ApiResponseSuccess(data)
 

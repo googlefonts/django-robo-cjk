@@ -1058,8 +1058,15 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
     def path(self):
         return get_character_glyph_layer_path(self)
 
+    def save(self, *args, **kwargs):
+        super(CharacterGlyphLayer, self).save(*args, **kwargs)
+        self.update_glif_updated_at()
+
     def serialize(self, **kwargs):
         return serialize_character_glyph_layer(self, **kwargs)
+
+    def update_glif_updated_at(self):
+        CharacterGlyph.objects.filter(pk=self.glif_id).update(updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -1164,8 +1171,15 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
     def path(self):
         return get_atomic_element_layer_path(self)
 
+    def save(self, *args, **kwargs):
+        super(AtomicElementLayer, self).save(*args, **kwargs)
+        self.update_glif_updated_at()
+
     def serialize(self, **kwargs):
         return serialize_atomic_element_layer(self, **kwargs)
+
+    def update_glif_updated_at(self):
+        AtomicElement.objects.filter(pk=self.glif_id).update(updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(

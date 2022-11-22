@@ -783,6 +783,10 @@ class GlifDataModel(models.Model):
     class Meta:
         abstract = True
 
+    deleted = models.BooleanField(
+        default=False,
+        verbose_name=_('Deleted'))
+
     data = models.TextField(
         verbose_name=_('Data'),
         help_text=_('(.glif xml data)'))

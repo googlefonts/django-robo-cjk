@@ -336,9 +336,9 @@ class GlifAdmin(admin.ModelAdmin):
     actions = [export_as_csv('Export as CSV', fields=['name'])]
 
     list_select_related = ('locked_by', 'updated_by', )
-    list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', )
+    list_display = ('name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'is_locked', 'status_display', 'created_at', 'updated_at', 'updated_by', 'deleted',)
     list_display_links = ('name', )
-    list_filter = (FontFilter, 'status', 'status_downgraded', ('status_downgraded_at', DateTimeRangeFilter, ), ('status_changed_at', DateTimeRangeFilter, ), 'previous_status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
+    list_filter = (FontFilter, 'deleted', 'status', 'status_downgraded', ('status_downgraded_at', DateTimeRangeFilter, ), ('status_changed_at', DateTimeRangeFilter, ), 'previous_status', 'updated_by', 'locked_by', 'is_locked', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', )
     search_fields = ('name', 'filename', 'unicode_hex', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'name', 'filename', 'is_empty', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     # raw_id_fields = ('font', )
@@ -347,7 +347,7 @@ class GlifAdmin(admin.ModelAdmin):
         return (
             ('Metadata', {
                 'classes': ('collapse', ),
-                'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', ),
+                'fields': ('created_at', 'updated_at', 'updated_by', 'deleted', 'editors', 'editors_history', ),
             }),
             ('Locking', {
                 'classes': ('collapse', ),
@@ -375,16 +375,16 @@ class GlifAdmin(admin.ModelAdmin):
 class GlifLayerAdmin(admin.ModelAdmin):
 
     list_select_related = ('updated_by', )
-    list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', )
+    list_display = ('group_name', 'name', 'filename', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', 'created_at', 'updated_at', 'updated_by', 'deleted',)
     list_display_links = ('group_name', )
-    list_filter = (GlifFontFilter, 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
+    list_filter = (GlifFontFilter, 'deleted', 'updated_by', 'group_name', 'has_unicode', 'has_variation_axis', 'has_outlines', 'has_components', 'is_empty', )
     search_fields = ('group_name', 'name', 'filename', 'components', )
     readonly_fields = ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )
     raw_id_fields = ('glif', )
     fieldsets = (
         ('Metadata', {
             'classes': ('collapse', ),
-            'fields': ('created_at', 'updated_at', 'updated_by', 'editors', 'editors_history', )
+            'fields': ('created_at', 'updated_at', 'updated_by', 'deleted', 'editors', 'editors_history', )
         }),
         (None, {
             'fields': ('glif', 'group_name', 'data', 'name', 'filename', 'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'components', )

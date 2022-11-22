@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 from django.core.validators import FileExtensionValidator
 from django.db import close_old_connections
 from django.db import models
+from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
@@ -1037,6 +1038,14 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def serialize(self, **kwargs):
         return serialize_character_glyph(self, **kwargs)
 
+    def update_layers_updated_at(self):
+        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
+        # update in-memory value
+        self.layers_updated_at = layers_updated_at_max
+        # update database value
+        cls = self.__class__
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+
     def __str__(self):
         return force_str('{}'.format(
             self.name))
@@ -1071,13 +1080,10 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     def save(self, *args, **kwargs):
         super(CharacterGlyphLayer, self).save(*args, **kwargs)
-        self.update_glif_layers_updated_at()
+        self.glif.update_layers_updated_at()
 
     def serialize(self, **kwargs):
         return serialize_character_glyph_layer(self, **kwargs)
-
-    def update_glif_layers_updated_at(self):
-        CharacterGlyph.objects.filter(pk=self.glif_id).update(layers_updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -1157,6 +1163,14 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def serialize(self, **kwargs):
         return serialize_atomic_element(self, **kwargs)
 
+    def update_layers_updated_at(self):
+        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
+        # update in-memory value
+        self.layers_updated_at = layers_updated_at_max
+        # update database value
+        cls = self.__class__
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+
     def __str__(self):
         return force_str('{}'.format(
             self.name))
@@ -1191,13 +1205,10 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     def save(self, *args, **kwargs):
         super(AtomicElementLayer, self).save(*args, **kwargs)
-        self.update_glif_layers_updated_at()
+        self.glif.update_layers_updated_at()
 
     def serialize(self, **kwargs):
         return serialize_atomic_element_layer(self, **kwargs)
-
-    def update_glif_layers_updated_at(self):
-        AtomicElement.objects.filter(pk=self.glif_id).update(layers_updated_at=self.updated_at)
 
     def __str__(self):
         return force_str('[{}] {}'.format(

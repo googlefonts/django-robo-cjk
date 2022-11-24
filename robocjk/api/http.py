@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
+from django.conf import settings
 from django.http import JsonResponse
 
 
@@ -13,6 +16,8 @@ class ApiResponse(JsonResponse):
                 'data': data,
                 'status': status,
                 'error': error,
+                'server_datetime': datetime.now(),
+                'server_timezone': settings.TIME_ZONE,
             },
             status=status,
             json_dumps_params={

@@ -98,6 +98,12 @@ class GlifFontFilter(FontFilter):
         return queryset
 
 
+class ProjectFontInline(admin.TabularInline):
+    model = Font
+    fields = ('name', 'uid', 'hashid', 'available', 'created_at', 'updated_at', 'updated_by', 'export_enabled', 'export_running', 'export_started_at', 'export_completed_at', )
+    readonly_fields = fields
+    extra = 0
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
 
@@ -124,6 +130,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'repo_url', 'repo_branch', 'designers', )
         }),
     )
+    inlines = [ProjectFontInline]
     filter_horizontal = ('designers', )
     save_on_top = True
     show_full_result_count = False

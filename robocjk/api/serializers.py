@@ -47,13 +47,13 @@ CHARACTER_GLYPH_LAYER_FIELDS = GLIF_LAYER_FIELDS.copy() + [
 
 # glyphs fields (minimal)
 ATOMIC_ELEMENT_ID_FIELDS = [
-    'id', 'name',
+    'id', 'name', 'updated_at', 'layers_updated_at',
 ]
 DEEP_COMPONENT_ID_FIELDS = [
-    'id', 'name',
+    'id', 'name', 'updated_at',
 ]
 CHARACTER_GLYPH_ID_FIELDS = [
-    'id', 'name', 'unicode_hex',
+    'id', 'name', 'unicode_hex', 'updated_at', 'layers_updated_at',
 ]
 
 

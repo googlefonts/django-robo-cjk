@@ -22,7 +22,7 @@ django-flat-theme==1.1.4
 django-js-asset==2.0.0
 django-json-widget==1.1.1
 fonttools==4.24.0
-fs==2.4.13
+fs==2.4.16
 ftfy==5.9
 future==0.18.2
 gevent==22.10.2

@@ -276,9 +276,9 @@ def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
     character_glyphs_qs = font.character_glyphs.filter(**glif_filters)
 
     if updated_since:
-        atomic_elements_qs = atomic_elements_qs.filter(Q(updated_at__gte=updated_since) | Q(layers_updated_at__gte=updated_since))
-        deep_components_qs = deep_components_qs.filter(updated_at__gte=updated_since)
-        character_glyphs_qs = character_glyphs_qs.filter(Q(updated_at__gte=updated_since) | Q(layers_updated_at__gte=updated_since))
+        atomic_elements_qs = atomic_elements_qs.filter(Q(updated_at__gt=updated_since) | Q(layers_updated_at__gt=updated_since))
+        deep_components_qs = deep_components_qs.filter(updated_at__gt=updated_since)
+        character_glyphs_qs = character_glyphs_qs.filter(Q(updated_at__gt=updated_since) | Q(layers_updated_at__gt=updated_since))
 
     data = {
         'atomic_elements': list(atomic_elements_qs.values(*ATOMIC_ELEMENT_ID_FIELDS)),

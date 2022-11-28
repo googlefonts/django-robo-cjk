@@ -141,7 +141,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         path = self.path()
         fsutil.make_dirs(path)
         repo_path = fsutil.join_path(path, '.git')
-        repo_branch = self.repo_branch or 'master'
+        repo_branch = self.repo_branch or 'main'
         if not fsutil.exists(repo_path):
             # repository doesn't exist, initialize it
             logger.info('Repository for project "{}" doesn\'t exist, initialize it.'.format(self.name))
@@ -151,15 +151,19 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                 'git config --local --add "user.name" "{}"'.format(settings.GIT_USER_NAME),
                 'git config --local --add "user.email" "{}"'.format(settings.GIT_USER_EMAIL),
                 'git remote add origin {}'.format(self.repo_url),
-                'git pull origin {}'.format(repo_branch))
+                'git checkout {}'.format(repo_branch),
+                'git pull origin {}'.format(repo_branch),
+            )
         else:
             # repository exist
             logger.info('Repository for project "{}" already exist, update it.'.format(self.name))
             run_commands(
                 'cd {}'.format(path),
                 'git reset --hard',
+                'git checkout {}'.format(repo_branch),
                 'git pull origin {}'.format(repo_branch),
-                'git clean -df')
+                'git clean -df',
+            )
         # save all project fonts to file.system
         fonts_qs = self.fonts.all()
         fonts_list = list(fonts_qs)

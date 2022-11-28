@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
-
-import fsutil
 import re
+from urllib.parse import unquote
+from django.conf import settings
+import fsutil
 
 
 FONT_PATTERN = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
@@ -28,73 +28,104 @@ CHARACTER_GLYPH_RE = re.compile(CHARACTER_GLYPH_PATTERN)
 CHARACTER_GLYPH_LAYER_RE = re.compile(CHARACTER_GLYPH_LAYER_PATTERN)
 
 
+def quote_filename(filename):
+    unsafe_table = {
+        ord("%"): "%25",
+        ord("/"): "%2F",
+        ord("\\"): "%5C",
+    }
+    return filename.translate(unsafe_table)
+
+
+def unquote_filename(filename):
+    return unquote(filename)
+
+
 def get_project_path(instance, name=None):
+    project_name = quote_filename(name or instance.slug)
     return fsutil.join_path(
         settings.GIT_REPOSITORIES_PATH,
-        (name or instance.slug))
+        project_name,
+    )
 
 
 def get_font_path(instance, name=None):
+    font_name = quote_filename(name or instance.slug)
     return fsutil.join_path(
         get_project_path(instance.project),
-        '{}.rcjk'.format(name or instance.slug))
+        '{}.rcjk'.format(font_name),
+    )
 
 
 def get_glif_filename(instance, name=None):
-    filename = name or instance.filename
+    filename = quote_filename(name or instance.filename)
     assert filename.endswith('.glif')
     return filename
 
 
 def get_character_glyphs_path(font):
     return fsutil.join_path(
-        get_font_path(font), 'characterGlyph')
+        get_font_path(font),
+        'characterGlyph',
+    )
 
 
 def get_character_glyph_path(instance, name=None):
     return fsutil.join_path(
         get_character_glyphs_path(instance.font),
-        get_glif_filename(instance, name))
+        get_glif_filename(instance, name),
+    )
 
 
 def get_character_glyph_layer_path(instance, name=None):
+    layer_group_name = quote_filename(instance.group_name)
     return fsutil.join_path(
         get_character_glyphs_path(instance.glif.font),
-        instance.group_name,
-        get_glif_filename(instance, name))
+        layer_group_name,
+        get_glif_filename(instance, name),
+    )
 
 
 def get_deep_components_path(font):
     return fsutil.join_path(
-        get_font_path(font), 'deepComponent')
+        get_font_path(font),
+        'deepComponent',
+    )
 
 
 def get_deep_component_path(instance, name=None):
     return fsutil.join_path(
         get_deep_components_path(instance.font),
-        get_glif_filename(instance, name))
+        get_glif_filename(instance, name),
+    )
 
 
 def get_atomic_elements_path(font):
     return fsutil.join_path(
-        get_font_path(font), 'atomicElement')
+        get_font_path(font),
+        'atomicElement',
+    )
 
 
 def get_atomic_element_path(instance, name=None):
     return fsutil.join_path(
         get_atomic_elements_path(instance.font),
-        get_glif_filename(instance, name))
+        get_glif_filename(instance, name),
+    )
 
 
 def get_atomic_element_layer_path(instance, name=None):
+    layer_group_name = quote_filename(instance.group_name)
     return fsutil.join_path(
         get_atomic_elements_path(instance.glif.font),
-        instance.group_name,
-        get_glif_filename(instance, name))
+        layer_group_name,
+        get_glif_filename(instance, name),
+    )
 
 
 def get_proof_path(instance):
     return fsutil.join_path(
         get_font_path(instance.font),
         'Proofing',
-        fsutil.get_filename(self.file.path))
+        fsutil.get_filename(self.file.path),
+    )

@@ -11,6 +11,7 @@ from robocjk.io.paths import (
     ATOMIC_ELEMENT_RE, ATOMIC_ELEMENT_LAYER_RE,
     DEEP_COMPONENT_RE,
     CHARACTER_GLYPH_RE, CHARACTER_GLYPH_LAYER_RE,
+    unquote_filename,
 )
 from robocjk.models import (
     Project, Font, CharacterGlyph, CharacterGlyphLayer, DeepComponent,
@@ -208,6 +209,7 @@ class Command(BaseCommand):
         data = GlifData()
         data.parse_string(content)
         layer_name = match.groupdict()['layer_name']
+        layer_name = unquote_filename(layer_name)
         try:
             glif_obj = glif_cls.objects.get(font=font, name=data.name)
         except glif_cls.DoesNotExist:

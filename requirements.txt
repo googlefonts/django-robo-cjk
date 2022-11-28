@@ -33,7 +33,7 @@ html5lib==1.1
 idna==2.10
 mailchecker==4.0.3
 mysqlclient==2.0.3
-phonenumbers==8.12.18
+phonenumbers==8.13.1
 pip-chill==1.0.1
 pipdeptree==2.3.3
 pycparser==2.20

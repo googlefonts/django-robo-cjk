@@ -643,7 +643,14 @@ class LockableModel(models.Model):
             self.locked_by = user
             self.locked_at = dt.datetime.now()
             if save:
-                self.save()
+                # self.save()
+                # don't call save method because it updates the updated_at field timestamp
+                glif_model = self.__class__
+                glif_model.objects.filter(pk=self.pk).update(
+                    is_locked=self.is_locked,
+                    locked_by=self.locked_by,
+                    locked_at=self.locked_at,
+                )
             return True
         return self.locked_by_id == user.id
 
@@ -667,7 +674,14 @@ class LockableModel(models.Model):
                 self.locked_by = None
                 self.locked_at = None
                 if save:
-                    self.save()
+                    # self.save()
+                    # don't call save method because it updates the updated_at field timestamp
+                    glif_model = self.__class__
+                    glif_model.objects.filter(pk=self.pk).update(
+                        is_locked=self.is_locked,
+                        locked_by=self.locked_by,
+                        locked_at=self.locked_at,
+                    )
                 return True
             return False
         return True

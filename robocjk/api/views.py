@@ -329,9 +329,9 @@ def glif_lock(request, params, user, font, *args, **kwargs):
         glif_obj.lock_by(user, save=True)
 
     data = {
-        'atomic_elements': list([atomic_element_obj.serialize(**kwargs) for atomic_element_obj in atomic_elements_list]),
-        'deep_components': list([deep_components_obj.serialize(**kwargs) for deep_components_obj in deep_components_list]),
-        'character_glyphs': list([character_glyphs_obj.serialize(**kwargs) for character_glyphs_obj in character_glyphs_list]),
+        'atomic_elements': list([atomic_element_obj.serialize(**params) for atomic_element_obj in atomic_elements_list]),
+        'deep_components': list([deep_components_obj.serialize(**params) for deep_components_obj in deep_components_list]),
+        'character_glyphs': list([character_glyphs_obj.serialize(**params) for character_glyphs_obj in character_glyphs_list]),
     }
     return ApiResponseSuccess(data)
 
@@ -377,9 +377,9 @@ def glif_unlock(request, params, user, font, *args, **kwargs):
         glif_obj.unlock_by(user, save=True)
 
     data = {
-        'atomic_elements': list([atomic_element_obj.serialize(**kwargs) for atomic_element_obj in atomic_elements_list]),
-        'deep_components': list([deep_components_obj.serialize(**kwargs) for deep_components_obj in deep_components_list]),
-        'character_glyphs': list([character_glyphs_obj.serialize(**kwargs) for character_glyphs_obj in character_glyphs_list]),
+        'atomic_elements': list([atomic_element_obj.serialize(**params) for atomic_element_obj in atomic_elements_list]),
+        'deep_components': list([deep_components_obj.serialize(**params) for deep_components_obj in deep_components_list]),
+        'character_glyphs': list([character_glyphs_obj.serialize(**params) for character_glyphs_obj in character_glyphs_list]),
     }
     return ApiResponseSuccess(data)
 

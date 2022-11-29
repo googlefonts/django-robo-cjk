@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from benedict import benedict
+
+from robocjk.debug import logger
+
 
 USER_FIELDS = [
     'id', 'username', 'first_name', 'last_name', 'email',
@@ -95,8 +99,9 @@ def _serialize_glif_layer(obj, fields, **kwargs):
 
 
 def serialize_atomic_element(obj, **kwargs):
-    return_layers = kwargs.get('return_layers', True)
-    return_related = kwargs.get('return_related', True)
+    options = benedict(kwargs)
+    return_layers = options.get_bool('return_layers', True)
+    return_related = options.get_bool('return_related', True)
     data = _serialize_glif(obj, ATOMIC_ELEMENT_FIELDS, **kwargs)
     data['type'] = 'Atomic Element'
     data['type_code'] = 'AE'
@@ -113,8 +118,9 @@ def serialize_atomic_element_layer(obj, **kwargs):
 
 
 def serialize_deep_component(obj, **kwargs):
-    return_layers = kwargs.get('return_layers', True)
-    return_related = kwargs.get('return_related', True)
+    options = benedict(kwargs)
+    return_layers = options.get_bool('return_layers', True)
+    return_related = options.get_bool('return_related', True)
     data = _serialize_glif(obj, DEEP_COMPONENT_FIELDS, **kwargs)
     data['type'] = 'Deep Component'
     data['type_code'] = 'DC'
@@ -129,8 +135,9 @@ def serialize_deep_component(obj, **kwargs):
 
 
 def serialize_character_glyph(obj, **kwargs):
-    return_layers = kwargs.get('return_layers', True)
-    return_related = kwargs.get('return_related', True)
+    options = benedict(kwargs)
+    return_layers = options.get_bool('return_layers', True)
+    return_related = options.get_bool('return_related', True)
     data = _serialize_glif(obj, CHARACTER_GLYPH_FIELDS, **kwargs)
     data['type'] = 'Character Glyph'
     data['type_code'] = 'CG'

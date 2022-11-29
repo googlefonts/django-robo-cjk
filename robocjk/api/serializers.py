@@ -102,7 +102,7 @@ def _serialize_glif(obj, fields, **kwargs):
     if obj.locked_by_id:
         user = obj.locked_by
         data['locked_by_user'] = serialize_user(user, **kwargs)
-        data['locked_at'] = obj.locket_at
+        data['locked_at'] = obj.locked_at
     return data
 
 

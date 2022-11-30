@@ -111,6 +111,16 @@ def _serialize_glif_layer(obj, fields, **kwargs):
     return data
 
 
+def get_glif_serialization_options(params):
+    params = benedict(params)
+    return {
+        'exclude_fields': params.get_list('exclude_fields', []),
+        'return_data': params.get_bool('return_data', True),
+        'return_layers': params.get_bool('return_layers', True),
+        'return_related': params.get_bool('return_related', True),
+    }
+
+
 def serialize_atomic_element(obj, **kwargs):
     options = benedict(kwargs)
     return_data = options.get_bool('return_data', True)

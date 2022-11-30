@@ -194,8 +194,8 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             'git commit -m "{}"'.format('Updated project.'),
             'git push origin {}'.format(repo_branch))
 
-    def serialize(self, **kwargs):
-        return serialize_project(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_project(self, options)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -511,8 +511,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         users_qs = user_manager.filter(pk__in=users_pks).order_by('first_name', 'last_name')
         return users_qs
 
-    def serialize(self, **kwargs):
-        return serialize_font(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_font(self, options)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -593,7 +593,7 @@ class GlyphsComposition(TimestampModel):
         default=dict,
         verbose_name=_('Data'))
 
-    def serialize(self, **kwargs):
+    def serialize(self, options=None):
         return self.data or {}
 
     def __str__(self):
@@ -1053,8 +1053,8 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def path(self):
         return get_character_glyph_path(self)
 
-    def serialize(self, **kwargs):
-        return serialize_character_glyph(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_character_glyph(self, options)
 
     def update_layers_updated_at(self):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
@@ -1100,8 +1100,8 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
         super(CharacterGlyphLayer, self).save(*args, **kwargs)
         self.glif.update_layers_updated_at()
 
-    def serialize(self, **kwargs):
-        return serialize_character_glyph_layer(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_character_glyph_layer(self, options)
 
     def __str__(self):
         return force_str('[{}] {}'.format(
@@ -1141,8 +1141,8 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def path(self):
         return get_deep_component_path(self)
 
-    def serialize(self, **kwargs):
-        return serialize_deep_component(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_deep_component(self, options)
 
     def __str__(self):
         return force_str('{}'.format(
@@ -1178,8 +1178,8 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     def path(self):
         return get_atomic_element_path(self)
 
-    def serialize(self, **kwargs):
-        return serialize_atomic_element(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_atomic_element(self, options)
 
     def update_layers_updated_at(self):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
@@ -1225,8 +1225,8 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
         super(AtomicElementLayer, self).save(*args, **kwargs)
         self.glif.update_layers_updated_at()
 
-    def serialize(self, **kwargs):
-        return serialize_atomic_element_layer(self, **kwargs)
+    def serialize(self, options=None):
+        return serialize_atomic_element_layer(self, options)
 
     def __str__(self):
         return force_str('[{}] {}'.format(

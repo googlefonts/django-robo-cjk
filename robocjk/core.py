@@ -101,7 +101,7 @@ class GlifData(object):
             if var_glyphs:
                 for item in var_glyphs:
                     item_key = 'status_{}'.format(item.get('sourceName', ''))
-                    self._status_with_variations[item_key] = item.get('status', '')
+                    self._status_with_variations[item_key] = item.get('status', 0)
 
             # parse status color old format fallback
             self._status_color = self._lib.get('public.markColor', None)

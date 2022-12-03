@@ -91,7 +91,7 @@ class GlifData(object):
             self._lib = benedict.from_plist(lib_str, keypath_separator='/')
 
             # parse status color new format 2021/09: public.markColor -> robocjk.status
-            self._status = self._lib.get('robocjk.status', None)
+            self._status = self._lib.get('robocjk.status', 0) or 0
             self._status_with_variations = {
                 'status': self._status,
             }
@@ -101,7 +101,7 @@ class GlifData(object):
             if var_glyphs:
                 for item in var_glyphs:
                     item_key = 'status_{}'.format(item.get('sourceName', ''))
-                    self._status_with_variations[item_key] = item.get('status', 0)
+                    self._status_with_variations[item_key] = item.get('status', 0) or 0
 
             # parse status color old format fallback
             self._status_color = self._lib.get('public.markColor', None)

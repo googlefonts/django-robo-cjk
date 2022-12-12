@@ -284,12 +284,12 @@ def require_atomic_element(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if not obj.is_lockable_by(user):
+                if obj.is_locked_by(user) or obj.is_lockable_by(user):
+                    # ok
+                    pass
+                else:
                     return ApiResponseForbidden(
-                        'Atomic Element object has already been locked by another user.')
-                if not obj.is_locked_by(user):
-                    return ApiResponseForbidden(
-                        'Atomic Element object must be locked by the current user.')
+                        'Atomic Element object is not already locked by the current user and can\'t be locked by the current user.')
             # success
             kwargs['atomic_element'] = obj
             return view_func(request, *args, **kwargs)
@@ -373,12 +373,12 @@ def require_deep_component(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if not obj.is_lockable_by(user):
+                if obj.is_locked_by(user) or obj.is_lockable_by(user):
+                    # ok
+                    pass
+                else:
                     return ApiResponseForbidden(
-                        'Deep Component object has already been locked by another user.')
-                if not obj.is_locked_by(user):
-                    return ApiResponseForbidden(
-                        'Deep Component object must be locked by the current user.')
+                        'Deep Component object is not already locked by the current user and can\'t be locked by the current user.')
             # success
             kwargs['deep_component'] = obj
             return view_func(request, *args, **kwargs)
@@ -425,12 +425,12 @@ def require_character_glyph(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if not obj.is_lockable_by(user):
+                if obj.is_locked_by(user) or obj.is_lockable_by(user):
+                    # ok
+                    pass
+                else:
                     return ApiResponseForbidden(
-                        'Character Glyph object has been locked by another user.')
-                if not obj.is_locked_by(user):
-                    return ApiResponseForbidden(
-                        'Character Glyph object must be locked by the current user.')
+                        'Character Glyph object is not already locked by the current user and can\'t be locked by the current user.')
             # success
             kwargs['character_glyph'] = obj
             return view_func(request, *args, **kwargs)

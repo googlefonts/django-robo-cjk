@@ -19,7 +19,7 @@ FONT_FIELDS = [
 
 GLIF_FIELDS = [
     'id', 'data', 'name', 'filename', 'unicode_hex',
-    'is_locked', 'locked_by_id', 'locked_at', 'lock_key', 'status',
+    'is_locked', 'locked_by_id', 'locked_at', 'status',
     'is_empty', 'has_variation_axis', 'has_outlines', 'has_components', 'has_unicode',
     'created_at', 'updated_at',
 ]

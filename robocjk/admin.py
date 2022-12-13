@@ -358,7 +358,7 @@ class GlifAdmin(admin.ModelAdmin):
             }),
             ('Locking', {
                 'classes': ('collapse', ),
-                'fields': ('is_locked', 'locked_by', 'locked_at', 'lock_key', ),
+                'fields': ('is_locked', 'locked_by', 'locked_at', ),
             }),
             ('Status', {
                 'classes': ('collapse', ),

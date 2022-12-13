@@ -300,6 +300,24 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/atomic-element/create/', payload=payload)
         self.assert_response_ok(response)
 
+    def test_0073_atomic_element_lock(self):
+        # print('test_0075_atomic_element_lock')
+        payload = {
+           'font_uid': self.get_font_uid(),
+           'name': 'hengpietest',
+        }
+        response, data = self.get_response('/api/atomic-element/lock/', payload=payload)
+        self.assert_response_error(response, 403)
+
+    def test_0074_atomic_element_unlock(self):
+        # print('test_0074_atomic_element_unlock')
+        payload = {
+           'font_uid': self.get_font_uid(),
+           'name': 'hengpietest',
+        }
+        response, data = self.get_response('/api/atomic-element/unlock/', payload=payload)
+        self.assert_response_ok(response)
+
     def test_0075_atomic_element_lock(self):
         # print('test_0075_atomic_element_lock')
         payload = {
@@ -533,6 +551,24 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/deep-component/create/', payload=payload)
         self.assert_response_ok(response)
 
+    def test_0213_deep_component_lock(self):
+        # print('test_0213_deep_component_lock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'name': 'DC_200CA_01test',
+        }
+        response, data = self.get_response('/api/deep-component/lock/', payload=payload)
+        self.assert_response_error(response, 403)
+
+    def test_0214_deep_component_unlock(self):
+        # print('test_0214_deep_component_unlock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'name': 'DC_200CA_01test',
+        }
+        response, data = self.get_response('/api/deep-component/unlock/', payload=payload)
+        self.assert_response_ok(response)
+
     def test_0215_deep_component_lock(self):
         # print('test_0215_deep_component_lock')
         payload = {
@@ -624,7 +660,25 @@ class APIsTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_0275_character_glyph_lock(self):
-        # print('test_0270_character_glyph_create')
+        # print('test_0275_character_glyph_lock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'name': 'uni200CAtest',
+        }
+        response, data = self.get_response('/api/character-glyph/lock/', payload=payload)
+        self.assert_response_error(response, 403)
+
+    def test_0280_character_glyph_unlock(self):
+        # print('test_0280_character_glyph_unlock')
+        payload = {
+            'font_uid': self.get_font_uid(),
+            'name': 'uni200CAtest',
+        }
+        response, data = self.get_response('/api/character-glyph/unlock/', payload=payload)
+        self.assert_response_ok(response)
+
+    def test_0285_character_glyph_lock(self):
+        # print('test_0285_character_glyph_lock')
         payload = {
             'font_uid': self.get_font_uid(),
             'name': 'uni200CAtest',
@@ -632,7 +686,7 @@ class APIsTestCase(TestCase):
         response, data = self.get_response('/api/character-glyph/lock/', payload=payload)
         self.assert_response_ok(response)
 
-    def test_0280_character_glyph_update(self):
+    def test_0289_character_glyph_update(self):
         # print('test_0280_character_glyph_update')
         payload = {
             'font_uid': self.get_font_uid(),

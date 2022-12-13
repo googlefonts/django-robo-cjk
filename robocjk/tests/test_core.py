@@ -117,7 +117,7 @@ class CoreTestCase(TestCase):
         # old format
         glif_data = self._read_glif_data('test_core_data/characterGlyph/cieuc.glif')
         # print(glif_data.status_color)
-        self.assertEqual(glif_data.status, None)
+        self.assertEqual(glif_data.status, 0)
         self.assertEqual(glif_data.status_color, '1,0,0,1')
 
     def test_glyph_data_status(self):

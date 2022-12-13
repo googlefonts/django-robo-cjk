@@ -41,10 +41,6 @@ from robocjk.io.paths import (
     get_atomic_element_layer_path,
     get_proof_path,
 )
-from robocjk.locking import (
-    decode_lock_key,
-    encode_lock_key,
-)
 from robocjk.managers import (
     ProjectManager,
     FontManager,
@@ -633,10 +629,6 @@ class LockableModel(models.Model):
         default=None,
         verbose_name=_('Locked at'))
 
-    lock_key = models.TextField(
-        blank=True,
-        verbose_name=_('Lock key'))
-
     def _is_valid_user(self, user):
         if not user or user.is_anonymous or not user.is_active:
             return False
@@ -650,11 +642,6 @@ class LockableModel(models.Model):
             self.is_locked = True
             self.locked_by = user
             self.locked_at = dt.datetime.now()
-            self.lock_key = encode_lock_key(
-                user=self.locked_by,
-                glif=self,
-                date=self.locked_at,
-            )
             if save:
                 # self.save()
                 # don't call save method because it updates the updated_at field timestamp
@@ -663,7 +650,6 @@ class LockableModel(models.Model):
                     is_locked=self.is_locked,
                     locked_by=self.locked_by,
                     locked_at=self.locked_at,
-                    lock_key=self.lock_key,
                 )
             # return True, self.lock_key # <- break functions that check the return value
             return True
@@ -689,7 +675,6 @@ class LockableModel(models.Model):
                 self.is_locked = False
                 self.locked_by = None
                 self.locked_at = None
-                self.lock_key = ""
                 if save:
                     # self.save()
                     # don't call save method because it updates the updated_at field timestamp
@@ -698,7 +683,6 @@ class LockableModel(models.Model):
                         is_locked=self.is_locked,
                         locked_by=self.locked_by,
                         locked_at=self.locked_at,
-                        lock_key="",
                     )
                 return True
             return False

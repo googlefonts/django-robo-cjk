@@ -665,8 +665,10 @@ class LockableModel(models.Model):
                     locked_at=self.locked_at,
                     lock_key=self.lock_key,
                 )
-            return True, self.lock_key
-        return False, None
+            # return True, self.lock_key # <- break functions that check the return value
+            return True
+        # return False, None # <- break functions that check the return value
+        return False
 
     def is_lockable_by(self, user):
         if not self._is_valid_user(user):
@@ -687,6 +689,7 @@ class LockableModel(models.Model):
                 self.is_locked = False
                 self.locked_by = None
                 self.locked_at = None
+                self.lock_key = ""
                 if save:
                     # self.save()
                     # don't call save method because it updates the updated_at field timestamp
@@ -695,6 +698,7 @@ class LockableModel(models.Model):
                         is_locked=self.is_locked,
                         locked_by=self.locked_by,
                         locked_at=self.locked_at,
+                        lock_key="",
                     )
                 return True
             return False

@@ -284,10 +284,7 @@ def require_atomic_element(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if obj.is_locked_by(user) or obj.is_lockable_by(user):
-                    # ok
-                    pass
-                else:
+                if not obj.is_locked_by(user):
                     return ApiResponseForbidden(
                         'Atomic Element object is not already locked by the current user and can\'t be locked by the current user.')
             # success
@@ -373,10 +370,7 @@ def require_deep_component(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if obj.is_locked_by(user) or obj.is_lockable_by(user):
-                    # ok
-                    pass
-                else:
+                if not obj.is_locked_by(user):
                     return ApiResponseForbidden(
                         'Deep Component object is not already locked by the current user and can\'t be locked by the current user.')
             # success
@@ -425,10 +419,7 @@ def require_character_glyph(**kwargs):
                 pass
             elif check_locked:
                 user = kwargs['user']
-                if obj.is_locked_by(user) or obj.is_lockable_by(user):
-                    # ok
-                    pass
-                else:
+                if not obj.is_locked_by(user):
                     return ApiResponseForbidden(
                         'Character Glyph object is not already locked by the current user and can\'t be locked by the current user.')
             # success

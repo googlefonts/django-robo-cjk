@@ -651,9 +651,7 @@ class LockableModel(models.Model):
                     locked_by=self.locked_by,
                     locked_at=self.locked_at,
                 )
-            # return True, self.lock_key # <- break functions that check the return value
             return True
-        # return False, None # <- break functions that check the return value
         return False
 
     def is_lockable_by(self, user):

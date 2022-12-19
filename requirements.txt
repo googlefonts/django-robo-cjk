@@ -34,7 +34,7 @@ mysqlclient==2.1.1
 phonenumbers==8.13.2
 pip-chill==1.0.1
 pipdeptree==2.3.3
-pycparser==2.20
+pycparser==2.21
 PyJWT==2.6.0
 pyOpenSSL==22.1.0
 pyparsing==3.0.9

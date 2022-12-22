@@ -21,7 +21,7 @@ django-js-asset==2.0.0
 django-json-widget==1.1.1
 fonttools==4.24.0
 fs==2.4.16
-ftfy==5.9
+ftfy==6.1.1
 future==0.18.2
 gevent==22.10.2
 greenlet==2.0.1

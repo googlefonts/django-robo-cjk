@@ -887,7 +887,7 @@ class GlifDataModel(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(GlifDataModel, self).__init__(*args, **kwargs)
-        self._init_data = self.data
+        self._init_data = None
 
     def _parse_data(self, data_str):
         if data_str:
@@ -924,6 +924,9 @@ class GlifDataModel(models.Model):
         if not isinstance(self, (CharacterGlyph, DeepComponent, AtomicElement, )):
             # glif layers have not status
             return
+
+        if not self._init_data:
+            self._init_data = self.data
 
         if self.data == self._init_data:
             # data is not changed

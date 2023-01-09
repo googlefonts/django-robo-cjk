@@ -369,11 +369,10 @@ class GlifAdmin(admin.ModelAdmin):
             }),
         )
 
-    # def get_queryset(self, request):
-    #     qs = super().get_queryset(request)
-    #     # causes n+1 queries
-    #     # qs = qs.defer('data')
-    #     return qs
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.defer('data')
+        return qs
 
     save_on_top = True
     show_full_result_count = False

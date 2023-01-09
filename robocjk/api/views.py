@@ -405,7 +405,7 @@ def atomic_element_create(request, params, user, font, data, glif, *args, **kwar
     atomic_element.font_id = font.id
     atomic_element.name = glif.name
     atomic_element.data = data
-    atomic_element.lock_by(user)
+    # atomic_element.lock_by(user)
     atomic_element.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize(options=params))
 
@@ -532,7 +532,7 @@ def deep_component_create(request, params, user, font, data, glif, *args, **kwar
     deep_component.font_id = font.id
     deep_component.name = glif.name
     deep_component.data = data
-    deep_component.lock_by(user)
+    # deep_component.lock_by(user)
     deep_component.save_by(user)
     return ApiResponseSuccess(deep_component.serialize(options=params))
 
@@ -602,7 +602,7 @@ def character_glyph_create(request, params, user, font, data, glif, *args, **kwa
     character_glyph.font_id = font.id
     character_glyph.name = glif.name
     character_glyph.data = data
-    character_glyph.lock_by(user)
+    # character_glyph.lock_by(user)
     character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize(options=params))
 

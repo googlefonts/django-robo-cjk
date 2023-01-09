@@ -307,7 +307,8 @@ class APIsTestCase(TestCase):
            'name': 'hengpietest',
         }
         response, data = self.get_response('/api/atomic-element/lock/', payload=payload)
-        self.assert_response_error(response, 403)
+        # self.assert_response_error(response, 403)
+        self.assert_response_ok(response)
 
     def test_0074_atomic_element_unlock(self):
         # print('test_0074_atomic_element_unlock')
@@ -558,7 +559,8 @@ class APIsTestCase(TestCase):
             'name': 'DC_200CA_01test',
         }
         response, data = self.get_response('/api/deep-component/lock/', payload=payload)
-        self.assert_response_error(response, 403)
+        # self.assert_response_error(response, 403)
+        self.assert_response_ok(response)
 
     def test_0214_deep_component_unlock(self):
         # print('test_0214_deep_component_unlock')
@@ -666,7 +668,8 @@ class APIsTestCase(TestCase):
             'name': 'uni200CAtest',
         }
         response, data = self.get_response('/api/character-glyph/lock/', payload=payload)
-        self.assert_response_error(response, 403)
+        # self.assert_response_error(response, 403)
+        self.assert_response_ok(response)
 
     def test_0280_character_glyph_unlock(self):
         # print('test_0280_character_glyph_unlock')

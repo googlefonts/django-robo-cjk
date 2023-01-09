@@ -22,9 +22,10 @@ pip==22.3.1
 pip-chill==1.0.1
 pipdeptree==2.3.3
 PyJWT==2.6.0
-pyOpenSSL==22.1.0
+pyOpenSSL==23.0.0
 pyparsing==3.0.9
-python-benedict==0.27.1
+python-benedict==0.28.1
+python-fsutil==0.9.1
 requests==2.28.1
 sentry-sdk==1.12.1
 unicodecsv==0.14.1

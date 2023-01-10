@@ -904,6 +904,9 @@ class GlifDataModel(models.Model):
     def _apply_data(self, data):
         if not data:
             return
+
+        self._update_init_data()
+
         self.data = data.xml_string
         self.name = data.name
         self.filename = data.filename
@@ -915,6 +918,10 @@ class GlifDataModel(models.Model):
         self.has_unicode = data.has_unicode
         self.components = data.components_str
 
+    def _update_init_data(self):
+        if not self._init_data:
+            self._init_data = self.data
+
     def _update_status(self, glif_data):
 
         if not glif_data:
@@ -925,8 +932,7 @@ class GlifDataModel(models.Model):
             # glif layers have not status
             return
 
-        if not self._init_data:
-            self._init_data = self.data
+        self._update_init_data()
 
         if self.data == self._init_data:
             # data is not changed
@@ -995,6 +1001,7 @@ class GlifDataModel(models.Model):
         raise NotImplementedError
 
     def save(self, *args, **kwargs):
+        self._update_init_data()
         glif_data = self._parse_data(self.data)
         self._apply_data(glif_data)
         self._update_status(glif_data)

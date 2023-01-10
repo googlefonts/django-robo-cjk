@@ -324,6 +324,17 @@ CACHES = {
 # logger = logging.getLogger('app')
 # logger.debug('message')
 
+def get_app_logger(level_debug, level, propagate=False):
+    handlers = ['debug_file', 'info_file', 'warning_file', 'error_file', 'mail_admins']
+    # handlers = ['console', 'debug_file', 'info_file', 'warning_file', 'error_file', 'mail_admins']
+    logger_options = {
+        'handlers': handlers,
+        'level': level_debug if DEBUG else level,
+        'propagate': propagate,
+    }
+    # print(logger_options)
+    return logger_options
+
 
 LOGGING = {
     'version': 1,
@@ -351,15 +362,15 @@ LOGGING = {
             'backupCount': 1,
             'formatter':'verbose',
         },
-        'debug_queries_file': {
-            'level': 'DEBUG',
-            # 'class': 'logging.FileHandler',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': ENV_DIR + '/logs/django-mysql-debug.log',
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 1,
-            'formatter':'verbose',
-        },
+#         'debug_queries_file': {
+#             'level': 'DEBUG',
+#             # 'class': 'logging.FileHandler',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': ENV_DIR + '/logs/django-mysql-debug.log',
+#             'maxBytes': 1024 * 1024 * 5, # 5 MB
+#             'backupCount': 1,
+#             'formatter':'verbose',
+#         },
         'info_file': {
             'level': 'INFO',
             # 'class': 'logging.FileHandler',
@@ -368,9 +379,6 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 1,
             'formatter': 'verbose',
-        },
-        'null': {
-            'class': 'logging.NullHandler',
         },
         'warning_file': {
             'level': 'WARNING',
@@ -396,13 +404,14 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },
+        'null': {
+            'class': 'logging.NullHandler',
+        },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'warning_file', 'error_file', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
+        'django': get_app_logger(
+            level_debug='WARNING', level='ERROR'
+        ),
 #         'django.db.backends': {
 #             'handlers': ['debug_queries_file'],
 #             'level': 'DEBUG',
@@ -411,16 +420,15 @@ LOGGING = {
             'handlers': ['null'],
             'propagate': False,
         },
-        'app': {
-            'handlers': ['console', 'warning_file', 'error_file'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
-        'robocjk': {
-            'handlers': ['console', 'debug_file', 'info_file', 'warning_file', 'error_file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        'app': get_app_logger(
+            level_debug='WARNING', level='ERROR'
+        ),
+        'robocjk': get_app_logger(
+            level_debug='WARNING', level='ERROR'
+        ),
+        '': get_app_logger(
+            level_debug='WARNING', level='ERROR', propagate=False
+        ),
     }
 }
 

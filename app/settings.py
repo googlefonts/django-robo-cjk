@@ -424,7 +424,7 @@ LOGGING = {
             level_debug='WARNING', level='ERROR'
         ),
         'robocjk': get_app_logger(
-            level_debug='WARNING', level='WARNING'
+            level_debug='INFO', level='INFO'
         ),
         '': get_app_logger(
             level_debug='WARNING', level='ERROR', propagate=False

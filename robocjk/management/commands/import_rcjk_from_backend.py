@@ -3,6 +3,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
+from extra_settings.models import Setting
+
 from robocjk.models import FontImport
 
 import io
@@ -17,6 +19,12 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+
+        import_enabled = Setting.get("ROBOCJK_IMPORT_ENABLED", default=True)
+        if not import_enabled:
+            message = "Import has been disabled through the 'ROBOCJK_IMPORT_ENABLED' setting in the admin."
+            self.stderr.write(message)
+            raise CommandError(message)
 
         if FontImport.objects.filter(status=FontImport.STATUS_LOADING).exists():
             self.stdout.write('There are already one or more fonts being loaded, retry later please.')

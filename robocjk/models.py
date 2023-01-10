@@ -14,6 +14,8 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 
+from extra_settings.models import Setting as ExtraSetting
+
 from robocjk.abstract_models import (
     UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel,
 )
@@ -1286,7 +1288,6 @@ class Proof(TimestampModel):
     def __str__(self):
         return force_str('[{}] {}'.format(
             self.get_filetype_display(), self.file))
-
 
 
 from robocjk.signals import *

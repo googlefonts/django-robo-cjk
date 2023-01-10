@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'django_json_widget',
+    'extra_settings',
     'rangefilter',
     'robocjk',
     'django_cleanup.apps.CleanupConfig',
@@ -299,6 +300,11 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': ENV_DIR + '/cache/',
+    },
+    "extra_settings": {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': ENV_DIR + '/cache/settings/',
+        'TIMEOUT': 60,
     },
 }
 

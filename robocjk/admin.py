@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from django_json_widget.widgets import JSONEditorWidget
+from extra_settings.admin import register_extra_settings_admin
 from rangefilter.filters import DateTimeRangeFilter
 
 from robocjk.actions import export_as_csv
@@ -20,8 +21,16 @@ from robocjk.models import (
     DeepComponent,
     AtomicElement, AtomicElementLayer,
     Proof, StatusModel,
+    # Setting,
 )
 from robocjk.utils import unicode_to_char
+
+
+register_extra_settings_admin(
+    app=__name__,
+    queryset_processor=None,
+    unregister_default=True,
+)
 
 
 admin.site.unregister(User)

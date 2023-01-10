@@ -5,6 +5,8 @@ from benedict import benedict
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
+from extra_settings.models import Setting
+
 from robocjk.core import GlifData
 from robocjk.io.paths import (
     FONTLIB_RE, FEATURES_RE, DESIGNSPACE_RE,
@@ -98,6 +100,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+
+        import_enabled = Setting.get("ROBOCJK_IMPORT_ENABLED", default=True)
+        if not import_enabled:
+            message = "Import has been disabled through the 'ROBOCJK_IMPORT_ENABLED' setting in the admin."
+            self.stderr.write(message)
+            raise CommandError(message)
 
         filepath = options.get('filepath')
         if not filepath.startswith('/'):

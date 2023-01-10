@@ -2,6 +2,8 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
+from extra_settings.models import Setting
+
 from robocjk.debug import logger
 from robocjk.models import Project
 
@@ -26,6 +28,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+
+        export_enabled = Setting.get("ROBOCJK_EXPORT_ENABLED", default=True)
+        if not export_enabled:
+            message = "Export has been disabled through the 'ROBOCJK_EXPORT_ENABLED' setting in the admin."
+            self.stderr.write(message)
+            raise CommandError(message)
 
         logger.info('-' * 100)
         logger.info('Start export - pid: {} - thread: {}'.format(

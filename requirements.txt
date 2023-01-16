@@ -28,7 +28,7 @@ pyparsing==3.0.9
 python-benedict==0.28.1
 python-fsutil==0.9.1
 requests==2.28.1
-sentry-sdk==1.12.1
+sentry-sdk==1.13.0
 unicodecsv==0.14.1
 wheel==0.38.4
 whitenoise==6.2.0

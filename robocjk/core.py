@@ -30,6 +30,7 @@ class GlifData(object):
     _status_color = None
     _status = None
     _status_dict = None # status and variation status
+    _status_with_variations = {}
     _ok = False
 
     def __init__(self, *args):

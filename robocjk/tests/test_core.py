@@ -140,3 +140,24 @@ class CoreTestCase(TestCase):
             'status_wght': 4,
         }
         self.assertEqual(glif_data.status_with_variations, expected_value)
+
+    def test_glyph_data_with_new_empty_glif(self):
+        glif_str = """<?xml version='1.0' encoding='UTF-8'?>
+        <glyph name="foo" format="2">
+          <outline>
+          </outline>
+        </glyph>"""
+        glif_data = GlifData()
+        glif_data.parse_string(glif_str)
+        self.assertTrue(glif_data.ok)
+        self.assertEqual(glif_data.error, None)
+        self.assertEqual(glif_data.name, 'foo')
+        self.assertEqual(glif_data.filename, 'foo.glif')
+        self.assertEqual(glif_data.unicode_hex, '')
+        self.assertEqual(glif_data.components_names, [])
+        self.assertEqual(glif_data.components_str, '')
+        self.assertFalse(glif_data.has_components)
+        self.assertFalse(glif_data.has_outlines)
+        self.assertFalse(glif_data.has_unicode)
+        self.assertFalse(glif_data.has_variation_axis)
+        self.assertTrue(glif_data.is_empty)

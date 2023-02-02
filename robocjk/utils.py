@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from fontTools.pens.recordingPen import RecordingPointPen
 from fontTools.ufoLib.glifLib import readGlyphFromString, writeGlyphToString
 
@@ -20,10 +18,10 @@ def char_to_unicode(s):
 
 
 def unicode_to_char(s):
-    return chr(int('0x{}'.format(s.lstrip('0')).lower(), 16))
+    return chr(int("0x{}".format(s.lstrip("0")).lower(), 16))
 
 
-illegal_characters = "\" * + / : < > ? [ \ ] | \0".split(" ")
+illegal_characters = '" * + / : < > ? [ \\ ] | \0'.split(" ")
 illegal_characters += [chr(i) for i in range(1, 32)]
 illegal_characters += [chr(0x7F)]
 reserved_filenames = "CON PRN AUX CLOCK$ NUL A:-Z: COM1".lower().split(" ")
@@ -103,8 +101,8 @@ def username_to_filename(username, existing=[], prefix="", suffix=""):
         filtered_username.append(character)
     username = "".join(filtered_username)
     # clip to 255
-    sliceLength = filename_max_length - prefix_length - suffix_length
-    username = username[:sliceLength]
+    slice_length = filename_max_length - prefix_length - suffix_length
+    username = username[:slice_length]
     # test for illegal files names
     parts = []
     for part in username.split("."):
@@ -151,9 +149,9 @@ def _handle_clash1(username, existing=[], prefix="", suffix=""):
     prefix_length = len(prefix)
     suffix_length = len(suffix)
     if prefix_length + len(username) + suffix_length + 15 > filename_max_length:
-        l = (prefix_length + len(username) + suffix_length + 15)
-        sliceLength = filename_max_length - l
-        username = username[:sliceLength]
+        total_length = prefix_length + len(username) + suffix_length + 15
+        slice_length = filename_max_length - total_length
+        username = username[:slice_length]
     final_name = None
     # try to add numbers to create a unique name
     counter = 1
@@ -214,7 +212,6 @@ def _handle_clash2(existing=[], prefix="", suffix=""):
             break
     # raise an error if nothing has been found
     if final_name is None:
-        raise NameTranslationError("No unique name could be found.")
+        raise NameError("No unique name could be found.")
     # finished
     return final_name
-

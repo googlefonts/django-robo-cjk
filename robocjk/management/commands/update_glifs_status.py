@@ -1,24 +1,13 @@
-# -*- coding: utf-8 -*-
+from django.core.management.base import BaseCommand
 
-from django.core.management.base import BaseCommand, CommandError
-from django.core.management import call_command
-
-from robocjk.models import (
-    StatusModel,
-    CharacterGlyph,
-    CharacterGlyphLayer,
-    DeepComponent,
-    AtomicElement,
-    AtomicElementLayer, )
+from robocjk.models import AtomicElement, CharacterGlyph, DeepComponent, StatusModel
 
 
 class Command(BaseCommand):
-
-    help = 'Update all glifs status (from xml value).'
+    help = "Update all glifs status (from xml value)."
 
     def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
-
+        super().__init__(*args, **kwargs)
 
     def handle(self, *args, **options):
         glif_models = [CharacterGlyph, DeepComponent, AtomicElement]
@@ -46,5 +35,8 @@ class Command(BaseCommand):
                         glif_obj.save()
 
                 glif_objs_counter += 1
-                print('Updated {} of {} - {} models.'.format(
-                    glif_objs_counter, glif_objs_total, glif_model))
+                print(
+                    "Updated {} of {} - {} models.".format(
+                        glif_objs_counter, glif_objs_total, glif_model
+                    )
+                )

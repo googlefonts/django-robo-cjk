@@ -1,24 +1,17 @@
-# -*- coding: utf-8 -*-
-
 # from robocjk.debug import logger
-from robocjk.io.decorators import threaded
-from robocjk.io.paths import (
-    get_project_path,
-    get_font_path,
-    # get_character_glyph_path,
-    # get_character_glyph_layer_path,
-    # get_deep_component_path,
-    # get_atomic_element_path,
-    # get_atomic_element_layer_path,
-    # get_proof_path,
-)
+import os
 
 import fsutil
-import os
+
+from robocjk.io.decorators import threaded
+from robocjk.io.paths import (  # get_character_glyph_path,; get_character_glyph_layer_path,; get_deep_component_path,; get_atomic_element_path,; get_atomic_element_layer_path,; get_proof_path,
+    get_font_path,
+    get_project_path,
+)
 
 
 def run_system_commands(*args):
-    cmd = ' && '.join(args)
+    cmd = " && ".join(args)
     os.system(cmd)
 
 
@@ -34,6 +27,8 @@ def create_or_update_project(instance, created, **kwargs):
             new_name = instance.slug
             fsutil.rename_dir(old_path, new_name)
     # init git repository if needed
+
+
 #     path = instance.path()
 #     fsutil.ensure_dirpath(path)
 #     git_repo_path = os.path.join(path, '.git')

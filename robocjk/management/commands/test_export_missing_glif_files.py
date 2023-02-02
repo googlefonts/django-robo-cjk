@@ -1,19 +1,14 @@
-# -*- coding: utf-8 -*-
-
-from django.core.management.base import BaseCommand, CommandError
-from django.core.management import call_command
+import fsutil
+from django.core.management.base import BaseCommand
 
 from robocjk.models import CharacterGlyph, CharacterGlyphLayer
 
-import fsutil
-
 
 class Command(BaseCommand):
-
-    help = 'Test export missing glif files'
+    help = "Test export missing glif files"
 
     def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def handle(self, *args, **options):
         # self.debug_missing_character_glyphs_files()
@@ -48,13 +43,13 @@ class Command(BaseCommand):
                 print(cg_obj)
                 print(cg_path)
 
-#         458822
-#         uni4F60.alt00
-#         /root/.rcjks/autocjk-hanzi/autocjk-hanzi.rcjk/characterGlyph/uni4F_60.alt00.glif
+    #         458822
+    #         uni4F60.alt00
+    #         /root/.rcjks/autocjk-hanzi/autocjk-hanzi.rcjk/characterGlyph/uni4F_60.alt00.glif
 
-#         458850
-#         uni4F64.alt00
-#         /root/.rcjks/autocjk-hanzi/autocjk-hanzi.rcjk/characterGlyph/uni4F_64.alt00.glif
+    #         458850
+    #         uni4F64.alt00
+    #         /root/.rcjks/autocjk-hanzi/autocjk-hanzi.rcjk/characterGlyph/uni4F_64.alt00.glif
 
     def debug_missing_character_glyphs_layers_files(self):
         cg_layers_qs = CharacterGlyphLayer.objects.filter(glif__font_id=21).defer("data")
@@ -65,6 +60,7 @@ class Command(BaseCommand):
                 print(cg_layer_obj.id)
                 print(cg_layer_obj)
                 print(cg_layer_path)
+
 
 #         723047
 #         [backup_master] uni4F60.alt00

@@ -1,27 +1,23 @@
-# -*- coding: utf-8 -*-
-
-import json
-
-# from django.conf import settings
+from xml.etree import ElementTree
 
 from benedict import benedict
-from xml.etree import ElementTree
 
 # from robocjk.debug import logger
 from robocjk.utils import username_to_filename
 
+# from django.conf import settings
 
-class GlifData(object):
 
+class GlifData:
     _error = None
     _xml_string = None
     _xml = None
     _lib = None
-    _name = ''
-    _filename = ''
-    _unicode_hex = ''
+    _name = ""
+    _filename = ""
+    _unicode_hex = ""
     _components_names = []
-    _components_str = ''
+    _components_str = ""
     _has_components = False
     _has_outlines = False
     _has_unicode = False
@@ -29,27 +25,27 @@ class GlifData(object):
     _is_empty = True
     _status_color = None
     _status = None
-    _status_dict = None # status and variation status
+    _status_dict = None  # status and variation status
     _status_with_variations = {}
     _ok = False
 
     def __init__(self, *args):
-        super(GlifData, self).__init__()
+        super().__init__()
 
-#     def parse_file(self, fp):
-#         self._ok = False
-#         try:
-#             self._xml = ElementTree.parse(fp)
-#             self._xml_string = ElementTree.tostring(self._xml).decode()
-#         except ElementTree.ParseError as xml_data_error:
-#             self._error = xml_data_error
-#             return
-#         try:
-#             self._parse_data()
-#         except Exception as xml_parse_error:
-#             self._error = xml_parse_error
-#             return
-#         self._ok = True
+    #     def parse_file(self, fp):
+    #         self._ok = False
+    #         try:
+    #             self._xml = ElementTree.parse(fp)
+    #             self._xml_string = ElementTree.tostring(self._xml).decode()
+    #         except ElementTree.ParseError as xml_data_error:
+    #             self._error = xml_data_error
+    #             return
+    #         try:
+    #             self._parse_data()
+    #         except Exception as xml_parse_error:
+    #             self._error = xml_parse_error
+    #             return
+    #         self._ok = True
 
     def parse_string(self, s):
         self._ok = False
@@ -58,7 +54,8 @@ class GlifData(object):
             self._xml_string = s.strip()
             self._xml = ElementTree.fromstring(self._xml_string)
             self._xml_string = "<?xml version='1.0' encoding='UTF-8'?>\n{}".format(
-                ElementTree.tostring(self._xml).decode())
+                ElementTree.tostring(self._xml).decode()
+            )
         except ElementTree.ParseError as xml_data_error:
             self._error = xml_data_error
             return
@@ -71,60 +68,61 @@ class GlifData(object):
 
     def _parse_data(self):
         # parse name and generate filename
-        self._name = self._xml.get('name')
+        self._name = self._xml.get("name")
         if not self._name:
-            raise ValueError('Invalid name, name cannot be "".'.format(self._name))
+            raise ValueError(f"Invalid name, name cannot be '{self._name}'.")
 
-        self._filename = '{}.glif'.format(username_to_filename(self.name))
+        basename = username_to_filename(self.name)
+        self._filename = f"{basename}.glif"
 
         # look for glyph unicode hex value
-        unicode_xml = self._xml.find('./unicode')
+        unicode_xml = self._xml.find("./unicode")
         if unicode_xml is not None:
-            self._unicode_hex = unicode_xml.get('hex')
-            self._has_unicode = bool(self._unicode_hex != '')
+            self._unicode_hex = unicode_xml.get("hex")
+            self._has_unicode = bool(self._unicode_hex != "")
 
         # look for <lib><dict> xml node
-        lib_xml = self._xml.find('./lib/dict')
+        lib_xml = self._xml.find("./lib/dict")
         if lib_xml is not None:
             lib_str = ElementTree.tostring(lib_xml).decode()
 
             # parse lib as plist
-            self._lib = benedict.from_plist(lib_str, keypath_separator='/')
+            self._lib = benedict.from_plist(lib_str, keypath_separator="/")
 
             # parse status color new format 2021/09: public.markColor -> robocjk.status
-            self._status = self._lib.get('robocjk.status', 0) or 0
+            self._status = self._lib.get("robocjk.status", 0) or 0
             self._status_with_variations = {
-                'status': self._status,
+                "status": self._status,
             }
 
-            var_status = {}
-            var_glyphs = self._lib.get('robocjk.variationGlyphs', [])
+            var_glyphs = self._lib.get("robocjk.variationGlyphs", [])
             if var_glyphs:
                 for item in var_glyphs:
-                    item_key = 'status_{}'.format(item.get('sourceName', ''))
-                    self._status_with_variations[item_key] = item.get('status', 0) or 0
+                    item_key = "status_{}".format(item.get("sourceName", ""))
+                    self._status_with_variations[item_key] = item.get("status", 0) or 0
 
             # parse status color old format fallback
-            self._status_color = self._lib.get('public.markColor', None)
+            self._status_color = self._lib.get("public.markColor", None)
 
             # parse components list
-            components_list = self._lib.get('robocjk.deepComponents', [])
-            components_names_set = { item.get('name') for item in components_list}
-            if '' in components_names_set:
-                components_names_set.remove('')
+            components_list = self._lib.get("robocjk.deepComponents", [])
+            components_names_set = {item.get("name") for item in components_list}
+            if "" in components_names_set:
+                components_names_set.remove("")
             self._components_names = list(components_names_set)
             self._components_names.sort(key=str.lower)
-            self._components_str = ','.join(self._components_names)
+            self._components_str = ",".join(self._components_names)
             # self._components_str = ','.join({'{}'.format(item) for item in self._components_names})
 
             # update computed properties
             self._has_components = bool(components_list)
-            self._has_variation_axis = bool(self._lib.get('robocjk.glyphVariationGlyphs')) or \
-                                       bool(self._lib.get('robocjk.variationGlyphs'))
+            self._has_variation_axis = bool(self._lib.get("robocjk.glyphVariationGlyphs")) or bool(
+                self._lib.get("robocjk.variationGlyphs")
+            )
 
         # update computed properties
-        self._has_outlines = bool(self._xml.find('./outline'))
-        self._is_empty = (not self._has_outlines and not self._has_components)
+        self._has_outlines = bool(self._xml.find("./outline"))
+        self._is_empty = not self._has_outlines and not self._has_components
 
     @property
     def error(self):
@@ -260,4 +258,3 @@ class GlifData(object):
 #         Return deep components list for the given character-glyph.
 #         """
 #         return self._deep_components_by_character_glyph.get(character_glyph, None)
-

@@ -22,7 +22,6 @@ from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.static import serve
 
-
 # def sentry_debug(request):
 # 	# trigger error
 #     division_by_zero = 1 / 0
@@ -30,29 +29,35 @@ from django.views.static import serve
 
 urlpatterns = [
     # admin urls
-    path('admin/', admin.site.urls),
-
-	# sentry debug url
-	# path('sentry-debug/', sentry_debug),
-
+    path("admin/", admin.site.urls),
+    # sentry debug url
+    # path('sentry-debug/', sentry_debug),
     # redirect home to admin until the website pages will be ready
-    path('', RedirectView.as_view(url='admin/'), name='home'),
-    path('', include('robocjk.api.urls')),
-
+    path("", RedirectView.as_view(url="admin/"), name="home"),
+    path("", include("robocjk.api.urls")),
     # media and static files with keycdn
     # https://www.keycdn.com/support/django-cdn-integration
-    re_path(r'^media/(?P<path>.*)$', serve, {
-        'document_root': settings.MEDIA_ROOT,
-        'show_indexes': True,
-    }),
-    re_path(r'^static/(?P<path>.*)$', serve, {
-        'document_root': settings.STATIC_ROOT,
-        'show_indexes': True,
-    }),
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve,
+        {
+            "document_root": settings.MEDIA_ROOT,
+            "show_indexes": True,
+        },
+    ),
+    re_path(
+        r"^static/(?P<path>.*)$",
+        serve,
+        {
+            "document_root": settings.STATIC_ROOT,
+            "show_indexes": True,
+        },
+    ),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
+        path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns

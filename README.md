@@ -2,7 +2,7 @@
 
 `django-robo-cjk` is the server-side engine based on `python` and `django` that serves the [robo-cjk](https://github.com/BlackFoundryCom/black-robo-cjk) plugin.
 
-Its purpose is to centralize and speed-up the design/development of CJK typefaces providing a whole set of APIs to manage `.rcjk` projects. 
+Its purpose is to centralize and speed-up the design/development of CJK typefaces providing a whole set of APIs to manage `.rcjk` projects.
 
 ## API
 
@@ -50,17 +50,17 @@ Its purpose is to centralize and speed-up the design/development of CJK typeface
    - [Project **List**](#project-list)
    - [Project **Get**](#project-get)
    - [Project **Create**](#project-create)
-   
+
 - [**Font**](#font)
    - [Font **List**](#font-list)
    - [Font **Get**](#font-get)
    - [Font **Create**](#font-create)
    - [Font **Update**](#font-update)
-   
+
 - [**Glyphs Composition**](#glyphs-composition)
    - [Glyphs Composition **Get**](#glyphs-composition-get)
    - [Glyphs Composition **Update**](#glyphs-composition-update)
-   
+
 - [**Glif**](#glif)
    - [Glif **List**](#glif-list)
    - [Glif **Lock**](#glif-lock)
@@ -450,8 +450,8 @@ See [Font Get](#font-get) response.
 ```javascript
 {
     "data": {
-        "\u2e80": "\u4e36\u4e36", 
-        "\u2e84": "\u2e84", 
+        "\u2e80": "\u4e36\u4e36",
+        "\u2e84": "\u2e84",
         // ...
     },
     "error": null,
@@ -1688,7 +1688,7 @@ See [Character Glyph Get](#character-glyph-get) response.
 
 ### Client
 
-There is client that is possible to use to interact with APIs easily. 
+There is client that is possible to use to interact with APIs easily.
 
 **Using the client all the API endpoints are available as methods and the authentication token will be managed/renewed automatically.**
 
@@ -1697,10 +1697,10 @@ Usage:
 from robocjk.api.client import Client
 
 c = Client(
-    host='https://...', 
-    username='<username>', 
+    host='https://...',
+    username='<username>',
     password='<password>')
-    
+
 response = c.user_me()
 print(response)
 ```

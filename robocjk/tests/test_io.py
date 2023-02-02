@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from django.test import TestCase
 
 from robocjk.io import paths
 
 
 class IOTestCase(TestCase):
-
     def setUp(self):
         pass
 

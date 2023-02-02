@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import threading
 
 
@@ -8,4 +6,5 @@ def threaded(func):
         func_thread = threading.Thread(target=func, args=args, kwargs=kwargs)
         func_thread.start()
         return func_thread
+
     return wrapper

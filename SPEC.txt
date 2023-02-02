@@ -773,5 +773,3 @@ MANAGERS:
 an atomic element is made of outlines and layers
 a deep component is made of atomic elements
 a character glyph is made of deep component and/or outlines and layers in this case
-
-

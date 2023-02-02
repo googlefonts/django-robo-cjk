@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from django.conf import settings
 from django.test import TestCase
+
 # from django.test import (
 #     Client, override_settings, RequestFactory, SimpleTestCase, TestCase,
 # )
@@ -9,17 +8,16 @@ from robocjk.api.client import Client
 
 
 class ClientTestCase(TestCase):
-
     @classmethod
     def setUpTestData(self):
         # Set up data for the whole TestCase
         self._client = Client(
             host=settings.TEST_API_HOST,
             username=settings.TEST_API_USERNAME,
-            password=settings.TEST_API_PASSWORD
+            password=settings.TEST_API_PASSWORD,
         )
-        self._project_uid = 'fde4fc80-c136-4e2f-a9be-c80e18b9f213'
-        self._font_uid = 'cbac1f2d-6b6c-46a4-a477-798d49042ff4'
+        self._project_uid = "fde4fc80-c136-4e2f-a9be-c80e18b9f213"
+        self._font_uid = "cbac1f2d-6b6c-46a4-a477-798d49042ff4"
 
     def setUp(self):
         # print('setUp')
@@ -32,19 +30,27 @@ class ClientTestCase(TestCase):
     def assert_response_ok(self, response):
         self.assertNotEqual(response, None)
         try:
-            self.assertEqual(response['status'], 200)
+            self.assertEqual(response["status"], 200)
         except AssertionError as error:
             print(response)
             raise error
-        self.assertEqual(response['error'], None)
-        self.assertNotEqual(response['data'], None)
-        self.assertTrue(isinstance(response, (dict, list, )))
+        self.assertEqual(response["error"], None)
+        self.assertNotEqual(response["data"], None)
+        self.assertTrue(
+            isinstance(
+                response,
+                (
+                    dict,
+                    list,
+                ),
+            )
+        )
 
     def assert_response_error(self, response, expected_status_code):
         # print(response)
-        self.assertEqual(response['status'], expected_status_code)
-        self.assertNotEqual(response['error'], None)
-        self.assertEqual(response['data'], None)
+        self.assertEqual(response["status"], expected_status_code)
+        self.assertNotEqual(response["error"], None)
+        self.assertEqual(response["data"], None)
 
     def assert_response_bad_request(self, response):
         self.assert_response_error(response, 400)
@@ -70,18 +76,14 @@ class ClientTestCase(TestCase):
     def test_client_with_invalid_host(self):
         with self.assertRaises(ValueError):
             client = Client(
-                host='http://invalid-robocjk.black-foundry.com/',
-                username='admin',
-                password='admin'
+                host="http://invalid-robocjk.black-foundry.com/",
+                username="admin",
+                password="admin",
             )
 
     def test_client_with_valid_host_without_api_installed(self):
         with self.assertRaises(ValueError):
-            client = Client(
-                host='https://www.google.com/',
-                username='admin',
-                password='admin'
-            )
+            client = Client(host="https://www.google.com/", username="admin", password="admin")
 
     def test_auth_token(self):
         response = self._client.auth_token()
@@ -117,22 +119,23 @@ class ClientTestCase(TestCase):
         response = self._client.font_get(font_uid=self._font_uid)
         # print(response)
         self.assert_response_ok(response)
-        data = response['data']
-        self.assertTrue(isinstance(data.get('fontlib'), dict))
-        self.assertTrue(isinstance(data.get('designspace'), dict))
+        data = response["data"]
+        self.assertTrue(isinstance(data.get("fontlib"), dict))
+        self.assertTrue(isinstance(data.get("designspace"), dict))
 
     def test_font_update(self):
         response = self._client.font_update(
             font_uid=self._font_uid,
-            fontlib={'fontlib-test':'ok'},
-            features='features-test-ok',
-            designspace={'designspace-test':'ok'})
+            fontlib={"fontlib-test": "ok"},
+            features="features-test-ok",
+            designspace={"designspace-test": "ok"},
+        )
         # print(response)
         self.assert_response_ok(response)
-        data = response['data']
-        self.assertEqual(data.get('fontlib').get('fontlib-test'), 'ok')
-        self.assertEqual(data.get('features'), 'features-test-ok')
-        self.assertEqual(data.get('designspace').get('designspace-test'), 'ok')
+        data = response["data"]
+        self.assertEqual(data.get("fontlib").get("fontlib-test"), "ok")
+        self.assertEqual(data.get("features"), "features-test-ok")
+        self.assertEqual(data.get("designspace").get("designspace-test"), "ok")
 
     def test_glyphs_composition_get(self):
         response = self._client.glyphs_composition_get(font_uid=self._font_uid)
@@ -140,10 +143,12 @@ class ClientTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_glyphs_composition_update(self):
-        response = self._client.glyphs_composition_update(font_uid=self._font_uid, data={'Glyphs-Composition-Test':'ok'})
+        response = self._client.glyphs_composition_update(
+            font_uid=self._font_uid, data={"Glyphs-Composition-Test": "ok"}
+        )
         # print(response)
         self.assert_response_ok(response)
-        self.assertEqual(response['data'], { 'Glyphs-Composition-Test':'ok' })
+        self.assertEqual(response["data"], {"Glyphs-Composition-Test": "ok"})
 
     def test_font_glif_list(self):
         response = self._client.glif_list(font_uid=self._font_uid)
@@ -153,26 +158,28 @@ class ClientTestCase(TestCase):
     def test_font_glif_lock(self):
         response = self._client.glif_lock(
             font_uid=self._font_uid,
-            atomic_elements=[83, 'curvedStroke','line'],
-            deep_components=['DC_2008A_00', 'DC_20041_01'],
-            character_glyphs=['uni27607'])
+            atomic_elements=[83, "curvedStroke", "line"],
+            deep_components=["DC_2008A_00", "DC_20041_01"],
+            character_glyphs=["uni27607"],
+        )
         # print(response)
         self.assert_response_ok(response)
-        self.assertEqual(len(response['data']['atomic_elements']), 2)
-        self.assertEqual(len(response['data']['deep_components']), 2)
-        self.assertEqual(len(response['data']['character_glyphs']), 1)
+        self.assertEqual(len(response["data"]["atomic_elements"]), 2)
+        self.assertEqual(len(response["data"]["deep_components"]), 2)
+        self.assertEqual(len(response["data"]["character_glyphs"]), 1)
 
     def test_font_glif_unlock(self):
         response = self._client.glif_lock(
             font_uid=self._font_uid,
-            atomic_elements=[83, 'curvedStroke','line'],
-            deep_components=['DC_2008A_00', 'DC_20041_01'],
-            character_glyphs=['uni27607'])
+            atomic_elements=[83, "curvedStroke", "line"],
+            deep_components=["DC_2008A_00", "DC_20041_01"],
+            character_glyphs=["uni27607"],
+        )
         # print(response)
         self.assert_response_ok(response)
-        self.assertEqual(len(response['data']['atomic_elements']), 2)
-        self.assertEqual(len(response['data']['deep_components']), 2)
-        self.assertEqual(len(response['data']['character_glyphs']), 1)
+        self.assertEqual(len(response["data"]["atomic_elements"]), 2)
+        self.assertEqual(len(response["data"]["deep_components"]), 2)
+        self.assertEqual(len(response["data"]["character_glyphs"]), 1)
 
     def test_atomic_element_list(self):
         response = self._client.atomic_element_list(font_uid=self._font_uid)
@@ -210,7 +217,9 @@ class ClientTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_deep_component_unlock(self):
-        response = self._client.deep_component_unlock(font_uid=self._font_uid, deep_component_id=896)
+        response = self._client.deep_component_unlock(
+            font_uid=self._font_uid, deep_component_id=896
+        )
         # print(response)
         self.assert_response_ok(response)
 
@@ -220,16 +229,22 @@ class ClientTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_character_glyph_get(self):
-        response = self._client.character_glyph_get(font_uid=self._font_uid, character_glyph_id=18627)
+        response = self._client.character_glyph_get(
+            font_uid=self._font_uid, character_glyph_id=18627
+        )
         # print(response)
         self.assert_response_ok(response)
 
     def test_character_glyph_lock(self):
-        response = self._client.character_glyph_lock(font_uid=self._font_uid, character_glyph_id=18627)
+        response = self._client.character_glyph_lock(
+            font_uid=self._font_uid, character_glyph_id=18627
+        )
         # print(response)
         self.assert_response_ok(response)
 
     def test_character_glyph_unlock(self):
-        response = self._client.character_glyph_unlock(font_uid=self._font_uid, character_glyph_id=18627)
+        response = self._client.character_glyph_unlock(
+            font_uid=self._font_uid, character_glyph_id=18627
+        )
         # print(response)
         self.assert_response_ok(response)

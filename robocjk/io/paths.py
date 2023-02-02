@@ -1,21 +1,33 @@
-# -*- coding: utf-8 -*-
-
 import re
 from urllib.parse import unquote
-from django.conf import settings
+
 import fsutil
+from django.conf import settings
 
-
-FONT_PATTERN = r'((?P<font_name>[\w\-_\.]+)\.rcjk\/)'
-FONTLIB_PATTERN = r'^{}?fontLib\.json$'.format(FONT_PATTERN)
-FEATURES_PATTERN = r'^{}?features\.fea$'.format(FONT_PATTERN)
-DESIGNSPACE_PATTERN = r'^{}?designspace\.json$'.format(FONT_PATTERN)
-NAME_PATTERN = r'[\w\-\_\.\+\(\)\[\]]+'
-ATOMIC_ELEMENT_PATTERN = r'^{}?atomicElement\/(?P<glif_name>{})\.glif$'.format(FONT_PATTERN, NAME_PATTERN)
-ATOMIC_ELEMENT_LAYER_PATTERN = r'^{}?atomicElement\/(?P<layer_name>{})\/(?P<glif_name>{})\.glif$'.format(FONT_PATTERN, NAME_PATTERN, NAME_PATTERN)
-DEEP_COMPONENT_PATTERN = r'^{}?deepComponent\/(?P<glif_name>{})\.glif$'.format(FONT_PATTERN, NAME_PATTERN)
-CHARACTER_GLYPH_PATTERN = r'^{}?characterGlyph\/(?P<glif_name>{})\.glif$'.format(FONT_PATTERN, NAME_PATTERN)
-CHARACTER_GLYPH_LAYER_PATTERN = r'^{}?characterGlyph\/(?P<layer_name>{})\/(?P<glif_name>{})\.glif$'.format(FONT_PATTERN, NAME_PATTERN, NAME_PATTERN)
+FONT_PATTERN = r"((?P<font_name>[\w\-_\.]+)\.rcjk\/)"
+FONTLIB_PATTERN = r"^{}?fontLib\.json$".format(FONT_PATTERN)
+FEATURES_PATTERN = r"^{}?features\.fea$".format(FONT_PATTERN)
+DESIGNSPACE_PATTERN = r"^{}?designspace\.json$".format(FONT_PATTERN)
+NAME_PATTERN = r"[\w\-\_\.\+\(\)\[\]]+"
+ATOMIC_ELEMENT_PATTERN = r"^{}?atomicElement\/(?P<glif_name>{})\.glif$".format(
+    FONT_PATTERN, NAME_PATTERN
+)
+ATOMIC_ELEMENT_LAYER_PATTERN = (
+    r"^{}?atomicElement\/(?P<layer_name>{})\/(?P<glif_name>{})\.glif$".format(
+        FONT_PATTERN, NAME_PATTERN, NAME_PATTERN
+    )
+)
+DEEP_COMPONENT_PATTERN = r"^{}?deepComponent\/(?P<glif_name>{})\.glif$".format(
+    FONT_PATTERN, NAME_PATTERN
+)
+CHARACTER_GLYPH_PATTERN = r"^{}?characterGlyph\/(?P<glif_name>{})\.glif$".format(
+    FONT_PATTERN, NAME_PATTERN
+)
+CHARACTER_GLYPH_LAYER_PATTERN = (
+    r"^{}?characterGlyph\/(?P<layer_name>{})\/(?P<glif_name>{})\.glif$".format(
+        FONT_PATTERN, NAME_PATTERN, NAME_PATTERN
+    )
+)
 
 FONT_RE = re.compile(FONT_PATTERN)
 FONTLIB_RE = re.compile(FONTLIB_PATTERN)
@@ -53,20 +65,20 @@ def get_font_path(instance, name=None):
     font_name = quote_filename(name or instance.slug)
     return fsutil.join_path(
         get_project_path(instance.project),
-        '{}.rcjk'.format(font_name),
+        "{}.rcjk".format(font_name),
     )
 
 
 def get_glif_filename(instance, name=None):
     filename = quote_filename(name or instance.filename)
-    assert filename.endswith('.glif')
+    assert filename.endswith(".glif")
     return filename
 
 
 def get_character_glyphs_path(font):
     return fsutil.join_path(
         get_font_path(font),
-        'characterGlyph',
+        "characterGlyph",
     )
 
 
@@ -89,7 +101,7 @@ def get_character_glyph_layer_path(instance, name=None):
 def get_deep_components_path(font):
     return fsutil.join_path(
         get_font_path(font),
-        'deepComponent',
+        "deepComponent",
     )
 
 
@@ -103,7 +115,7 @@ def get_deep_component_path(instance, name=None):
 def get_atomic_elements_path(font):
     return fsutil.join_path(
         get_font_path(font),
-        'atomicElement',
+        "atomicElement",
     )
 
 
@@ -126,6 +138,6 @@ def get_atomic_element_layer_path(instance, name=None):
 def get_proof_path(instance):
     return fsutil.join_path(
         get_font_path(instance.font),
-        'Proofing',
-        fsutil.get_filename(self.file.path),
+        "Proofing",
+        fsutil.get_filename(instance.file.path),
     )

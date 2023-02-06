@@ -2,7 +2,6 @@ from django.db.models.signals import post_save, pre_delete
 
 
 def connect_signals():
-
     from robocjk.io.client import (
         create_or_update_font,
         create_or_update_project,

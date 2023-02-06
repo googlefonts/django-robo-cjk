@@ -1,5 +1,4 @@
 [flake8]
-# TODO: remove ignore
 ignore = E501,W504
 max-line-length = 89
 max-complexity = 10

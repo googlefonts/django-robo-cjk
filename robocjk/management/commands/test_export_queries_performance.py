@@ -28,7 +28,9 @@ class Command(BaseCommand):
             .order_by()
         )
         character_glyphs_layers_qs = (
-            CharacterGlyphLayer.objects.select_related("glif", "glif__font", "glif__font__project")
+            CharacterGlyphLayer.objects.select_related(
+                "glif", "glif__font", "glif__font__project"
+            )
             .filter(glif__font_id=font_id)
             .order_by()
         )
@@ -43,7 +45,9 @@ class Command(BaseCommand):
             .order_by()
         )
         atomic_elements_layers_qs = (
-            AtomicElementLayer.objects.select_related("glif", "glif__font", "glif__font__project")
+            AtomicElementLayer.objects.select_related(
+                "glif", "glif__font", "glif__font__project"
+            )
             .filter(glif__font_id=font_id)
             .order_by()
         )

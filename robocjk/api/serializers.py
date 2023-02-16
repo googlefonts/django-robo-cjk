@@ -129,7 +129,11 @@ def _get_serialization_options(options):
 
 def _serialize_object(obj, fields, options):
     exclude_fields = options["exclude_fields"]
-    return {field: getattr(obj, field, None) for field in fields if field not in exclude_fields}
+    return {
+        field: getattr(obj, field, None)
+        for field in fields
+        if field not in exclude_fields
+    }
 
 
 def _serialize_glif(obj, fields, options):
@@ -180,7 +184,9 @@ def serialize_atomic_element(obj, options=None):
     data["type_code"] = "AE"
     if return_layers:
         layers_fields = (
-            ATOMIC_ELEMENT_LAYER_FIELDS if return_data else ATOMIC_ELEMENT_LAYER_ID_FIELDS
+            ATOMIC_ELEMENT_LAYER_FIELDS
+            if return_data
+            else ATOMIC_ELEMENT_LAYER_ID_FIELDS
         )
         data["layers"] = list(obj.layers.values(*layers_fields))
     if return_related:
@@ -192,7 +198,9 @@ def serialize_atomic_element(obj, options=None):
 def serialize_atomic_element_layer(obj, options=None):
     options = _get_serialization_options(options)
     return_data = options["return_data"]
-    fields = ATOMIC_ELEMENT_LAYER_FIELDS if return_data else ATOMIC_ELEMENT_LAYER_ID_FIELDS
+    fields = (
+        ATOMIC_ELEMENT_LAYER_FIELDS if return_data else ATOMIC_ELEMENT_LAYER_ID_FIELDS
+    )
     return _serialize_glif_layer(obj, fields, options)
 
 
@@ -209,7 +217,10 @@ def serialize_deep_component(obj, options=None):
         data["layers"] = []
     if return_related:
         data["made_of"] = list(
-            [serialize_atomic_element(glif_obj, options) for glif_obj in obj.atomic_elements.all()]
+            [
+                serialize_atomic_element(glif_obj, options)
+                for glif_obj in obj.atomic_elements.all()
+            ]
         )
         data["used_by"] = list(obj.character_glyphs.values(*CHARACTER_GLYPH_ID_FIELDS))
     return data
@@ -226,13 +237,17 @@ def serialize_character_glyph(obj, options=None):
     data["type_code"] = "CG"
     if return_layers:
         layers_fields = (
-            CHARACTER_GLYPH_LAYER_FIELDS if return_data else CHARACTER_GLYPH_LAYER_ID_FIELDS
+            CHARACTER_GLYPH_LAYER_FIELDS
+            if return_data
+            else CHARACTER_GLYPH_LAYER_ID_FIELDS
         )
         data["layers"] = list(obj.layers.values(*layers_fields))
     if return_related:
         made_of_character_glyphs = []
         # create a set for storing character-glyphs ids to avoid possible circular references
-        made_of_character_glyphs_refs = options.get("made_of_character_glyphs_refs", set())
+        made_of_character_glyphs_refs = options.get(
+            "made_of_character_glyphs_refs", set()
+        )
         if obj.id not in made_of_character_glyphs_refs:
             made_of_character_glyphs_refs.add(obj.id)
             options["made_of_character_glyphs_refs"] = made_of_character_glyphs_refs
@@ -243,7 +258,10 @@ def serialize_character_glyph(obj, options=None):
                 ]
             )
         made_of_deep_components = list(
-            [serialize_deep_component(glif_obj, options) for glif_obj in obj.deep_components.all()]
+            [
+                serialize_deep_component(glif_obj, options)
+                for glif_obj in obj.deep_components.all()
+            ]
         )
         data["made_of"] = made_of_character_glyphs + made_of_deep_components
         used_by_character_glyphs = list(
@@ -256,5 +274,7 @@ def serialize_character_glyph(obj, options=None):
 def serialize_character_glyph_layer(obj, options=None):
     options = _get_serialization_options(options)
     return_data = options["return_data"]
-    fields = CHARACTER_GLYPH_LAYER_FIELDS if return_data else CHARACTER_GLYPH_LAYER_ID_FIELDS
+    fields = (
+        CHARACTER_GLYPH_LAYER_FIELDS if return_data else CHARACTER_GLYPH_LAYER_ID_FIELDS
+    )
     return _serialize_glif_layer(obj, fields, options)

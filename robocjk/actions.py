@@ -28,12 +28,14 @@ def export_as_csv(  # noqa: C901
 
         now = datetime.datetime.now()
         if date:
-            filename_auto += "-{date:%Y%m%d}".format(date=now)
+            filename_auto += f"-{now:%Y%m%d}"
         if time:
-            filename_auto += "-{hour:%H%M%S}".format(hour=now)
+            filename_auto += f"-{now:%H%M%S}"
 
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename={}.csv".format(filename_auto)
+        response["Content-Disposition"] = "attachment; filename={}.csv".format(
+            filename_auto
+        )
 
         field_names = None
         field_names_display = None
@@ -42,7 +44,9 @@ def export_as_csv(  # noqa: C901
             if all(isinstance(val, tuple) for val in fields):
                 if exclude:
                     field_names = [val[1] for val in fields if val[1] not in exclude]
-                    field_names_display = [val[0] for val in fields if val[1] not in exclude]
+                    field_names_display = [
+                        val[0] for val in fields if val[1] not in exclude
+                    ]
                 else:
                     field_names = [val[1] for val in fields]
                     field_names_display = [val[0] for val in fields]

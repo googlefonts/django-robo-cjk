@@ -162,7 +162,9 @@ urlpatterns = [
         name="deep_component_unlock",
     ),
     # Character Glyph
-    path("api/character-glyph/list/", character_glyph_list, name="character_glyph_list"),
+    path(
+        "api/character-glyph/list/", character_glyph_list, name="character_glyph_list"
+    ),
     path("api/character-glyph/get/", character_glyph_get, name="character_glyph_get"),
     path(
         "api/character-glyph/create/",
@@ -179,7 +181,9 @@ urlpatterns = [
         character_glyph_delete,
         name="character_glyph_delete",
     ),
-    path("api/character-glyph/lock/", character_glyph_lock, name="character_glyph_lock"),
+    path(
+        "api/character-glyph/lock/", character_glyph_lock, name="character_glyph_lock"
+    ),
     path(
         "api/character-glyph/unlock/",
         character_glyph_unlock,

@@ -7,7 +7,10 @@ class NameSlugModel(models.Model):
     class Meta:
         abstract = True
 
-    name = models.CharField(verbose_name=_("Name"), max_length=50)
+    name = models.CharField(
+        verbose_name=_("Name"),
+        max_length=50,
+    )
     slug = models.SlugField(
         verbose_name=_("Slug"),
         max_length=50,
@@ -26,9 +29,11 @@ class NameSlugModel(models.Model):
         slug_base = slugify(self.name)
         slug_n = 1
         slug_unique = slug_base
-        while self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists():
+        while (
+            self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists()
+        ):
             slug_n += 1
-            slug_unique = "{}-{}".format(slug_base, slug_n)
+            slug_unique = f"{slug_base}-{slug_n}"
         self.slug = slug_unique
 
     def save(self, *args, **kwargs):
@@ -42,7 +47,10 @@ class TitleSlugModel(models.Model):
     class Meta:
         abstract = True
 
-    title = models.CharField(verbose_name=_("Name"), max_length=150)
+    title = models.CharField(
+        verbose_name=_("Name"),
+        max_length=150,
+    )
     slug = models.SlugField(
         verbose_name=_("Slug"),
         max_length=150,
@@ -61,9 +69,11 @@ class TitleSlugModel(models.Model):
         slug_base = slugify(self.name)
         slug_n = 1
         slug_unique = slug_base
-        while self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists():
+        while (
+            self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists()
+        ):
             slug_n += 1
-            slug_unique = "{}-{}".format(slug_base, slug_n)
+            slug_unique = f"{slug_base}-{slug_n}"
         self.slug = slug_unique
 
     def save(self, *args, **kwargs):

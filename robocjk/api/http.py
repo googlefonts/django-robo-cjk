@@ -24,7 +24,7 @@ class ApiResponse(JsonResponse):
         self.error = error
 
     def _format_error(self, prefix, message=""):
-        return "{} - {}".format(prefix, message) if message else prefix
+        return f"{prefix} - {message}" if message else prefix
 
 
 class ApiResponseSuccess(ApiResponse):
@@ -67,15 +67,21 @@ class ApiResponseNotFound(ApiResponseError):
 
 class ApiResponseMethodNotAllowed(ApiResponseError):
     def __init__(self, error=""):
-        super().__init__(status=405, error=self._format_error("Method Not Allowed", error))
+        super().__init__(
+            status=405, error=self._format_error("Method Not Allowed", error)
+        )
 
 
 class ApiResponseInternalServerError(ApiResponseError):
     def __init__(self, error=""):
-        super().__init__(status=500, error=self._format_error("Internal Server Error", error))
+        super().__init__(
+            status=500, error=self._format_error("Internal Server Error", error)
+        )
         # TODO: log
 
 
 class ApiResponseServiceUnavailableError(ApiResponseError):
     def __init__(self, error=""):
-        super().__init__(status=503, error=self._format_error("Service Unavailable Error", error))
+        super().__init__(
+            status=503, error=self._format_error("Service Unavailable Error", error)
+        )

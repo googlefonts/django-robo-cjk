@@ -9,7 +9,9 @@ from django.contrib.auth import authenticate, get_user_model
 
 def decode_auth_token(token):
     try:
-        decoded = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        decoded = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
         return decoded
     except jwt.ExpiredSignatureError:
         # logger.error('decode_auth_token -> jwt.ExpiredSignatureError')

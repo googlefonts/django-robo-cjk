@@ -10,7 +10,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="font",
             name="export_completed_at",
-            field=models.DateTimeField(blank=True, null=True, verbose_name="Export completed at"),
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Export completed at"
+            ),
         ),
         migrations.AddField(
             model_name="font",
@@ -20,6 +22,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="font",
             name="export_started_at",
-            field=models.DateTimeField(blank=True, null=True, verbose_name="Export started at"),
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Export started at"
+            ),
         ),
     ]

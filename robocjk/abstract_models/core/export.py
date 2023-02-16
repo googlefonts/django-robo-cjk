@@ -11,20 +11,32 @@ class ExportModel(models.Model):
     class Meta:
         abstract = True
 
-    export_enabled = models.BooleanField(default=True, verbose_name=_("Export enabled"))
+    export_enabled = models.BooleanField(
+        default=True,
+        verbose_name=_("Export enabled"),
+    )
 
-    export_running = models.BooleanField(default=False, verbose_name=_("Export running"))
+    export_running = models.BooleanField(
+        default=False,
+        verbose_name=_("Export running"),
+    )
 
     export_started_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Export started at")
+        null=True,
+        blank=True,
+        verbose_name=_("Export started at"),
     )
 
     export_completed_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Export completed at")
+        null=True,
+        blank=True,
+        verbose_name=_("Export completed at"),
     )
 
     last_full_export_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Last full export at")
+        null=True,
+        blank=True,
+        verbose_name=_("Last full export at"),
     )
 
     @property
@@ -35,7 +47,9 @@ class ExportModel(models.Model):
         if not last_full_export_at:
             return True
         now = dt.datetime.now()
-        last_full_export_older_than_24h = (now - last_full_export_at) >= dt.timedelta(hours=24)
+        last_full_export_older_than_24h = (now - last_full_export_at) >= dt.timedelta(
+            hours=24
+        )
         last_full_export_day_before = (now.day - last_full_export_at.day) > 0
         # print(last_full_export_older_than_24h, last_full_export_day_before)
         return last_full_export_older_than_24h or last_full_export_day_before
@@ -68,7 +82,7 @@ class ExportModel(models.Model):
             return False
 
         if not self.export_enabled:
-            logger.info('Skipped export for "{}" because it is disabled.'.format(self))
+            logger.info(f'Skipped export for "{self}" because it is disabled.')
             return False
 
         if self.export_running:
@@ -89,7 +103,7 @@ class ExportModel(models.Model):
                 return False
 
         # save export started status in the database
-        logger.info('Started export for "{}".'.format(self))
+        logger.info(f'Started export for "{self}".')
         self.export_running = True
         self.export_started_at = dt.datetime.now()
         self.save()
@@ -119,7 +133,7 @@ class ExportModel(models.Model):
             self.last_full_export_at = dt.datetime.now()
 
         self.save()
-        logger.info('Completed export for "{}".'.format(self))
+        logger.info(f'Completed export for "{self}".')
         return True
 
     def save_to_file_system(self, full_export):

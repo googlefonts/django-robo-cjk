@@ -45,8 +45,10 @@ class Command(BaseCommand):
             try:
                 project_obj = Project.objects.get(uid=project_uid)
             except Project.DoesNotExist:
-                message = 'Invalid project_uid, project with uid "{}" doesn\'t exist.'.format(
-                    project_uid
+                message = (
+                    'Invalid project_uid, project with uid "{}" doesn\'t exist.'.format(
+                        project_uid
+                    )
                 )
                 self.stderr.write(message)
                 raise CommandError(message)

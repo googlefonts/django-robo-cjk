@@ -39,14 +39,17 @@ class Client:
     def __init__(self, host, username, password):
         """
         Initialize a new Robo-CJK API client using the given credentials,
-        then authentication is automatically managed by the client, no need to do anything.
+        then authentication is automatically managed by the client,
+        no need to do anything.
         """
-        if not host or not any([host.startswith(protocol) for protocol in ["http://", "https://"]]):
-            raise ValueError("Invalid host: {}".format(host))
+        if not host or not any(
+            [host.startswith(protocol) for protocol in ["http://", "https://"]]
+        ):
+            raise ValueError(f"Invalid host: {host}")
         if not username:
-            raise ValueError("Invalid username: {}".format(username))
+            raise ValueError(f"Invalid username: {username}")
         if not password:
-            raise ValueError("Invalid password: {}".format(password))
+            raise ValueError(f"Invalid password: {password}")
 
         # strip last slash in case
         if host.endswith("/"):
@@ -72,7 +75,9 @@ class Client:
         except Exception as e:
             # invalid host
             raise ValueError(
-                "Unable to call RoboCJK APIs at host: {} - Exception: {}".format(self._host, e)
+                "Unable to call RoboCJK APIs at host: {} - Exception: {}".format(
+                    self._host, e
+                )
             )
 
         # obtain the auth token to prevent 401 error on first call
@@ -122,7 +127,7 @@ class Client:
         # build request headers
         headers = {}
         if self._auth_token:
-            headers["Authorization"] = "Bearer {}".format(self._auth_token)
+            headers["Authorization"] = f"Bearer {self._auth_token}"
         headers["Cache-Control"] = "no-cache"
         headers["Pragma"] = "no-cache"
         return url, data, headers
@@ -193,8 +198,8 @@ class Client:
         }
         url = view_names.get(view_name)
         if not url:
-            raise Exception('Invalid url view_name: "{}".'.format(view_name))
-        abs_url = "{}{}".format(self._host, url)
+            raise Exception(f'Invalid url view_name: "{view_name}".')
+        abs_url = f"{self._host}{url}"
         return abs_url
 
     def auth_token(self):
@@ -270,7 +275,9 @@ class Client:
         }
         return self._api_call("font_get", params)
 
-    def font_create(self, project_uid, name, fontlib=None, features=None, designspace=None):
+    def font_create(
+        self, project_uid, name, fontlib=None, features=None, designspace=None
+    ):
         """
         Create a new Font with the specified project_uid and name.
         Optionally, it is possible to pass also fontlib, features and designspace.
@@ -332,7 +339,8 @@ class Client:
         has_unicode=None,
     ):
         """
-        Get the lists of Atomic Elements / Deep Components / Character Glyphs of a Font according to the given filters.
+        Get the lists of Atomic Elements / Deep Components / Character Glyphs
+        of a Font according to the given filters.
         """
         params = {
             "font_uid": font_uid,
@@ -362,7 +370,8 @@ class Client:
         return_related=False,
     ):
         """
-        Lock lists of Atomic Elements / Deep Components / Character Glyphs of a Font by their id or name.
+        Lock lists of Atomic Elements / Deep Components / Character Glyphs
+        of a Font by their id or name.
         """
         params = {
             "font_uid": font_uid,
@@ -389,7 +398,8 @@ class Client:
         return_related=False,
     ):
         """
-        Unlock lists of Atomic Elements / Deep Components / Character Glyphs of a Font by their id or name.
+        Unlock lists of Atomic Elements / Deep Components / Character Glyphs
+        of a Font by their id or name.
         """
         params = {
             "font_uid": font_uid,
@@ -517,7 +527,8 @@ class Client:
     ):
         """
         Update the status of an Atomic Element.
-        Status value must be one of the following: 'todo', 'wip', 'checking-1', 'checking-2', 'checking-3', 'done'.
+        Status value must be one of the following:
+        "todo", "wip", "checking-1", "checking-2", "checking-3", "done".
         """
         params = {
             "font_uid": font_uid,
@@ -668,7 +679,9 @@ class Client:
         }
         return self._api_call("atomic_element_layer_update", params)
 
-    def atomic_element_layer_delete(self, font_uid, atomic_element_id, layer_id, ignore_lock=False):
+    def atomic_element_layer_delete(
+        self, font_uid, atomic_element_id, layer_id, ignore_lock=False
+    ):
         """
         Delete an Atomic Element Layer.
         """
@@ -794,7 +807,8 @@ class Client:
     ):
         """
         Update the status of a Deep Component.
-        Status value must be one of the following: 'todo', 'wip', 'checking-1', 'checking-2', 'checking-3', 'done'.
+        Status value must be one of the following:
+        "todo", "wip", "checking-1", "checking-2", "checking-3", "done".
         """
         params = {
             "font_uid": font_uid,
@@ -974,7 +988,8 @@ class Client:
     ):
         """
         Update the status of a Character Glyph.
-        Status value must be one of the following: 'todo', 'wip', 'checking-1', 'checking-2', 'checking-3', 'done'.
+        Status value must be one of the following:
+        "todo", "wip", "checking-1", "checking-2", "checking-3", "done".
         """
         params = {
             "font_uid": font_uid,

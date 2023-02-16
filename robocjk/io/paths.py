@@ -5,9 +5,9 @@ import fsutil
 from django.conf import settings
 
 FONT_PATTERN = r"((?P<font_name>[\w\-_\.]+)\.rcjk\/)"
-FONTLIB_PATTERN = r"^{}?fontLib\.json$".format(FONT_PATTERN)
-FEATURES_PATTERN = r"^{}?features\.fea$".format(FONT_PATTERN)
-DESIGNSPACE_PATTERN = r"^{}?designspace\.json$".format(FONT_PATTERN)
+FONTLIB_PATTERN = rf"^{FONT_PATTERN}?fontLib\.json$"
+FEATURES_PATTERN = rf"^{FONT_PATTERN}?features\.fea$"
+DESIGNSPACE_PATTERN = rf"^{FONT_PATTERN}?designspace\.json$"
 NAME_PATTERN = r"[\w\-\_\.\+\(\)\[\]]+"
 ATOMIC_ELEMENT_PATTERN = r"^{}?atomicElement\/(?P<glif_name>{})\.glif$".format(
     FONT_PATTERN, NAME_PATTERN
@@ -65,7 +65,7 @@ def get_font_path(instance, name=None):
     font_name = quote_filename(name or instance.slug)
     return fsutil.join_path(
         get_project_path(instance.project),
-        "{}.rcjk".format(font_name),
+        f"{font_name}.rcjk",
     )
 
 

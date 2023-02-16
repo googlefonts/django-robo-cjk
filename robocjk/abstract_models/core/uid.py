@@ -8,4 +8,8 @@ class UIDModel(models.Model):
     class Meta:
         abstract = True
 
-    uid = models.UUIDField(verbose_name=_("Unique ID"), default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(
+        verbose_name=_("Unique ID"),
+        default=uuid.uuid4,
+        editable=False,
+    )

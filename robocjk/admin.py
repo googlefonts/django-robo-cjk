@@ -45,7 +45,10 @@ class CustomizedUserAdmin(UserAdmin):
 
     def _is_administrator(self, request):
         user = request.user
-        return user.is_superuser or user.groups.filter(name__iexact="administrators").exists()
+        return (
+            user.is_superuser
+            or user.groups.filter(name__iexact="administrators").exists()
+        )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -93,8 +96,12 @@ class FontFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         # This is where you create filter options; we have two:
-        fonts = Font.objects.select_related("project").order_by("project__name", "name").all()
-        return [(font.id, "{} / {}".format(font.project.name, font.name)) for font in fonts]
+        fonts = (
+            Font.objects.select_related("project")
+            .order_by("project__name", "name")
+            .all()
+        )
+        return [(font.id, f"{font.project.name} / {font.name}") for font in fonts]
 
     def queryset(self, request, queryset):
         font_id = self.value()
@@ -331,9 +338,15 @@ class FontAdmin(admin.ModelAdmin):
             manager = cls.objects
             tot += manager.filter(font=font).count()
             tot_wip += manager.filter(font=font, status=cls.STATUS_WIP).count()
-            tot_checking_1 += manager.filter(font=font, status=cls.STATUS_CHECKING_1).count()
-            tot_checking_2 += manager.filter(font=font, status=cls.STATUS_CHECKING_2).count()
-            tot_checking_3 += manager.filter(font=font, status=cls.STATUS_CHECKING_3).count()
+            tot_checking_1 += manager.filter(
+                font=font, status=cls.STATUS_CHECKING_1
+            ).count()
+            tot_checking_2 += manager.filter(
+                font=font, status=cls.STATUS_CHECKING_2
+            ).count()
+            tot_checking_3 += manager.filter(
+                font=font, status=cls.STATUS_CHECKING_3
+            ).count()
             tot_done += manager.filter(font=font, status=cls.STATUS_DONE).count()
 
         perc_wip = 0
@@ -355,7 +368,7 @@ class FontAdmin(admin.ModelAdmin):
         color_checking_3 = StatusModel.STATUS_COLOR_CHECKING_3
         color_done = StatusModel.STATUS_COLOR_DONE
 
-        title_wip = "{}: {}%".format(StatusModel.STATUS_DISPLAY_WIP, round(perc_wip))
+        title_wip = f"{StatusModel.STATUS_DISPLAY_WIP}: {round(perc_wip)}%"
         title_checking_1 = "{}: {}%".format(
             StatusModel.STATUS_DISPLAY_CHECKING_1, round(perc_checking_1)
         )
@@ -365,7 +378,7 @@ class FontAdmin(admin.ModelAdmin):
         title_checking_3 = "{}: {}%".format(
             StatusModel.STATUS_DISPLAY_CHECKING_3, round(perc_checking_3)
         )
-        title_done = "{}: {}%".format(StatusModel.STATUS_DISPLAY_DONE, round(perc_done))
+        title_done = f"{StatusModel.STATUS_DISPLAY_DONE}: {round(perc_done)}%"
 
         html = f"""
             <div style="display: block; width: 100%; min-width: 150px; height: 15px; position: relative; background-color: rgba(0,0,0,0.1);">
@@ -564,7 +577,7 @@ class GlifAdmin(admin.ModelAdmin):
             """.format(
             obj.status_color
         )
-        html = '<span style="{}">{}</span>'.format(css, obj.get_status_display())
+        html = f'<span style="{css}">{obj.get_status_display()}</span>'
         return mark_safe(html)
 
     status_display.short_description = _("Status")

@@ -109,11 +109,13 @@ class Command(BaseCommand):
         if not filepath.startswith("/"):
             filepath = fsutil.join_path("/root/robocjk/temp/", filepath)
         if not filepath.endswith(".zip"):
-            message = "Invalid filepath, expected a .zip file containing .rcjk font project."
+            message = (
+                "Invalid filepath, expected a .zip file containing .rcjk font project."
+            )
             self.stderr.write(message)
             raise CommandError(message)
         if not fsutil.exists(filepath):
-            message = 'Invalid filepath, file "{}" doesn\'t exist.'.format(filepath)
+            message = f'Invalid filepath, file "{filepath}" doesn\'t exist.'
             self.stderr.write(message)
             raise CommandError(message)
 
@@ -121,11 +123,13 @@ class Command(BaseCommand):
         try:
             font_obj = Font.objects.select_related("project").get(uid=font_uid)
         except Font.DoesNotExist:
-            message = 'Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(font_uid)
+            message = 'Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(
+                font_uid
+            )
             self.stderr.write(message)
             raise CommandError(message)
 
-        self.stdout.write('Importing "{}"...'.format(font_obj.name))
+        self.stdout.write(f'Importing "{font_obj.name}"...')
 
         if font_obj.export_running:
             message = 'There is an export running for "{}", the import will run on export complete.'.format(
@@ -179,23 +183,23 @@ class Command(BaseCommand):
         glif_objs = font_obj.deep_components.filter(has_components=True)
         glif_objs_counter = 0
         glif_objs_total = len(glif_objs)
-        self.stdout.write("Updating {} DeepComponent relations...".format(glif_objs_total))
+        self.stdout.write(f"Updating {glif_objs_total} DeepComponent relations...")
         for glif_obj in glif_objs:
             glif_obj.save()
             glif_objs_counter += 1
             # self.stdout.write('Updated DeepComponent relations - {} of {}'.format(glif_objs_counter, glif_objs_total))
-        self.stdout.write("Updated {} DeepComponent relations.".format(glif_objs_total))
+        self.stdout.write(f"Updated {glif_objs_total} DeepComponent relations.")
 
         # update character-glyphs relations with deep-components
         glif_objs = font_obj.character_glyphs.filter(has_components=True)
         glif_objs_counter = 0
         glif_objs_total = len(glif_objs)
-        self.stdout.write("Updating {} CharacterGlyphs relations...".format(glif_objs_total))
+        self.stdout.write(f"Updating {glif_objs_total} CharacterGlyphs relations...")
         for glif_obj in glif_objs:
             glif_obj.save()
             glif_objs_counter += 1
             # self.stdout.write('Updated CharacterGlyph relations - {} of {}'.format(glif_objs_counter, glif_objs_total))
-        self.stdout.write("Updated {} CharacterGlyphs relations.".format(glif_objs_total))
+        self.stdout.write(f"Updated {glif_objs_total} CharacterGlyphs relations.")
 
         font_obj.available = True
         font_obj.save()
@@ -233,7 +237,7 @@ class Command(BaseCommand):
         try:
             glif_obj = glif_cls.objects.get(font=font, name=data.name)
         except glif_cls.DoesNotExist:
-            self.stderr.write("Import Error {} [{}]: {}".format(cls, layer_name, data.name))
+            self.stderr.write(f"Import Error {cls} [{layer_name}]: {data.name}")
             return
         obj, created = cls.objects.update_or_create(
             glif=glif_obj, group_name=layer_name, defaults={"data": content}
@@ -253,4 +257,6 @@ class Command(BaseCommand):
         self._import_glif(CharacterGlyph, font, content, match)
 
     def _import_character_glyph_layer(self, font, content, match):
-        self._import_glif_layer(CharacterGlyph, CharacterGlyphLayer, font, content, match)
+        self._import_glif_layer(
+            CharacterGlyph, CharacterGlyphLayer, font, content, match
+        )

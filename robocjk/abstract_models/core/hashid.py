@@ -21,7 +21,9 @@ class HashidModel(models.Model):
             # get hashids options from settings and fallback to some defaults
             hashids_options = getattr(settings, "HASHIDS_OPTIONS", {})
             hashids_options.setdefault("salt", "django")
-            hashids_options.setdefault("alphabet", "abcdefghijklmnopqrstuvwxyz0123456789")
+            hashids_options.setdefault(
+                "alphabet", "abcdefghijklmnopqrstuvwxyz0123456789"
+            )
             hashids_options.setdefault("min_length", 8)
             hashids = Hashids(**hashids_options)
             hashid = hashids.encode(self.pk, 1)

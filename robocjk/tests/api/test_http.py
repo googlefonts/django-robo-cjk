@@ -39,7 +39,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 400)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Bad Request - {}".format(m))
+        self.assertEqual(d["error"], f"Bad Request - {m}")
         self.assertEqual(d["data"], None)
 
     def test_unauthorized_response(self):
@@ -49,7 +49,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 401)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Unauthorized - {}".format(m))
+        self.assertEqual(d["error"], f"Unauthorized - {m}")
         self.assertEqual(d["data"], None)
 
     def test_forbidden_response(self):
@@ -59,7 +59,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 403)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Forbidden - {}".format(m))
+        self.assertEqual(d["error"], f"Forbidden - {m}")
         self.assertEqual(d["data"], None)
 
     def test_not_found_response(self):
@@ -69,7 +69,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 404)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Not Found - {}".format(m))
+        self.assertEqual(d["error"], f"Not Found - {m}")
         self.assertEqual(d["data"], None)
 
     def test_method_not_allowed_response(self):
@@ -79,7 +79,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 405)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Method Not Allowed - {}".format(m))
+        self.assertEqual(d["error"], f"Method Not Allowed - {m}")
         self.assertEqual(d["data"], None)
 
     def test_internal_server_error_response(self):
@@ -89,7 +89,7 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 500)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Internal Server Error - {}".format(m))
+        self.assertEqual(d["error"], f"Internal Server Error - {m}")
         self.assertEqual(d["data"], None)
 
     def test_service_unavailable_error_response(self):
@@ -99,5 +99,5 @@ class HttpTestCase(TestCase):
         self.assertEqual(r.status_code, 503)
         d = json.loads(r.content)
         self.assertEqual(d["status"], r.status_code)
-        self.assertEqual(d["error"], "Service Unavailable Error - {}".format(m))
+        self.assertEqual(d["error"], f"Service Unavailable Error - {m}")
         self.assertEqual(d["data"], None)

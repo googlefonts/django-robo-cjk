@@ -40,7 +40,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "is_locked",
-                    models.BooleanField(db_index=True, default=False, verbose_name="Is Locked"),
+                    models.BooleanField(
+                        db_index=True, default=False, verbose_name="Is Locked"
+                    ),
                 ),
                 (
                     "locked_at",
@@ -206,15 +208,21 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "uid",
-                    models.UUIDField(default=uuid.uuid4, editable=False, verbose_name="Unique ID"),
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, verbose_name="Unique ID"
+                    ),
                 ),
                 (
                     "available",
-                    models.BooleanField(db_index=True, default=True, verbose_name="Available"),
+                    models.BooleanField(
+                        db_index=True, default=True, verbose_name="Available"
+                    ),
                 ),
                 (
                     "fontlib",
-                    models.JSONField(blank=True, default=dict, null=True, verbose_name="FontLib"),
+                    models.JSONField(
+                        blank=True, default=dict, null=True, verbose_name="FontLib"
+                    ),
                 ),
                 ("features", models.TextField(blank=True, verbose_name="Features")),
                 (
@@ -366,7 +374,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "uid",
-                    models.UUIDField(default=uuid.uuid4, editable=False, verbose_name="Unique ID"),
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, verbose_name="Unique ID"
+                    ),
                 ),
                 (
                     "repo_url",
@@ -435,7 +445,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "data",
-                    models.JSONField(blank=True, default=dict, null=True, verbose_name="Data"),
+                    models.JSONField(
+                        blank=True, default=dict, null=True, verbose_name="Data"
+                    ),
                 ),
                 (
                     "editors",
@@ -607,7 +619,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "is_locked",
-                    models.BooleanField(db_index=True, default=False, verbose_name="Is Locked"),
+                    models.BooleanField(
+                        db_index=True, default=False, verbose_name="Is Locked"
+                    ),
                 ),
                 (
                     "locked_at",
@@ -793,7 +807,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "is_locked",
-                    models.BooleanField(db_index=True, default=False, verbose_name="Is Locked"),
+                    models.BooleanField(
+                        db_index=True, default=False, verbose_name="Is Locked"
+                    ),
                 ),
                 (
                     "locked_at",
@@ -1093,7 +1109,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "group_name",
-                    models.CharField(db_index=True, max_length=50, verbose_name="Group Name"),
+                    models.CharField(
+                        db_index=True, max_length=50, verbose_name="Group Name"
+                    ),
                 ),
                 (
                     "editors",
@@ -1237,7 +1255,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "group_name",
-                    models.CharField(db_index=True, max_length=50, verbose_name="Group Name"),
+                    models.CharField(
+                        db_index=True, max_length=50, verbose_name="Group Name"
+                    ),
                 ),
                 (
                     "editors",

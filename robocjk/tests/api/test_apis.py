@@ -93,12 +93,12 @@ class APIsTestCase(TestCase):
     def get_response(cls, url, payload=None, files=None, headers=None):
         host = settings.TEST_API_HOST
         # view_url = reverse('view_name')
-        absolute_url = "{}{}".format(host, url)
+        absolute_url = f"{host}{url}"
         payload = payload or {}
         headers = headers or {}
         auth_token = cls.auth_token
         if auth_token is not None:
-            headers["Authorization"] = "Bearer {}".format(auth_token)
+            headers["Authorization"] = f"Bearer {auth_token}"
         headers["Cache-Control"] = "no-cache"
         files = files or []
         options = {
@@ -203,7 +203,9 @@ class APIsTestCase(TestCase):
         payload = {
             "font_uid": self.get_font_uid(),
         }
-        response, data = self.get_response("/api/glyphs-composition/get/", payload=payload)
+        response, data = self.get_response(
+            "/api/glyphs-composition/get/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0043_glyphs_composition_update(self):
@@ -212,7 +214,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "data": '{"Glyphs-Composition-Test":"ok"}',
         }
-        response, data = self.get_response("/api/glyphs-composition/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/glyphs-composition/update/", payload=payload
+        )
         self.assert_response_ok(response)
         self.assertEqual(data, {"Glyphs-Composition-Test": "ok"})
 
@@ -304,7 +308,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "data": self.get_glif_data("atomic_element_create/hengpietest.glif"),
         }
-        response, data = self.get_response("/api/atomic-element/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/create/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0073_atomic_element_lock(self):
@@ -323,7 +329,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0075_atomic_element_lock(self):
@@ -342,7 +350,9 @@ class APIsTestCase(TestCase):
             "data": self.get_glif_data("atomic_element_update/hengpietest.glif"),
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/update/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0085_atomic_element_update_missing_data(self):
@@ -352,17 +362,23 @@ class APIsTestCase(TestCase):
             # 'data': '',
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/update/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0090_atomic_element_update_invalid_data(self):
         # print('test_0090_atomic_element_update_invalid_data')
         payload = {
             "font_uid": self.get_font_uid(),
-            "data": self.get_glif_data("atomic_element_update_invalid_data/hengpietest.glif"),
+            "data": self.get_glif_data(
+                "atomic_element_update_invalid_data/hengpietest.glif"
+            ),
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/update/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0095_atomic_element_update_missing_id(self):
@@ -372,7 +388,9 @@ class APIsTestCase(TestCase):
             "data": self.get_glif_data("atomic_element_update/hengpietest.glif"),
             # 'name': 'hengpietest',
         }
-        response, data = self.get_response("/api/atomic-element/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/update/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0120_atomic_element_unlock(self):
@@ -381,7 +399,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0125_atomic_element_lock_for_delete(self):
@@ -399,7 +419,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "hengpietest",
         }
-        response, data = self.get_response("/api/atomic-element/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/delete/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0135_atomic_element_lock_for_layer(self):
@@ -420,7 +442,9 @@ class APIsTestCase(TestCase):
                 "atomic_element_layer_create_integrity_error/taperingLineLeft.glif"
             ),
         }
-        response, data = self.get_response("/api/atomic-element/layer/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/create/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0145_atomic_element_layer_create(self):
@@ -429,9 +453,13 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "atomic_element_name": "taperingLineLeft",
             "group_name": "4",
-            "data": self.get_glif_data("atomic_element_layer_create/taperingLineLeft.glif"),
+            "data": self.get_glif_data(
+                "atomic_element_layer_create/taperingLineLeft.glif"
+            ),
         }
-        response, data = self.get_response("/api/atomic-element/layer/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/create/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0150_atomic_element_layer_update(self):
@@ -440,9 +468,13 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "atomic_element_name": "taperingLineLeft",
             "group_name": "4",
-            "data": self.get_glif_data("atomic_element_layer_update/taperingLineLeft.glif"),
+            "data": self.get_glif_data(
+                "atomic_element_layer_update/taperingLineLeft.glif"
+            ),
         }
-        response, data = self.get_response("/api/atomic-element/layer/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/update/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0155_atomic_element_layer_rename_missing_name(self):
@@ -452,7 +484,9 @@ class APIsTestCase(TestCase):
             "atomic_element_name": "taperingLineLeft",
             "group_name": "4",
         }
-        response, data = self.get_response("/api/atomic-element/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/rename/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0160_atomic_element_layer_rename_existing_name(self):
@@ -463,7 +497,9 @@ class APIsTestCase(TestCase):
             "group_name": "4",
             "new_group_name": "3",
         }
-        response, data = self.get_response("/api/atomic-element/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/rename/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0165_atomic_element_layer_rename(self):
@@ -474,7 +510,9 @@ class APIsTestCase(TestCase):
             "group_name": "4",
             "new_group_name": "4-renamed",
         }
-        response, data = self.get_response("/api/atomic-element/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/rename/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0170_atomic_element_layer_rename_revert(self):
@@ -485,7 +523,9 @@ class APIsTestCase(TestCase):
             "group_name": "4-renamed",
             "new_group_name": "4",
         }
-        response, data = self.get_response("/api/atomic-element/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/rename/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0175_atomic_element_layer_delete_missing_layer_id_or_layer_name(self):
@@ -495,7 +535,9 @@ class APIsTestCase(TestCase):
             "atomic_element_name": "taperingLineLeft",
             # 'group_name': '4',
         }
-        response, data = self.get_response("/api/atomic-element/layer/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/delete/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0180_atomic_element_layer_delete(self):
@@ -505,7 +547,9 @@ class APIsTestCase(TestCase):
             "atomic_element_name": "taperingLineLeft",
             "group_name": "4",
         }
-        response, data = self.get_response("/api/atomic-element/layer/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/layer/delete/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0185_atomic_element_unlock_for_layer(self):
@@ -514,7 +558,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "taperingLineLeft",
         }
-        response, data = self.get_response("/api/atomic-element/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/atomic-element/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0190_deep_component_list(self):
@@ -558,7 +604,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "data": self.get_glif_data("deep_component_create/DC_200CA_01.glif"),
         }
-        response, data = self.get_response("/api/deep-component/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/deep-component/create/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0213_deep_component_lock(self):
@@ -577,7 +625,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "DC_200CA_01test",
         }
-        response, data = self.get_response("/api/deep-component/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/deep-component/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0215_deep_component_lock(self):
@@ -596,7 +646,9 @@ class APIsTestCase(TestCase):
             "data": self.get_glif_data("deep_component_update/DC_200CA_01.glif"),
             "name": "DC_200CA_01test",
         }
-        response, data = self.get_response("/api/deep-component/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/deep-component/update/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0235_deep_component_unlock(self):
@@ -605,7 +657,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "DC_200CA_01test",
         }
-        response, data = self.get_response("/api/deep-component/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/deep-component/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0240_deep_component_lock_for_delete(self):
@@ -623,7 +677,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "DC_200CA_01test",
         }
-        response, data = self.get_response("/api/deep-component/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/deep-component/delete/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0250_character_glyph_list(self):
@@ -631,7 +687,9 @@ class APIsTestCase(TestCase):
         payload = {
             "font_uid": self.get_font_uid(),
         }
-        response, data = self.get_response("/api/character-glyph/list/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/list/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0255_character_glyph_get(self):
@@ -667,7 +725,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "data": self.get_glif_data("character_glyph_create/uni200CA.glif"),
         }
-        response, data = self.get_response("/api/character-glyph/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/create/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0275_character_glyph_lock(self):
@@ -676,7 +736,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/lock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
         # self.assert_response_error(response, 403)
         self.assert_response_ok(response)
 
@@ -686,7 +748,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0285_character_glyph_lock(self):
@@ -695,7 +759,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/lock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0289_character_glyph_update(self):
@@ -705,7 +771,9 @@ class APIsTestCase(TestCase):
             "name": "uni200CAtest",
             "data": self.get_glif_data("character_glyph_update/uni200CA.glif"),
         }
-        response, data = self.get_response("/api/character-glyph/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/update/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0290_character_glyph_unlock(self):
@@ -714,7 +782,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/unlock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0295_character_glyph_lock_for_delete(self):
@@ -723,7 +793,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/lock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0300_character_glyph_delete(self):
@@ -732,7 +804,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni200CAtest",
         }
-        response, data = self.get_response("/api/character-glyph/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/delete/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0305_character_glyph_lock_for_layer(self):
@@ -741,7 +815,9 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni4CF2",
         }
-        response, data = self.get_response("/api/character-glyph/lock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0310_character_glyph_layer_create_integrity_error(self):
@@ -750,9 +826,13 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "character_glyph_name": "uni4CF2",
             "group_name": "20",
-            "data": self.get_glif_data("character_glyph_layer_create_integrity_error/uni4CF2.glif"),
+            "data": self.get_glif_data(
+                "character_glyph_layer_create_integrity_error/uni4CF2.glif"
+            ),
         }
-        response, data = self.get_response("/api/character-glyph/layer/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/create/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0315_character_glyph_layer_create(self):
@@ -763,7 +843,9 @@ class APIsTestCase(TestCase):
             "group_name": "21",
             "data": self.get_glif_data("character_glyph_layer_create/uni4CF2.glif"),
         }
-        response, data = self.get_response("/api/character-glyph/layer/create/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/create/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0320_character_glyph_layer_rename_missing_name(self):
@@ -774,7 +856,9 @@ class APIsTestCase(TestCase):
             "group_name": "21",
             # 'new_group_name': '22',
         }
-        response, data = self.get_response("/api/character-glyph/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/rename/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0325_character_glyph_layer_rename_existing_name(self):
@@ -785,7 +869,9 @@ class APIsTestCase(TestCase):
             "group_name": "21",
             "new_group_name": "20",
         }
-        response, data = self.get_response("/api/character-glyph/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/rename/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0330_character_glyph_layer_rename(self):
@@ -796,7 +882,9 @@ class APIsTestCase(TestCase):
             "group_name": "21",
             "new_group_name": "21-renamed",
         }
-        response, data = self.get_response("/api/character-glyph/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/rename/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0335_character_glyph_layer_rename_revert(self):
@@ -807,7 +895,9 @@ class APIsTestCase(TestCase):
             "group_name": "21-renamed",
             "new_group_name": "21",
         }
-        response, data = self.get_response("/api/character-glyph/layer/rename/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/rename/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0340_character_glyph_layer_update(self):
@@ -818,7 +908,9 @@ class APIsTestCase(TestCase):
             "group_name": "21",
             "data": self.get_glif_data("character_glyph_layer_update/uni4CF2.glif"),
         }
-        response, data = self.get_response("/api/character-glyph/layer/update/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/update/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0345_character_glyph_layer_delete_missing_layer_id_or_layer_name(self):
@@ -828,7 +920,9 @@ class APIsTestCase(TestCase):
             "character_glyph_name": "uni4CF2",
             # 'group_name': 21,
         }
-        response, data = self.get_response("/api/character-glyph/layer/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/delete/", payload=payload
+        )
         self.assert_response_bad_request(response)
 
     def test_0350_character_glyph_layer_delete(self):
@@ -838,7 +932,9 @@ class APIsTestCase(TestCase):
             "character_glyph_name": "uni4CF2",
             "group_name": "21",
         }
-        response, data = self.get_response("/api/character-glyph/layer/delete/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/layer/delete/", payload=payload
+        )
         self.assert_response_ok(response)
 
     def test_0355_character_glyph_unlock_for_layer(self):
@@ -847,5 +943,7 @@ class APIsTestCase(TestCase):
             "font_uid": self.get_font_uid(),
             "name": "uni4CF2",
         }
-        response, data = self.get_response("/api/character-glyph/unlock/", payload=payload)
+        response, data = self.get_response(
+            "/api/character-glyph/unlock/", payload=payload
+        )
         self.assert_response_ok(response)

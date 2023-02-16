@@ -24,7 +24,7 @@ class Command(BaseCommand):
             AtomicElementLayer,
         ]
         for glif_model in glif_models:
-            print("Updating {} models.".format(glif_model))
+            print(f"Updating {glif_model} models.")
             glif_objs = glif_model.objects.filter(has_components=True)
             glif_objs_counter = 0
             glif_objs_total = len(glif_objs)

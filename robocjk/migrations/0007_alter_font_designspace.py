@@ -10,6 +10,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="font",
             name="designspace",
-            field=models.JSONField(blank=True, default=dict, null=True, verbose_name="Designspace"),
+            field=models.JSONField(
+                blank=True, default=dict, null=True, verbose_name="Designspace"
+            ),
         ),
     ]

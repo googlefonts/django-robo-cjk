@@ -71,13 +71,15 @@ def require_params(**required_params):
         def inner(request, *args, **kwargs):
             params = kwargs["params"]
             for param_key, param_type in required_params.items():
-                method_name = "get_{}".format(param_type)
+                method_name = f"get_{param_type}"
                 method = getattr(params, method_name, None)
                 if method is None:
                     raise ValueError(f"Invalid param type: '{param_type}'")
                 value = method(param_key, default=None)
                 if value is None:
-                    return ApiResponseBadRequest(f"Invalid or missing parameter '{param_key}'.")
+                    return ApiResponseBadRequest(
+                        f"Invalid or missing parameter '{param_key}'."
+                    )
                 params[param_key] = value
             return view_func(request, *args, **kwargs)
 
@@ -95,7 +97,9 @@ def require_user(view_func):
         if user and user.is_active:
             kwargs["user"] = user
             return view_func(request, *args, **kwargs)
-        return ApiResponseUnauthorized("This resource is accessible only upon authentication.")
+        return ApiResponseUnauthorized(
+            "This resource is accessible only upon authentication."
+        )
 
     wrapper.__dict__["require_user"] = True
     return wrapper
@@ -110,7 +114,9 @@ def require_project(view_func):
         params = kwargs["params"]
         project_uid = params.get_uuid("project_uid")
         if not project_uid:
-            return ApiResponseBadRequest("Missing or invalid parameter '{}project_uid'.")
+            return ApiResponseBadRequest(
+                "Missing or invalid parameter '{}project_uid'."
+            )
         try:
             project_obj = user.projects.prefetch_related("fonts").get(uid=project_uid)
         except Project.DoesNotExist:
@@ -142,7 +148,9 @@ def require_font(view_func):
             font_name = params.get_str("font_name")
             if project_uid and font_name:
                 try:
-                    font_obj = Font.objects.get(project__uid=project_uid, name=font_name)
+                    font_obj = Font.objects.get(
+                        project__uid=project_uid, name=font_name
+                    )
                     font_uid = font_obj.uid
                 except Font.DoesNotExist:
                     pass
@@ -279,7 +287,9 @@ def require_status(view_func):
 def require_atomic_element(**kwargs):
     # read decorator options
     select_related = kwargs.get("select_related", ["font", "locked_by"]) or []
-    prefetch_related = kwargs.get("prefetch_related", ["layers", "deep_components"]) or []
+    prefetch_related = (
+        kwargs.get("prefetch_related", ["layers", "deep_components"]) or []
+    )
     prefix_params = kwargs.get("prefix_params", False)
     check_locked = kwargs.get("check_locked", False)
 
@@ -292,14 +302,14 @@ def require_atomic_element(**kwargs):
             prefix = "atomic_element_" if prefix_params else ""
             filters = benedict(
                 {
-                    "id": params.get_int("{}id".format(prefix), None),
-                    "name": params.get_str("{}name".format(prefix), None),
+                    "id": params.get_int(f"{prefix}id", None),
+                    "name": params.get_str(f"{prefix}name", None),
                 }
             )
             filters.clean()
             if not filters:
                 return ApiResponseBadRequest(
-                    "Missing parameter '{}id' or '{}name'.".format(prefix, prefix)
+                    f"Missing parameter '{prefix}id' or '{prefix}name'."
                 )
             filters["font__uid"] = kwargs["font"].uid
             # retrieve atomic element object
@@ -312,7 +322,7 @@ def require_atomic_element(**kwargs):
                 )
             except obj_cls.DoesNotExist:
                 return ApiResponseNotFound(
-                    "Atomic Element object with '{}' not found.".format(filters)
+                    f"Atomic Element object with '{filters}' not found."
                 )
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -354,14 +364,14 @@ def require_atomic_element_layer(**kwargs):
             prefix = "layer_" if prefix_params else ""
             filters = benedict(
                 {
-                    "id": params.get_int("{}id".format(prefix), None),
-                    "group_name": params.get_str("{}group_name".format(prefix), None),
+                    "id": params.get_int(f"{prefix}id", None),
+                    "group_name": params.get_str(f"{prefix}group_name", None),
                 }
             )
             filters.clean()
             if not filters:
                 return ApiResponseBadRequest(
-                    "Missing parameter '{}id' or '{}group_name'.".format(prefix, prefix)
+                    f"Missing parameter '{prefix}id' or '{prefix}group_name'."
                 )
             # retrieve atomic element layer object
             atomic_element = kwargs["atomic_element"]
@@ -372,7 +382,7 @@ def require_atomic_element_layer(**kwargs):
                 filters["font_uid"] = atomic_element.font.uid
                 filters["atomic_elemens_id"] = atomic_element.id
                 return ApiResponseNotFound(
-                    "Atomic Element Layer object with '{}' not found.".format(filters)
+                    f"Atomic Element Layer object with '{filters}' not found."
                 )
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -390,7 +400,11 @@ def require_deep_component(**kwargs):
     # read decorator options
     select_related_defaults = ["font", "locked_by"]
     select_related = kwargs.get("select_related", select_related_defaults) or []
-    prefetch_related_defaults = ["character_glyphs", "atomic_elements", "atomic_elements__layers"]
+    prefetch_related_defaults = [
+        "character_glyphs",
+        "atomic_elements",
+        "atomic_elements__layers",
+    ]
     prefetch_related = kwargs.get("prefetch_related", prefetch_related_defaults) or []
     prefix_params = kwargs.get("prefix_params", False)
     check_locked = kwargs.get("check_locked", False)
@@ -404,14 +418,14 @@ def require_deep_component(**kwargs):
             prefix = "deep_component_" if prefix_params else ""
             filters = benedict(
                 {
-                    "id": params.get_int("{}id".format(prefix), None),
-                    "name": params.get_str("{}name".format(prefix), None),
+                    "id": params.get_int(f"{prefix}id", None),
+                    "name": params.get_str(f"{prefix}name", None),
                 }
             )
             filters.clean()
             if not filters:
                 return ApiResponseBadRequest(
-                    "Missing parameter '{}id' or '{}name'.".format(prefix, prefix)
+                    f"Missing parameter '{prefix}id' or '{prefix}name'."
                 )
             filters["font__uid"] = kwargs["font"].uid
             # retrieve deep component object
@@ -424,7 +438,7 @@ def require_deep_component(**kwargs):
                 )
             except obj_cls.DoesNotExist:
                 return ApiResponseNotFound(
-                    "Deep Component object with '{}' not found.".format(filters)
+                    f"Deep Component object with '{filters}' not found."
                 )
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -471,9 +485,9 @@ def require_character_glyph(**kwargs):
             prefix = "character_glyph_" if prefix_params else ""
             filters = benedict(
                 {
-                    "id": params.get_int("{}id".format(prefix), None),
-                    "name": params.get_str("{}name".format(prefix), None),
-                    "unicode_hex": params.get_str("{}unicode_hex".format(prefix), None),
+                    "id": params.get_int(f"{prefix}id", None),
+                    "name": params.get_str(f"{prefix}name", None),
+                    "unicode_hex": params.get_str(f"{prefix}unicode_hex", None),
                 }
             )
             filters.clean()
@@ -494,7 +508,7 @@ def require_character_glyph(**kwargs):
                 )
             except obj_cls.DoesNotExist:
                 return ApiResponseNotFound(
-                    "Character Glyph object with '{}' not found.".format(filters)
+                    f"Character Glyph object with '{filters}' not found."
                 )
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()
@@ -536,14 +550,14 @@ def require_character_glyph_layer(**kwargs):
             prefix = "layer_" if prefix_params else ""
             filters = benedict(
                 {
-                    "id": params.get_int("{}id".format(prefix), None),
-                    "group_name": params.get_str("{}group_name".format(prefix), None),
+                    "id": params.get_int(f"{prefix}id", None),
+                    "group_name": params.get_str(f"{prefix}group_name", None),
                 }
             )
             filters.clean()
             if not filters:
                 return ApiResponseBadRequest(
-                    "Missing parameter '{}id' or '{}group_name'.".format(prefix, prefix)
+                    f"Missing parameter '{prefix}id' or '{prefix}group_name'."
                 )
             # retrieve character glyph layer object
             character_glyph = kwargs["character_glyph"]
@@ -554,7 +568,7 @@ def require_character_glyph_layer(**kwargs):
                 filters["font_uid"] = character_glyph.font.uid
                 filters["character_glyph_id"] = character_glyph.id
                 return ApiResponseNotFound(
-                    "Character Glyph Layer object with '{}' not found.".format(filters)
+                    f"Character Glyph Layer object with '{filters}' not found."
                 )
             except obj_cls.MultipleObjectsReturned:
                 return ApiResponseInternalServerError()

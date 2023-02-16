@@ -63,8 +63,12 @@ class Command(BaseCommand):
             font_import_out_str = font_import_out.getvalue()
             font_import_err_str = font_import_err.getvalue()
             font_import_obj.status = (
-                FontImport.STATUS_ERROR if font_import_err_str else FontImport.STATUS_COMPLETED
+                FontImport.STATUS_ERROR
+                if font_import_err_str
+                else FontImport.STATUS_COMPLETED
             )
-            font_import_obj.logs = "{}\n---\n{}".format(font_import_out_str, font_import_err_str)
+            font_import_obj.logs = "{}\n---\n{}".format(
+                font_import_out_str, font_import_err_str
+            )
             # print(font_import_obj.logs)
             font_import_obj.save()

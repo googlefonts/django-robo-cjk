@@ -23,7 +23,7 @@ class Command(BaseCommand):
             font_obj = Font.objects.select_related("project").get(uid=font_uid)
         except Font.DoesNotExist:
             raise CommandError(
-                'Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(font_uid)
+                f'Invalid font_uid, font with uid "{font_uid}" doesn\'t exist.'
             )
 
         font_obj.available = False

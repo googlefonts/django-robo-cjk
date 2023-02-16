@@ -10,6 +10,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="project",
             name="repo_branch",
-            field=models.CharField(default="master", max_length=50, verbose_name="Repo branch"),
+            field=models.CharField(
+                default="master", max_length=50, verbose_name="Repo branch"
+            ),
         ),
     ]

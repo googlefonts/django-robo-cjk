@@ -50,7 +50,9 @@ class CoreTestCase(TestCase):
         self.assertFalse(glif_data.is_empty)
 
     def test_glyph_data_with_deep_component(self):
-        glif_data = self._read_glif_data("test_core_data/deepComponent/D_C__98E_0_00.glif")
+        glif_data = self._read_glif_data(
+            "test_core_data/deepComponent/D_C__98E_0_00.glif"
+        )
         self.assertTrue(glif_data.ok)
         self.assertEqual(glif_data.error, None)
         self.assertEqual(glif_data.name, "DC_98E0_00")
@@ -71,7 +73,9 @@ class CoreTestCase(TestCase):
         self.assertFalse(glif_data.is_empty)
 
     def test_glyph_data_with_deep_component_empty(self):
-        glif_data = self._read_glif_data("test_core_data/deepComponent/D_C__9E_1F__00.glif")
+        glif_data = self._read_glif_data(
+            "test_core_data/deepComponent/D_C__9E_1F__00.glif"
+        )
         self.assertTrue(glif_data.ok)
         self.assertEqual(glif_data.error, None)
         self.assertEqual(glif_data.name, "DC_9E1F_00")
@@ -96,7 +100,9 @@ class CoreTestCase(TestCase):
             glif_data.components_names,
             ["DC_4EBB_00", "DC_5341_00", "DC_53E3_00", "DC_5973_01"],
         )
-        self.assertEqual(glif_data.components_str, "DC_4EBB_00,DC_5341_00,DC_53E3_00,DC_5973_01")
+        self.assertEqual(
+            glif_data.components_str, "DC_4EBB_00,DC_5341_00,DC_53E3_00,DC_5973_01"
+        )
         self.assertTrue(glif_data.has_components)
         self.assertFalse(glif_data.has_outlines)
         self.assertTrue(glif_data.has_unicode)

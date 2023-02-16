@@ -61,7 +61,9 @@ def auth_token(request, params, *args, **kwargs):
     token_expiration = {"days": 1} if settings.DEBUG else {"minutes": 5}
     token = get_auth_token(request, username, password, expiration=token_expiration)
     if token is None:
-        return ApiResponseBadRequest("Unable to generate auth token, invalid credentials.")
+        return ApiResponseBadRequest(
+            "Unable to generate auth token, invalid credentials."
+        )
     data = {
         "auth_token": token,
         "refresh_token": None,  # TODO
@@ -121,11 +123,14 @@ def project_create(request, params, user, *args, **kwargs):
         repo_ssh_url_validator(repo_url)
     except ValidationError as repo_url_error:
         return ApiResponseBadRequest(
-            "Invalid parameter 'repo_url': {} -> {}".format(repo_url, repo_url_error.message)
+            "Invalid parameter 'repo_url': {} -> {}".format(
+                repo_url, repo_url_error.message
+            )
         )
     if Project.objects.filter(name__iexact=name).exists():
         return ApiResponseBadRequest(
-            "Project with name='{}' already exists, " "please choose a different name.".format(name)
+            "Project with name='{}' already exists, "
+            "please choose a different name.".format(name)
         )
     if Project.objects.filter(repo_url__iexact=repo_url).exists():
         return ApiResponseBadRequest(
@@ -192,7 +197,8 @@ def font_create(request, params, user, *args, **kwargs):
     name = params.get_str("name")
     if Font.objects.filter(name__iexact=name).exists():
         return ApiResponseBadRequest(
-            "Font with name='{}' already exists, " "please choose a different name.".format(name)
+            "Font with name='{}' already exists, "
+            "please choose a different name.".format(name)
         )
     font = Font()
     font.project = project
@@ -280,7 +286,9 @@ def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
     data = {
         "atomic_elements": list(atomic_elements_qs.values(*ATOMIC_ELEMENT_ID_FIELDS)),
         "deep_components": list(deep_components_qs.values(*DEEP_COMPONENT_ID_FIELDS)),
-        "character_glyphs": list(character_glyphs_qs.values(*CHARACTER_GLYPH_ID_FIELDS)),
+        "character_glyphs": list(
+            character_glyphs_qs.values(*CHARACTER_GLYPH_ID_FIELDS)
+        ),
     }
     return ApiResponseSuccess(data)
 
@@ -420,7 +428,9 @@ def glif_unlock(request, params, user, font, *args, **kwargs):
 @require_font
 @require_glif_filters
 def atomic_element_list(request, params, user, font, glif_filters, *args, **kwargs):
-    data = list(font.atomic_elements.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS))
+    data = list(
+        font.atomic_elements.filter(**glif_filters).values(*ATOMIC_ELEMENT_ID_FIELDS)
+    )
     return ApiResponseSuccess(data)
 
 
@@ -455,7 +465,9 @@ def atomic_element_create(request, params, user, font, data, glif, *args, **kwar
 @require_user
 @require_atomic_element(check_locked=True)
 @require_data
-def atomic_element_update(request, params, user, atomic_element, data, glif, *args, **kwargs):
+def atomic_element_update(
+    request, params, user, atomic_element, data, glif, *args, **kwargs
+):
     atomic_element.data = data
     atomic_element.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize(options=params))
@@ -557,7 +569,9 @@ def atomic_element_layer_update(
 @api_view
 @require_user
 @require_atomic_element_layer()
-def atomic_element_layer_delete(request, params, user, atomic_element_layer, *args, **kwargs):
+def atomic_element_layer_delete(
+    request, params, user, atomic_element_layer, *args, **kwargs
+):
     return ApiResponseSuccess(atomic_element_layer.delete())
 
 
@@ -566,7 +580,9 @@ def atomic_element_layer_delete(request, params, user, atomic_element_layer, *ar
 @require_font
 @require_glif_filters
 def deep_component_list(request, params, user, font, glif_filters, *args, **kwargs):
-    data = list(font.deep_components.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS))
+    data = list(
+        font.deep_components.filter(**glif_filters).values(*DEEP_COMPONENT_ID_FIELDS)
+    )
     return ApiResponseSuccess(data)
 
 
@@ -601,7 +617,9 @@ def deep_component_create(request, params, user, font, data, glif, *args, **kwar
 @require_user
 @require_deep_component(check_locked=True)
 @require_data
-def deep_component_update(request, params, user, deep_component, data, glif, *args, **kwargs):
+def deep_component_update(
+    request, params, user, deep_component, data, glif, *args, **kwargs
+):
     deep_component.data = data
     deep_component.save_by(user)
     return ApiResponseSuccess(deep_component.serialize(options=params))
@@ -641,7 +659,9 @@ def deep_component_unlock(request, params, user, deep_component, *args, **kwargs
 @require_font
 @require_glif_filters
 def character_glyph_list(request, params, user, font, glif_filters, *args, **kwargs):
-    data = list(font.character_glyphs.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS))
+    data = list(
+        font.character_glyphs.filter(**glif_filters).values(*CHARACTER_GLYPH_ID_FIELDS)
+    )
     return ApiResponseSuccess(data)
 
 
@@ -676,7 +696,9 @@ def character_glyph_create(request, params, user, font, data, glif, *args, **kwa
 @require_user
 @require_character_glyph(check_locked=True)
 @require_data
-def character_glyph_update(request, params, user, character_glyph, data, glif, *args, **kwargs):
+def character_glyph_update(
+    request, params, user, character_glyph, data, glif, *args, **kwargs
+):
     character_glyph.data = data
     character_glyph.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize(options=params))
@@ -778,5 +800,7 @@ def character_glyph_layer_update(
 @api_view
 @require_user
 @require_character_glyph_layer()
-def character_glyph_layer_delete(request, params, user, character_glyph_layer, *args, **kwargs):
+def character_glyph_layer_delete(
+    request, params, user, character_glyph_layer, *args, **kwargs
+):
     return ApiResponseSuccess(character_glyph_layer.delete())

@@ -8,10 +8,20 @@ class TimestampModel(models.Model):
         abstract = True
 
     created_at = models.DateTimeField(
-        auto_now_add=True, editable=False, verbose_name=_("Created at")
+        auto_now_add=True,
+        editable=False,
+        verbose_name=_(
+            "Created at",
+        ),
     )
 
-    updated_at = models.DateTimeField(auto_now=True, editable=False, verbose_name=_("Updated at"))
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        editable=False,
+        verbose_name=_(
+            "Updated at",
+        ),
+    )
 
     updated_by = models.ForeignKey(
         get_user_model(),
@@ -22,9 +32,16 @@ class TimestampModel(models.Model):
         verbose_name=_("Updated by"),
     )
 
-    editors = models.ManyToManyField(get_user_model(), related_name="+", verbose_name=_("Editors"))
+    editors = models.ManyToManyField(
+        get_user_model(),
+        related_name="+",
+        verbose_name=_("Editors"),
+    )
 
-    editors_history = models.TextField(blank=True, verbose_name=_("Editors History"))
+    editors_history = models.TextField(
+        blank=True,
+        verbose_name=_("Editors History"),
+    )
 
     def update_editors_history(self, user):
         editor_name = user.get_full_name()

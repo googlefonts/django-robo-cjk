@@ -65,7 +65,7 @@ from robocjk.validators import GitSSHRepositoryURLValidator
 def run_commands(*args):
     cmds = args
     cmd = " && ".join(cmds)
-    logger.info("Run commands: \n{}".format(cmd))
+    logger.info(f"Run commands: \n{cmd}")
 
     # # Run commands using os.system
     # os.system(cmd)
@@ -79,7 +79,7 @@ def run_commands(*args):
     try:
         cmd_output = subprocess.check_output(cmd, shell=True)
         cmd_output_str = cmd_output.decode("UTF-8")
-        logger.info("Command output: {}".format(cmd_output_str))
+        logger.info(f"Command output: {cmd_output_str}")
     except subprocess.CalledProcessError as error:
         # print("error code", error.returncode, error.output)
         if error.returncode == 1:
@@ -93,7 +93,7 @@ def run_commands(*args):
                 )
             cmd_output = error.output
             cmd_output_str = cmd_output.decode("UTF-8")
-            logger.exception("Command error: {}".format(cmd_output_str))
+            logger.exception(f"Command error: {cmd_output_str}")
             raise error
 
 
@@ -113,7 +113,9 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         max_length=200,
         validators=[GitSSHRepositoryURLValidator()],
         verbose_name=_("Repo URL"),
-        help_text=_("The .git repository SSH URL, eg. git@github.com:username/repository.git"),
+        help_text=_(
+            "The .git repository SSH URL, eg. git@github.com:username/repository.git"
+        ),
     )
 
     repo_branch = models.CharField(
@@ -145,7 +147,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         self.designers.add(user)
 
     def save_to_file_system(self, full_export=False):
-        logger.info('Saving project "{}" to file system...'.format(self.name))
+        logger.info(f'Saving project "{self.name}" to file system...')
         path = self.path()
         fsutil.make_dirs(path)
         repo_path = fsutil.join_path(path, ".git")
@@ -153,25 +155,35 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         if not fsutil.exists(repo_path):
             # repository doesn't exist, initialize it
             logger.info(
-                'Repository for project "{}" doesn\'t exist, initialize it.'.format(self.name)
+                'Repository for project "{}" doesn\'t exist, initialize it.'.format(
+                    self.name
+                )
             )
             run_commands(
-                "cd {}".format(path),
+                f"cd {path}",
                 "git init",
-                'git config --local --add "user.name" "{}"'.format(settings.GIT_USER_NAME),
-                'git config --local --add "user.email" "{}"'.format(settings.GIT_USER_EMAIL),
-                "git remote add origin {}".format(self.repo_url),
-                "git checkout {}".format(repo_branch),
-                "git pull origin {}".format(repo_branch),
+                'git config --local --add "user.name" "{}"'.format(
+                    settings.GIT_USER_NAME
+                ),
+                'git config --local --add "user.email" "{}"'.format(
+                    settings.GIT_USER_EMAIL
+                ),
+                f"git remote add origin {self.repo_url}",
+                f"git checkout {repo_branch}",
+                f"git pull origin {repo_branch}",
             )
         else:
             # repository exist
-            logger.info('Repository for project "{}" already exist, update it.'.format(self.name))
+            logger.info(
+                'Repository for project "{}" already exist, update it.'.format(
+                    self.name
+                )
+            )
             run_commands(
-                "cd {}".format(path),
+                f"cd {path}",
                 "git reset --hard",
-                "git checkout {}".format(repo_branch),
-                "git pull origin {}".format(repo_branch),
+                f"git checkout {repo_branch}",
+                f"git pull origin {repo_branch}",
                 "git clean -df",
             )
         # save all project fonts to file.system
@@ -203,23 +215,23 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             if font_export_success:
                 # add all changed files, commit and push to the git repository
                 run_commands(
-                    "cd {}".format(path),
-                    "git add ./{}".format(font_dirpath),
-                    'git commit -m "{}"'.format(font_commit_message),
-                    "git push origin {}".format(repo_branch),
+                    f"cd {path}",
+                    f"git add ./{font_dirpath}",
+                    f'git commit -m "{font_commit_message}"',
+                    f"git push origin {repo_branch}",
                 )
         run_commands(
-            "cd {}".format(path),
+            f"cd {path}",
             "git add --all",
             'git commit -m "{}"'.format("Updated project."),
-            "git push origin {}".format(repo_branch),
+            f"git push origin {repo_branch}",
         )
 
     def serialize(self, options=None):
         return serialize_project(self, options)
 
     def __str__(self):
-        return force_str("{}".format(self.name))
+        return force_str(f"{self.name}")
 
 
 def save_glif_to_file_system(glif_data):
@@ -291,10 +303,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         users_names = [user.get_full_name() for user in users_qs]
         users_str = ", ".join(users_names)
         # return 'Updated {}.'.format(self.name)
-        message = "Updated {}".format(self.name)
+        message = f"Updated {self.name}"
         if users_str:
-            return "{} by: {}.".format(message, users_str)
-        return "{}.".format(message)
+            return f"{message} by: {users_str}."
+        return f"{message}."
 
     def num_character_glyphs(self):
         return self.character_glyphs.count()
@@ -323,26 +335,32 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 )
             )
             return
-        logger.info('Saving font "{}" to file system...'.format(font.name))
+        logger.info(f'Saving font "{font.name}" to file system...')
         path = font.path()
         fsutil.make_dirs(path)
         # write fontLib.json file
-        logger.info('Saving font "{}" "fontLib.json" to file system...'.format(font.name))
+        logger.info(f'Saving font "{font.name}" "fontLib.json" to file system...')
         fontlib_path = fsutil.join_path(path, "fontLib.json")
         fontlib_str = benedict(font.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write features.fea file
-        logger.info('Saving font "{}" "features.fea" to file system...'.format(font.name))
+        logger.info(f'Saving font "{font.name}" "features.fea" to file system...')
         features_path = fsutil.join_path(path, "features.fea")
         fsutil.write_file(features_path, font.features)
         # write designspace.json file
-        logger.info('Saving font "{}" "designspace.json" to file system...'.format(font.name))
+        logger.info(f'Saving font "{font.name}" "designspace.json" to file system...')
         designspace_path = fsutil.join_path(path, "designspace.json")
         designspace_str = benedict(font.designspace, keypath_separator=None).dump()
         fsutil.write_file(designspace_path, designspace_str)
         # write glyphsComposition.json file
-        logger.info('Saving font "{}" "glyphsComposition.json" to file system...'.format(font.name))
-        glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(font_id=font.id)
+        logger.info(
+            'Saving font "{}" "glyphsComposition.json" to file system...'.format(
+                font.name
+            )
+        )
+        glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(
+            font_id=font.id
+        )
         glyphs_composition_path = fsutil.join_path(path, "glyphsComposition.json")
         glyphs_composition_str = benedict(
             glyphs_composition_obj.serialize(), keypath_separator=None
@@ -362,14 +380,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         if full_export:
             # remove existing glifs dirs
-            fsutil.remove_dirs(character_glyphs_path, deep_components_path, atomic_elements_path)
+            fsutil.remove_dirs(
+                character_glyphs_path, deep_components_path, atomic_elements_path
+            )
 
         # create empty dirs to avoid errors in fonts that have not all entities
         fsutil.make_dirs(character_glyphs_path)
         fsutil.make_dirs(deep_components_path)
         fsutil.make_dirs(atomic_elements_path)
 
-        logger.info('Loading font "{}" glifs from database.'.format(font.name))
+        logger.info(f'Loading font "{font.name}" glifs from database.')
 
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
@@ -379,18 +399,18 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 updated_after = min(font.export_started_at, font.export_completed_at)
                 glifs_filters["updated_at__gt"] = updated_after
 
-        character_glyphs_qs = CharacterGlyph.objects.select_related("font", "font__project").filter(
-            font=font, **glifs_filters
-        )
+        character_glyphs_qs = CharacterGlyph.objects.select_related(
+            "font", "font__project"
+        ).filter(font=font, **glifs_filters)
         character_glyphs_layers_qs = CharacterGlyphLayer.objects.select_related(
             "glif", "glif__font", "glif__font__project"
         ).filter(glif__font=font, **glifs_filters)
-        deep_components_qs = DeepComponent.objects.select_related("font", "font__project").filter(
-            font=font, **glifs_filters
-        )
-        atomic_elements_qs = AtomicElement.objects.select_related("font", "font__project").filter(
-            font=font, **glifs_filters
-        )
+        deep_components_qs = DeepComponent.objects.select_related(
+            "font", "font__project"
+        ).filter(font=font, **glifs_filters)
+        atomic_elements_qs = AtomicElement.objects.select_related(
+            "font", "font__project"
+        ).filter(font=font, **glifs_filters)
         atomic_elements_layers_qs = AtomicElementLayer.objects.select_related(
             "glif", "glif__font", "glif__font__project"
         ).filter(glif__font=font, **glifs_filters)
@@ -437,11 +457,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 font.name, glifs_count, num_processes
             )
         )
-        logger.info(" - {} character glyphs".format(character_glyphs_count))
-        logger.info(" - {} character glyphs layers".format(character_glyphs_layers_count))
-        logger.info(" - {} deep components".format(deep_components_count))
-        logger.info(" - {} atomic elements".format(atomic_elements_count))
-        logger.info(" - {} atomic elements layers".format(atomic_elements_layers_count))
+        logger.info(f" - {character_glyphs_count} character glyphs")
+        logger.info(f" - {character_glyphs_layers_count} character glyphs layers")
+        logger.info(f" - {deep_components_count} deep components")
+        logger.info(f" - {atomic_elements_count} atomic elements")
+        logger.info(f" - {atomic_elements_layers_count} atomic elements layers")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
             for glifs_paginator in glifs_paginators:
@@ -454,12 +474,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                         )
                         for glif in glifs_list
                     )
-                    glifs_files_written_on_disk = pool.map(save_glif_to_file_system, glifs_data)
+                    glifs_files_written_on_disk = pool.map(
+                        save_glif_to_file_system, glifs_data
+                    )
                     if not all(glifs_files_written_on_disk):
                         logger.exception("Some files were not written to disk.")
                     glifs_progress += len(glifs_list)
                     glifs_progress_perc = (
-                        int(round((glifs_progress / glifs_count) * 100)) if glifs_count > 0 else 0
+                        int(round((glifs_progress / glifs_count) * 100))
+                        if glifs_count > 0
+                        else 0
                     )
                     logger.info(
                         'Saving font "{}" - {} of {} total glifs - {}%'.format(
@@ -481,9 +505,12 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         def count_glif_layers_files(dirpath):
             layers_dirs = fsutil.list_dirs(dirpath)
             layers_dirs_glif_files = [
-                fsutil.search_files(layer_dir, glif_files_pattern) for layer_dir in layers_dirs
+                fsutil.search_files(layer_dir, glif_files_pattern)
+                for layer_dir in layers_dirs
             ]
-            return sum([len(layer_dir_files) for layer_dir_files in layers_dirs_glif_files])
+            return sum(
+                [len(layer_dir_files) for layer_dir_files in layers_dirs_glif_files]
+            )
 
         def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
             message = "Expected {}, found {} {} .glif files on file-system.".format(
@@ -495,16 +522,24 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 logger.info(message)
             elif glifs_count > glifs_expected_count:
                 if abs(glifs_expected_count - glifs_count) < 50:
-                    message = "{} (some files have been created in the meanwhile)".format(message)
+                    message = (
+                        "{} (some files have been created in the meanwhile)".format(
+                            message
+                        )
+                    )
                     logger.info(message)
                 elif glifs_expected_count > 0:
                     logger.error(message)
 
         character_glyphs_count = CharacterGlyph.objects.filter(font=font).count()
-        character_glyphs_layers_count = CharacterGlyphLayer.objects.filter(glif__font=font).count()
+        character_glyphs_layers_count = CharacterGlyphLayer.objects.filter(
+            glif__font=font
+        ).count()
         deep_components_count = DeepComponent.objects.filter(font=font).count()
         atomic_elements_count = AtomicElement.objects.filter(font=font).count()
-        atomic_elements_layers_count = AtomicElementLayer.objects.filter(glif__font=font).count()
+        atomic_elements_layers_count = AtomicElementLayer.objects.filter(
+            glif__font=font
+        ).count()
 
         verify_glifs_count(
             count_glif_files(character_glyphs_path),
@@ -532,7 +567,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             "atomic elements layers",
         )
 
-        logger.info('Saved font "{}" to file system.'.format(font.name))
+        logger.info(f'Saved font "{font.name}" to file system.')
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):
         """
@@ -598,14 +633,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         )
 
         users_pks = list(set(users_pks))
-        users_qs = user_manager.filter(pk__in=users_pks).order_by("first_name", "last_name")
+        users_qs = user_manager.filter(pk__in=users_pks).order_by(
+            "first_name", "last_name"
+        )
         return users_qs
 
     def serialize(self, options=None):
         return serialize_font(self, options)
 
     def __str__(self):
-        return force_str("{}".format(self.name))
+        return force_str(f"{self.name}")
 
 
 class FontImport(TimestampModel):
@@ -656,7 +693,9 @@ class FontImport(TimestampModel):
         verbose_name_plural = _("Fonts Imports")
 
     def __str__(self):
-        return force_str("{} [{}]: {}".format(_("Font Import"), self.status, self.filename))
+        return force_str(
+            "{} [{}]: {}".format(_("Font Import"), self.status, self.filename)
+        )
 
 
 class GlyphsComposition(TimestampModel):
@@ -1023,7 +1062,7 @@ class GlifDataModel(models.Model):
                 return gliph_data
             else:
                 logger.exception(
-                    "{} - parse data error: {}".format(self.__class__, gliph_data.error)
+                    f"{self.__class__} - parse data error: {gliph_data.error}"
                 )
                 return None
         return None
@@ -1077,10 +1116,15 @@ class GlifDataModel(models.Model):
             if init_glif_data:
                 any_status_downgraded = False
                 any_status_upgraded = False
-                if init_glif_data.status_with_variations != glif_data.status_with_variations:
+                if (
+                    init_glif_data.status_with_variations
+                    != glif_data.status_with_variations
+                ):
                     # some status changed, check if any status has been downgraded
                     for key, val in glif_data.status_with_variations.items():
-                        init_val = init_glif_data.status_with_variations.get(key, 0) or 0
+                        init_val = (
+                            init_glif_data.status_with_variations.get(key, 0) or 0
+                        )
                         # flag as downgraded when any source changes from done to a previous status
                         if init_val == 4 and val < init_val:
                             any_status_downgraded = True
@@ -1121,7 +1165,9 @@ class GlifDataModel(models.Model):
                 # logger.debug(comp_names)
                 if comp_names:
                     comp_set.clear()
-                    comp_objs = comp_cls.objects.filter(font_id=self.font_id, name__in=comp_names)
+                    comp_objs = comp_cls.objects.filter(
+                        font_id=self.font_id, name__in=comp_names
+                    )
                     # logger.debug(comp_objs)
                     comp_set.add(*comp_objs)
                 else:
@@ -1208,7 +1254,9 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return serialize_character_glyph(self, options)
 
     def update_layers_updated_at(self):
-        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
+        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
+            "updated_at__max"
+        ]
         # update in-memory value
         self.layers_updated_at = layers_updated_at_max
         # update database value
@@ -1216,7 +1264,7 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
 
     def __str__(self):
-        return force_str("{}".format(self.name))
+        return force_str(f"{self.name}")
 
 
 class CharacterGlyphLayer(GlifDataModel, TimestampModel):
@@ -1255,7 +1303,7 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
         return serialize_character_glyph_layer(self, options)
 
     def __str__(self):
-        return force_str("[{}] {}".format(self.group_name, self.name))
+        return force_str(f"[{self.group_name}] {self.name}")
 
 
 class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
@@ -1299,7 +1347,7 @@ class DeepComponent(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return serialize_deep_component(self, options)
 
     def __str__(self):
-        return force_str("{}".format(self.name))
+        return force_str(f"{self.name}")
 
 
 class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
@@ -1336,7 +1384,9 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         return serialize_atomic_element(self, options)
 
     def update_layers_updated_at(self):
-        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))["updated_at__max"]
+        layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
+            "updated_at__max"
+        ]
         # update in-memory value
         self.layers_updated_at = layers_updated_at_max
         # update database value
@@ -1344,7 +1394,7 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
 
     def __str__(self):
-        return force_str("{}".format(self.name))
+        return force_str(f"{self.name}")
 
 
 class AtomicElementLayer(GlifDataModel, TimestampModel):
@@ -1364,7 +1414,11 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
         verbose_name=_("Glif"),
     )
 
-    group_name = models.CharField(db_index=True, max_length=50, verbose_name=_("Group Name"))
+    group_name = models.CharField(
+        db_index=True,
+        max_length=50,
+        verbose_name=_("Group Name"),
+    )
 
     objects = AtomicElementLayerManager()
 
@@ -1379,7 +1433,7 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
         return serialize_atomic_element_layer(self, options)
 
     def __str__(self):
-        return force_str("[{}] {}".format(self.group_name, self.name))
+        return force_str(f"[{self.group_name}] {self.name}")
 
 
 class Proof(TimestampModel):
@@ -1438,7 +1492,7 @@ class Proof(TimestampModel):
         return get_proof_path(self)
 
     def __str__(self):
-        return force_str("[{}] {}".format(self.get_filetype_display(), self.file))
+        return force_str(f"[{self.get_filetype_display()}] {self.file}")
 
 
 connect_signals()

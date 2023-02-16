@@ -83,7 +83,9 @@ class ClientTestCase(TestCase):
 
     def test_client_with_valid_host_without_api_installed(self):
         with self.assertRaises(ValueError):
-            client = Client(host="https://www.google.com/", username="admin", password="admin")
+            client = Client(
+                host="https://www.google.com/", username="admin", password="admin"
+            )
 
     def test_auth_token(self):
         response = self._client.auth_token()
@@ -187,17 +189,23 @@ class ClientTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_atomic_element_get(self):
-        response = self._client.atomic_element_get(font_uid=self._font_uid, atomic_element_id=83)
+        response = self._client.atomic_element_get(
+            font_uid=self._font_uid, atomic_element_id=83
+        )
         # print(response)
         self.assert_response_ok(response)
 
     def test_atomic_element_lock(self):
-        response = self._client.atomic_element_lock(font_uid=self._font_uid, atomic_element_id=83)
+        response = self._client.atomic_element_lock(
+            font_uid=self._font_uid, atomic_element_id=83
+        )
         # print(response)
         self.assert_response_ok(response)
 
     def test_atomic_element_unlock(self):
-        response = self._client.atomic_element_unlock(font_uid=self._font_uid, atomic_element_id=83)
+        response = self._client.atomic_element_unlock(
+            font_uid=self._font_uid, atomic_element_id=83
+        )
         # print(response)
         self.assert_response_ok(response)
 
@@ -207,12 +215,16 @@ class ClientTestCase(TestCase):
         self.assert_response_ok(response)
 
     def test_deep_component_get(self):
-        response = self._client.deep_component_get(font_uid=self._font_uid, deep_component_id=896)
+        response = self._client.deep_component_get(
+            font_uid=self._font_uid, deep_component_id=896
+        )
         # print(response)
         self.assert_response_ok(response)
 
     def test_deep_component_lock(self):
-        response = self._client.deep_component_lock(font_uid=self._font_uid, deep_component_id=896)
+        response = self._client.deep_component_lock(
+            font_uid=self._font_uid, deep_component_id=896
+        )
         # print(response)
         self.assert_response_ok(response)
 

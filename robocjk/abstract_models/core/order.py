@@ -6,4 +6,7 @@ class OrderModel(models.Model):
     class Meta:
         abstract = True
 
-    order = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=0)
+    order = models.PositiveSmallIntegerField(
+        verbose_name=_("Order"),
+        default=0,
+    )

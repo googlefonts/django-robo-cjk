@@ -27,7 +27,9 @@ class Command(BaseCommand):
 
     def debug_character_glyphs_layers_files_saving(self):
         for cg_layer_id in [723047, 723048, 723049, 723050, 723101, 723102]:
-            cg_layer_obj = CharacterGlyphLayer.objects.get(glif__font_id=21, id=cg_layer_id)
+            cg_layer_obj = CharacterGlyphLayer.objects.get(
+                glif__font_id=21, id=cg_layer_id
+            )
             print(cg_layer_obj, fsutil.exists(cg_layer_obj.path()))
             cg_layer_obj.save_to_file_system()
             print(cg_layer_obj, fsutil.exists(cg_layer_obj.path()))
@@ -52,7 +54,9 @@ class Command(BaseCommand):
     #         /root/.rcjks/autocjk-hanzi/autocjk-hanzi.rcjk/characterGlyph/uni4F_64.alt00.glif
 
     def debug_missing_character_glyphs_layers_files(self):
-        cg_layers_qs = CharacterGlyphLayer.objects.filter(glif__font_id=21).defer("data")
+        cg_layers_qs = CharacterGlyphLayer.objects.filter(glif__font_id=21).defer(
+            "data"
+        )
         # print(len(cg_layers_qs))
         for cg_layer_obj in cg_layers_qs:
             cg_layer_path = cg_layer_obj.path()

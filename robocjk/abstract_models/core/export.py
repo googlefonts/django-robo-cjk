@@ -2,7 +2,7 @@ import datetime as dt
 
 from django.conf import settings
 from django.db import close_old_connections, models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from robocjk.debug import logger
 

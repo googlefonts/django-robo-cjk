@@ -564,6 +564,7 @@ class GlyphsCompositionAdmin(admin.ModelAdmin):
 
 
 class GlifAdmin(admin.ModelAdmin):
+    @admin.display(description=_("Status"))
     def status_display(self, obj):
         css = """
             color: #FFFFFF;
@@ -579,9 +580,6 @@ class GlifAdmin(admin.ModelAdmin):
         )
         html = f'<span style="{css}">{obj.get_status_display()}</span>'
         return mark_safe(html)
-
-    status_display.short_description = _("Status")
-    status_display.allow_tags = True
 
     actions = [export_as_csv("Export as CSV", fields=["name"])]
 

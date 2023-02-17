@@ -297,7 +297,7 @@ STATICFILES_FINDERS = (
 #    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # else:
 #    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "robocjk.storage.ManifestStaticFilesStorageNotStrict"
 
 
 CACHES = {
@@ -426,6 +426,10 @@ LOGGING = {
         "": get_app_logger(level_debug="WARNING", level="ERROR", propagate=False),
     },
 }
+
+
+# django-admin-rangefilter - https://github.com/silentsokolov/django-admin-rangefilter
+ADMIN_RANGEFILTER_NONCE_ENABLED = False
 
 
 # django-cors-headers

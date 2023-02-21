@@ -1175,6 +1175,9 @@ class GlifDataModel(models.Model):
             return True
         return False
 
+    def update_components(self):
+        self._update_components()
+
     def path(self):
         raise NotImplementedError
 

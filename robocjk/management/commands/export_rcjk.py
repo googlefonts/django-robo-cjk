@@ -15,7 +15,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--project-uid",
             required=False,
-            help='The uid "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" of the project that will be exported.',
+            help="The uid 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' of the project that will be exported.",
         )
         parser.add_argument(
             "--full",
@@ -31,11 +31,10 @@ class Command(BaseCommand):
             raise CommandError(message)
 
         logger.info("-" * 100)
-        logger.info(
-            "Start export - pid: {} - thread: {}".format(
-                os.getpid(), threading.current_thread().name
-            )
-        )
+
+        process_id = os.getpid()
+        thread_name = threading.current_thread().name
+        logger.info(f"Start export - pid: {process_id} - thread: {thread_name}")
 
         project_uid = options.get("project_uid", None)
         projects_full_export = options.get("full", False)
@@ -45,11 +44,7 @@ class Command(BaseCommand):
             try:
                 project_obj = Project.objects.get(uid=project_uid)
             except Project.DoesNotExist:
-                message = (
-                    'Invalid project_uid, project with uid "{}" doesn\'t exist.'.format(
-                        project_uid
-                    )
-                )
+                message = f"Invalid project_uid, project with uid '{project_uid}' doesn't exist."
                 self.stderr.write(message)
                 raise CommandError(message)
             else:
@@ -60,9 +55,8 @@ class Command(BaseCommand):
             for project in projects_qs:
                 project.export(full=projects_full_export)
 
-        logger.info(
-            "Complete export - pid: {} - thread: {}".format(
-                os.getpid(), threading.current_thread().name
-            )
-        )
+        process_id = os.getpid()
+        thread_name = threading.current_thread().name
+        logger.info(f"Complete export - pid: {process_id} - thread: {thread_name}")
+
         logger.info("-" * 100)

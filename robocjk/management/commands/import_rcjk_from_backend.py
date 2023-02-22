@@ -38,9 +38,7 @@ class Command(BaseCommand):
             font = font_import_obj.font
             if font.export_running:
                 self.stdout.write(
-                    'There is an export running for "{}", the import will run on export complete.'.format(
-                        font.name
-                    )
+                    f"There is an export running for '{font.name}', the import will run on export complete."
                 )
                 continue
             font_import_obj.status = FontImport.STATUS_LOADING
@@ -67,8 +65,6 @@ class Command(BaseCommand):
                 if font_import_err_str
                 else FontImport.STATUS_COMPLETED
             )
-            font_import_obj.logs = "{}\n---\n{}".format(
-                font_import_out_str, font_import_err_str
-            )
+            font_import_obj.logs = f"{font_import_out_str}\n---\n{font_import_err_str}"
             # print(font_import_obj.logs)
             font_import_obj.save()

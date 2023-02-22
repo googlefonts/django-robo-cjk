@@ -84,12 +84,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--filepath",
             required=True,
-            help='The zipped .rcjk filepath. The filepath must be absolute or relative to "/root/robocjk/temp/"',
+            help="The zipped .rcjk filepath. The filepath must be absolute or relative to '/root/robocjk/temp/'",
         )
         parser.add_argument(
             "--font-uid",
             required=True,
-            help='The uid "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" of the font into which the .rcjk files will be imported.',
+            help="The uid 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' of the font into which the .rcjk files will be imported.",
         )
         parser.add_argument(
             "--font-clear",
@@ -123,18 +123,14 @@ class Command(BaseCommand):
         try:
             font_obj = Font.objects.select_related("project").get(uid=font_uid)
         except Font.DoesNotExist:
-            message = 'Invalid font_uid, font with uid "{}" doesn\'t exist.'.format(
-                font_uid
-            )
+            message = f"Invalid font_uid, font with uid '{font_uid}' doesn't exist."
             self.stderr.write(message)
             raise CommandError(message)
 
-        self.stdout.write(f'Importing "{font_obj.name}"...')
+        self.stdout.write(f"Importing '{font_obj.name}' ...")
 
         if font_obj.export_running:
-            message = 'There is an export running for "{}", the import will run on export complete.'.format(
-                font_obj.name
-            )
+            message = "There is an export running for '{font_obj.name}', the import will run on export complete."
             self.stderr.write(message)
             raise CommandError(message)
 
@@ -168,12 +164,9 @@ class Command(BaseCommand):
 
             for item in self._import_mappings:
                 group_name = item["group_name"]
-                self.stdout.write(
-                    "Found {} {} to import.".format(
-                        len(self._import_groups[group_name]),
-                        group_name.replace("_", " ").title(),
-                    )
-                )
+                group_count = len(self._import_groups[group_name])
+                group_count_title = group_name.replace("_", " ").title()
+                self.stdout.write(f"Found {group_count} {group_count_title} to import.")
 
             for item in self._import_mappings:
                 for name, match in self._import_groups[item["group_name"]]:

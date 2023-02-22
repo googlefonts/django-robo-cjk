@@ -32,7 +32,5 @@ class Command(BaseCommand):
                 glif_obj.save()
                 glif_objs_counter += 1
                 print(
-                    "Updated {} of {} - {} models.".format(
-                        glif_objs_counter, glif_objs_total, glif_model
-                    )
+                    f"Updated {glif_objs_counter} of {glif_objs_total} - {glif_model} models."
                 )

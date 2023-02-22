@@ -13,6 +13,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Max
 from django.utils.encoding import force_str
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from robocjk.abstract_models import (
@@ -155,19 +156,13 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         if not fsutil.exists(repo_path):
             # repository doesn't exist, initialize it
             logger.info(
-                'Repository for project "{}" doesn\'t exist, initialize it.'.format(
-                    self.name
-                )
+                f"Repository for project '{self.name}' doesn't exist, initialize it."
             )
             run_commands(
                 f"cd {path}",
                 "git init",
-                'git config --local --add "user.name" "{}"'.format(
-                    settings.GIT_USER_NAME
-                ),
-                'git config --local --add "user.email" "{}"'.format(
-                    settings.GIT_USER_EMAIL
-                ),
+                f'git config --local --add "user.name" "{settings.GIT_USER_NAME}"',
+                f'git config --local --add "user.email" "{settings.GIT_USER_EMAIL}"',
                 f"git remote add origin {self.repo_url}",
                 f"git checkout {repo_branch}",
                 f"git pull origin {repo_branch}",
@@ -175,9 +170,7 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         else:
             # repository exist
             logger.info(
-                'Repository for project "{}" already exist, update it.'.format(
-                    self.name
-                )
+                f'Repository for project "{self.name}" already exist, update it.'
             )
             run_commands(
                 f"cd {path}",
@@ -194,18 +187,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         fonts_rcjk_dirs = {font.path() for font in fonts_list}
         fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
         logger.info(
-            'Deleting project "{}" old fonts from file system...\n{}'.format(
-                self.name, fonts_rcjk_deleted_dirs
-            )
+            f'Deleting project "{self.name}" old fonts from file system...\n{fonts_rcjk_deleted_dirs}'
         )
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
+        export_strategy_name = "full" if full_export else "incremental"
+        font_names = [font.name for font in fonts_list]
         logger.info(
-            'Saving project "{}" fonts ({} export) to file system...\n{}'.format(
-                self.name,
-                "full" if full_export else "incremental",
-                [font.name for font in fonts_list],
-            )
+            f'Saving project "{self.name}" fonts ({export_strategy_name} export) to file system...\n{font_names}'
         )
 
         for font in fonts_list:
@@ -294,6 +283,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
     objects = FontManager()
 
+    @cached_property
+    def full_name(self):
+        return f"{self.project.name} / {self.name}"
+
     def get_commit_message(self, **options):
         """
         Get the commit message for the font combining the font name and
@@ -328,35 +321,32 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
     def save_to_file_system(self, full_export=False):  # noqa: C901
         font = self
+        font_name = font.full_name
         if not font.available:
             logger.info(
-                'Skipped font "{}" saving because it is not available (maybe there is an import running).'.format(
-                    font.name
-                )
+                f"Skipped font '{font_name}' saving because it is not available (maybe there is an import running)."
             )
             return
-        logger.info(f'Saving font "{font.name}" to file system...')
+        logger.info(f"Saving font '{font_name}' to file system...")
         path = font.path()
         fsutil.make_dirs(path)
         # write fontLib.json file
-        logger.info(f'Saving font "{font.name}" "fontLib.json" to file system...')
+        logger.info(f"Saving font '{font_name}' 'fontLib.json' to file system...")
         fontlib_path = fsutil.join_path(path, "fontLib.json")
         fontlib_str = benedict(font.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write features.fea file
-        logger.info(f'Saving font "{font.name}" "features.fea" to file system...')
+        logger.info(f"Saving font '{font_name}' 'features.fea' to file system...")
         features_path = fsutil.join_path(path, "features.fea")
         fsutil.write_file(features_path, font.features)
         # write designspace.json file
-        logger.info(f'Saving font "{font.name}" "designspace.json" to file system...')
+        logger.info(f"Saving font '{font_name}' 'designspace.json' to file system...")
         designspace_path = fsutil.join_path(path, "designspace.json")
         designspace_str = benedict(font.designspace, keypath_separator=None).dump()
         fsutil.write_file(designspace_path, designspace_str)
         # write glyphsComposition.json file
         logger.info(
-            'Saving font "{}" "glyphsComposition.json" to file system...'.format(
-                font.name
-            )
+            f"Saving font '{font_name}' 'glyphsComposition.json' to file system..."
         )
         glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(
             font_id=font.id
@@ -369,9 +359,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         # delete existing character-glyphs, deep-components and atomic-elements directories
         logger.info(
-            'Deleting font "{}" character-glyphs, deep-components and atomic-elements folders...'.format(
-                font.name
-            )
+            f"Deleting font '{font_name}' character-glyphs, deep-components and atomic-elements folders..."
         )
 
         character_glyphs_path = get_character_glyphs_path(font)
@@ -389,7 +377,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         fsutil.make_dirs(deep_components_path)
         fsutil.make_dirs(atomic_elements_path)
 
-        logger.info(f'Loading font "{font.name}" glifs from database.')
+        logger.info(f"Loading font '{font_name}' glifs from database.")
 
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
@@ -453,9 +441,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
 
         logger.info(
-            'Saving font "{}" - {} glifs to file system using {} process(es).'.format(
-                font.name, glifs_count, num_processes
-            )
+            f"Saving font '{font_name}' - {glifs_count} glifs to file system using {num_processes} process(es)."
         )
         logger.info(f" - {character_glyphs_count} character glyphs")
         logger.info(f" - {character_glyphs_layers_count} character glyphs layers")
@@ -486,15 +472,11 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                         else 0
                     )
                     logger.info(
-                        'Saving font "{}" - {} of {} total glifs - {}%'.format(
-                            font.name, glifs_progress, glifs_count, glifs_progress_perc
-                        )
+                        f"Saving font '{font_name}' - {glifs_progress} of {glifs_count} total glifs - {glifs_progress_perc}%"
                     )
 
         logger.info(
-            'Verifying font "{}" - expected {} glifs exists on file system.'.format(
-                font.name, glifs_count
-            )
+            f"Verifying font '{font_name}' - expected {glifs_count} glifs exists on file system."
         )
 
         glif_files_pattern = "*.glif"
@@ -513,9 +495,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             )
 
         def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
-            message = "Expected {}, found {} {} .glif files on file-system.".format(
-                glifs_expected_count, glifs_count, glifs_type_name
-            )
+            message = f"Verifying font '{font_name}' - expected {glifs_expected_count}, found {glifs_count} {glifs_type_name} .glif files on file-system."
             if glifs_count < glifs_expected_count:
                 logger.error(message)
             elif glifs_count == glifs_expected_count:
@@ -523,9 +503,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             elif glifs_count > glifs_expected_count:
                 if abs(glifs_expected_count - glifs_count) < 50:
                     message = (
-                        "{} (some files have been created in the meanwhile)".format(
-                            message
-                        )
+                        f"{message} (some files have been created in the meanwhile)"
                     )
                     logger.info(message)
                 elif glifs_expected_count > 0:
@@ -567,7 +545,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             "atomic elements layers",
         )
 
-        logger.info(f'Saved font "{font.name}" to file system.')
+        logger.info(f"Saved font '{font_name}' to file system.")
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):
         """
@@ -693,9 +671,7 @@ class FontImport(TimestampModel):
         verbose_name_plural = _("Fonts Imports")
 
     def __str__(self):
-        return force_str(
-            "{} [{}]: {}".format(_("Font Import"), self.status, self.filename)
-        )
+        return force_str(f"Font Import [{self.status}]: {self.filename}")
 
 
 class GlyphsComposition(TimestampModel):
@@ -727,7 +703,7 @@ class GlyphsComposition(TimestampModel):
         return self.data or {}
 
     def __str__(self):
-        return force_str("{} / {}".format(self.font.name, _("Glyphs Composition")))
+        return force_str("{self.font.name} / {Glyphs Composition}")
 
 
 class LockableModel(models.Model):

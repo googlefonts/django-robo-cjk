@@ -14,7 +14,8 @@ class NameSlugModel(models.Model):
     slug = models.SlugField(
         verbose_name=_("Slug"),
         max_length=50,
-        unique=True,
+        # unique=True,
+        db_index=True,
         null=True,
         blank=True,
         editable=False,
@@ -26,15 +27,17 @@ class NameSlugModel(models.Model):
         self.initial_slug = self.slug
 
     def _update_slug(self):
-        slug_base = slugify(self.name)
-        slug_n = 1
-        slug_unique = slug_base
-        while (
-            self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists()
-        ):
-            slug_n += 1
-            slug_unique = f"{slug_base}-{slug_n}"
-        self.slug = slug_unique
+        self.slug = slugify(self.name)
+
+    #         slug_base = slugify(self.name)
+    #         slug_n = 1
+    #         slug_unique = slug_base
+    #         while (
+    #             self.__class__.objects.exclude(pk=self.pk).filter(slug=slug_unique).exists()
+    #         ):
+    #             slug_n += 1
+    #             slug_unique = f"{slug_base}-{slug_n}"
+    #         self.slug = slug_unique
 
     def save(self, *args, **kwargs):
         self._update_slug()

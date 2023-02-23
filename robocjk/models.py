@@ -971,7 +971,7 @@ class GlifDataModel(models.Model):
 
     unicode_hex = models.CharField(
         db_index=True,
-        max_length=10,
+        max_length=50,
         blank=True,
         default="",
         verbose_name=_("Unicode hex"),
@@ -1029,6 +1029,16 @@ class GlifDataModel(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._init_data = None
+
+    @property
+    def unicodes_hex(self):
+        if not self.unicode_hex:
+            return []
+        return self.unicode_hex.split(",")
+
+    @property
+    def unicodes_int(self):
+        return list([int(unicode_hex_str, 16) for unicode_hex_str in self.unicodes_hex])
 
     def _parse_data(self, data_str):
         if data_str:

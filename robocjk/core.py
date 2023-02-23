@@ -16,6 +16,7 @@ class GlifData:
     _name = ""
     _filename = ""
     _unicode_hex = ""
+    _unicodes = []
     _components_names = []
     _components_str = ""
     _has_components = False
@@ -76,10 +77,19 @@ class GlifData:
         self._filename = f"{basename}.glif"
 
         # look for glyph unicode hex value
-        unicode_xml = self._xml.find("./unicode")
-        if unicode_xml is not None:
-            self._unicode_hex = unicode_xml.get("hex")
-            self._has_unicode = bool(self._unicode_hex != "")
+        unicodes = list(
+            filter(
+                None,
+                [
+                    unicode_node.get("hex")
+                    for unicode_node in self._xml.findall("./unicode")
+                ],
+            )
+        )
+        if unicodes:
+            self._unicode_hex = ",".join(unicodes)
+            self._unicodes = unicodes
+            self._has_unicode = True
 
         # look for <lib><dict> xml node
         lib_xml = self._xml.find("./lib/dict")
@@ -151,6 +161,10 @@ class GlifData:
     @property
     def unicode_hex(self):
         return self._unicode_hex
+
+    @property
+    def unicodes(self):
+        return self._unicodes
 
     @property
     def components_names(self):

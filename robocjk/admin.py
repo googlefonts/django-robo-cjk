@@ -824,7 +824,10 @@ class CharacterGlyphLayerInline(GlifLayerInline):
 @admin.register(CharacterGlyph)
 class CharacterGlyphAdmin(GlifAdmin):
     def character(self, obj):
-        return unicode_to_char(obj.unicode_hex) if obj.unicode_hex else ""
+        chars = "".join(
+            [unicode_to_char(unicode_hex_str) for unicode_hex_str in obj.unicodes_hex]
+        )
+        return chars
 
     def get_list_display(self, request):
         ld = super().get_list_display(request)

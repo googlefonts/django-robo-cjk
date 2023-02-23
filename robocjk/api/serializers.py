@@ -138,6 +138,8 @@ def _serialize_object(obj, fields, options):
 
 def _serialize_glif(obj, fields, options):
     data = _serialize_object(obj, fields, options)
+    if obj.unicode_hex:
+        data["unicodes"] = obj.unicodes_int
     data["locked_by_user"] = None
     data["locked_at"] = None
     if obj.locked_by_id:

@@ -18,7 +18,7 @@ class Command(BaseCommand):
             glif_objs_total = len(glif_objs)
             for glif_obj in glif_objs:
                 glif_obj_changed = False
-                glif_data = glif_obj._parse_data()
+                glif_data = glif_obj._parse_data(glif_obj.data)
                 if glif_data:
                     status = StatusModel.get_status_from_data(data=glif_data)
                     if status != glif_obj.status:

@@ -172,3 +172,9 @@ class CoreTestCase(TestCase):
         self.assertFalse(glif_data.has_unicode)
         self.assertFalse(glif_data.has_variation_axis)
         self.assertTrue(glif_data.is_empty)
+
+    def test_glyph_data_with_multiple_unicodes(self):
+        glif_data = self._read_glif_data("test_core_data/characterGlyph/uni313B.glif")
+        self.assertTrue(glif_data.has_unicode)
+        self.assertEqual(glif_data.unicode_hex, "313B,11B1")
+        self.assertEqual(glif_data.unicodes, ["313B", "11B1"])

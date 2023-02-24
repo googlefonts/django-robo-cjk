@@ -4,6 +4,7 @@ from robocjk.utils import (
     char_to_unicode,
     format_glif,
     unicode_to_char,
+    unicodes_str_to_list,
     username_to_filename,
 )
 
@@ -21,6 +22,22 @@ class UtilsTestCase(TestCase):
 
     def test_unicode_to_char(self):
         self.assertEqual(unicode_to_char("4E12"), "丒")
+
+    def test_unicodes_str_to_list(self):
+        f = unicodes_str_to_list
+        self.assertEqual(f(None), [])
+        self.assertEqual(f(""), [])
+        self.assertEqual(f("4E12"), ["4E12"])
+        self.assertEqual(f("4E12,4E13"), ["4E12", "4E13"])
+        self.assertEqual(f("4E12,4E13,4E14"), ["4E12", "4E13", "4E14"])
+
+    def test_unicodes_str_to_int_list(self):
+        f = unicodes_str_to_list
+        self.assertEqual(f(None, to_int=True), [])
+        self.assertEqual(f("", to_int=True), [])
+        self.assertEqual(f("4E12", to_int=True), [19986])
+        self.assertEqual(f("4E12,4E13", to_int=True), [19986, 19987])
+        self.assertEqual(f("4E12,4E13,4E14", to_int=True), [19986, 19987, 19988])
 
     def test_username_to_filename(self):
         f = username_to_filename

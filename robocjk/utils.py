@@ -17,6 +17,17 @@ def char_to_unicode(s):
     return hex(ord(s))[2:].zfill(4).upper()
 
 
+def unicodes_str_to_list(unicodes_str, to_int=False):
+    if not unicodes_str:
+        return []
+    unicodes_list = unicodes_str.split(",")
+    if to_int:
+        unicodes_list = list(
+            [int(unicode_hex_str, 16) for unicode_hex_str in unicodes_list]
+        )
+    return unicodes_list
+
+
 def unicode_to_char(s):
     return chr(int("0x{}".format(s.lstrip("0")).lower(), 16))
 

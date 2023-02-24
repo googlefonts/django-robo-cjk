@@ -57,7 +57,7 @@ from robocjk.managers import (
     ProjectManager,
 )
 from robocjk.signals import connect_signals
-from robocjk.utils import format_glif
+from robocjk.utils import format_glif, unicodes_str_to_list
 from robocjk.validators import GitSSHRepositoryURLValidator
 
 # import time
@@ -1032,13 +1032,11 @@ class GlifDataModel(models.Model):
 
     @property
     def unicodes_hex(self):
-        if not self.unicode_hex:
-            return []
-        return self.unicode_hex.split(",")
+        return unicodes_str_to_list(self.unicode_hex, to_int=False)
 
     @property
     def unicodes_int(self):
-        return list([int(unicode_hex_str, 16) for unicode_hex_str in self.unicodes_hex])
+        return unicodes_str_to_list(self.unicode_hex, to_int=True)
 
     def _parse_data(self, data_str):
         if data_str:

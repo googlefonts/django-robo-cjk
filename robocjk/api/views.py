@@ -40,6 +40,7 @@ from robocjk.models import (
     GlyphsComposition,
     Project,
 )
+from robocjk.utils import unicodes_str_to_list
 from robocjk.validators import GitSSHRepositoryURLValidator
 
 UserClass = get_user_model()
@@ -283,12 +284,32 @@ def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
             Q(updated_at__gt=updated_since) | Q(layers_updated_at__gt=updated_since)
         )
 
+    atomic_elements_qs = atomic_elements_qs.values(*ATOMIC_ELEMENT_ID_FIELDS)
+    atomic_elements_list = list(atomic_elements_qs)
+
+    deep_components_qs = deep_components_qs.values(*DEEP_COMPONENT_ID_FIELDS)
+    deep_components_list = list(deep_components_qs)
+
+    character_glyphs_qs = character_glyphs_qs.values(*CHARACTER_GLYPH_ID_FIELDS)
+    character_glyphs_list = list(character_glyphs_qs)
+
+    # patch Character Glyphs data adding computed unicodes int list
+    character_glyphs_count = len(character_glyphs_list)
+    character_glyph_index = 0
+    while character_glyph_index < character_glyphs_count:
+        character_glyph_data = character_glyphs_list[character_glyph_index]
+        character_glyph_unicode_hex = character_glyph_data.get("unicode_hex")
+        if character_glyph_unicode_hex:
+            character_glyph_data["unicodes"] = unicodes_str_to_list(
+                character_glyph_unicode_hex,
+                to_int=True,
+            )
+        character_glyph_index += 1
+
     data = {
-        "atomic_elements": list(atomic_elements_qs.values(*ATOMIC_ELEMENT_ID_FIELDS)),
-        "deep_components": list(deep_components_qs.values(*DEEP_COMPONENT_ID_FIELDS)),
-        "character_glyphs": list(
-            character_glyphs_qs.values(*CHARACTER_GLYPH_ID_FIELDS)
-        ),
+        "atomic_elements": atomic_elements_list,
+        "deep_components": deep_components_list,
+        "character_glyphs": character_glyphs_list,
     }
     return ApiResponseSuccess(data)
 

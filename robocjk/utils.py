@@ -22,9 +22,7 @@ def unicodes_str_to_list(unicodes_str, to_int=False):
         return []
     unicodes_list = unicodes_str.split(",")
     if to_int:
-        unicodes_list = list(
-            [int(unicode_hex_str, 16) for unicode_hex_str in unicodes_list]
-        )
+        unicodes_list = [int(unicode_hex_str, 16) for unicode_hex_str in unicodes_list]
     return unicodes_list
 
 

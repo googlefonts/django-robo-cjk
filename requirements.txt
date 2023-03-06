@@ -21,7 +21,7 @@ html5lib==1.1
 mysqlclient==2.1.1
 pip==23.0.1
 pip-chill==1.0.1
-pipdeptree==2.5.0
+pipdeptree==2.5.2
 pre-commit==3.0.4
 PyJWT==2.6.0
 pyOpenSSL==23.0.0

@@ -164,8 +164,8 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                 f'git config --local --add "user.name" "{settings.GIT_USER_NAME}"',
                 f'git config --local --add "user.email" "{settings.GIT_USER_EMAIL}"',
                 f"git remote add origin {self.repo_url}",
-                f"git checkout {repo_branch}",
                 f"git pull origin {repo_branch}",
+                f"git push --set-upstream origin {repo_branch}",
             )
         else:
             # repository exist

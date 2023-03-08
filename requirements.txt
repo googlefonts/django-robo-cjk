@@ -6,10 +6,10 @@ django-admin-rangefilter==0.9.0
 django-ckeditor==6.5.1
 django-cleanup==7.0.0
 django-compat==1.0.15
-django-cors-headers==3.13.0
+django-cors-headers==3.14.0
 django-csp==3.7
 django-debug-toolbar==3.8.1
-django-environ==0.9.0
+django-environ==0.10.0
 django-extra-settings==0.8.1
 django-json-widget==1.1.1
 fonttools==4.38.0
@@ -21,8 +21,8 @@ html5lib==1.1
 mysqlclient==2.1.1
 pip==23.0.1
 pip-chill==1.0.1
-pipdeptree==2.5.0
-pre-commit==3.0.4
+pipdeptree==2.5.2
+pre-commit==3.1.1
 PyJWT==2.6.0
 pyOpenSSL==23.0.0
 pyparsing==3.0.9
@@ -32,4 +32,4 @@ requests==2.28.2
 sentry-sdk==1.15.0
 unicodecsv==0.14.1
 wheel==0.38.4
-whitenoise==6.3.0
+whitenoise==6.4.0

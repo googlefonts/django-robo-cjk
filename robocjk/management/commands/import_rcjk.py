@@ -154,12 +154,7 @@ class Command(BaseCommand):
                 for item in self._import_mappings:
                     match = item["path_regex"].match(name)
                     if match:
-                        self._import_groups[item["group_name"]].append(
-                            (
-                                name,
-                                match,
-                            )
-                        )
+                        self._import_groups[item["group_name"]].append((name, match))
                         continue
 
             for item in self._import_mappings:

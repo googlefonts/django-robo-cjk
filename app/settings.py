@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 import environ
+import pymysql
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import ignore_logger as sentry_sdk_ignore_logger
@@ -195,6 +196,9 @@ DATABASES = {
         #         }
     },
 }
+
+pymysql.version_info = (2, 1, 1)
+pymysql.install_as_MySQLdb()
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 

@@ -1181,6 +1181,88 @@ class GlifDataModel(models.Model):
         # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 
+class DeletedGlif(models.Model):
+    GLIF_TYPE_ATOMIC_ELEMENT = "atomic_element"
+    GLIF_TYPE_ATOMIC_ELEMENT_LAYER = "atomic_element_layer"
+    GLIF_TYPE_DEEP_COMPONENT = "deep_component"
+    GLIF_TYPE_CHARACTER_GLYPH = "character_glyph"
+    GLIF_TYPE_CHARACTER_GLYPH_LAYER = "character_glyph_layer"
+
+    GLIF_TYPE_CHOICES = (
+        (GLIF_TYPE_ATOMIC_ELEMENT, _("Atomic Element")),
+        (GLIF_TYPE_ATOMIC_ELEMENT_LAYER, _("Atomic Element Layer")),
+        (GLIF_TYPE_DEEP_COMPONENT, _("Deep Component")),
+        (GLIF_TYPE_CHARACTER_GLYPH, _("Character Glyph")),
+        (GLIF_TYPE_CHARACTER_GLYPH_LAYER, _("Character Glyph Layer")),
+    )
+
+    GLIF_TYPES = (
+        GLIF_TYPE_ATOMIC_ELEMENT,
+        GLIF_TYPE_ATOMIC_ELEMENT_LAYER,
+        GLIF_TYPE_DEEP_COMPONENT,
+        GLIF_TYPE_CHARACTER_GLYPH,
+        GLIF_TYPE_CHARACTER_GLYPH_LAYER,
+    )
+
+    class Meta:
+        app_label = "robocjk"
+        verbose_name = _("Deleted Glif")
+        verbose_name_plural = _("Deleted Glifs")
+
+    deleted_at = models.DateTimeField(
+        verbose_name=_("Deleted at"),
+    )
+    deleted_by = models.ForeignKey(
+        get_user_model(),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("Deleted by"),
+    )
+    font = models.ForeignKey(
+        "robocjk.Font",
+        on_delete=models.CASCADE,
+        related_name="deleted_glifs",
+        verbose_name=_("Font"),
+    )
+    glif_type = models.CharField(
+        db_index=True,
+        max_length=50,
+        choices=GLIF_TYPE_CHOICES,
+        verbose_name=_("Glif Type"),
+    )
+    glif_id = models.PositiveIntegerField(
+        db_index=True,
+        verbose_name=_("Glif ID"),
+    )
+    group_name = models.CharField(
+        db_index=True,
+        blank=True,
+        max_length=50,
+        verbose_name=_("Group Name"),
+    )
+    name = models.CharField(
+        db_index=True,
+        blank=True,
+        max_length=50,
+        verbose_name=_("Name"),
+    )
+    filename = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name=_("Filename"),
+    )
+    filepath = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Filepath"),
+    )
+
+    def __str__(self):
+        return force_str(f"[{self.glif_type}] {self.glif_id}")
+
+
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     class Meta:
         app_label = "robocjk"

@@ -1204,6 +1204,21 @@ class DeletedGlif(models.Model):
         GLIF_TYPE_CHARACTER_GLYPH_LAYER,
     )
 
+    @classmethod
+    def get_glif_type_by_glif(cls, glif):
+        if isinstance(glif, AtomicElement):
+            return cls.GLIF_TYPE_ATOMIC_ELEMENT
+        elif isinstance(glif, AtomicElementLayer):
+            return cls.GLIF_TYPE_ATOMIC_ELEMENT_LAYER
+        elif isinstance(glif, DeepComponent):
+            return cls.GLIF_TYPE_DEEP_COMPONENT
+        elif isinstance(glif, CharacterGlyph):
+            return cls.GLIF_TYPE_CHARACTER_GLYPH
+        elif isinstance(glif, CharacterGlyphLayer):
+            return cls.GLIF_TYPE_CHARACTER_GLYPH_LAYER
+        else:
+            raise ValueError(f"Invalid glif: {glif}")
+
     class Meta:
         app_label = "robocjk"
         verbose_name = _("Deleted Glif")
@@ -1361,6 +1376,10 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
 
     objects = CharacterGlyphLayerManager()
 
+    @property
+    def font(self):
+        return self.glif.font
+
     def path(self):
         return get_character_glyph_layer_path(self)
 
@@ -1490,6 +1509,10 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
     )
 
     objects = AtomicElementLayerManager()
+
+    @property
+    def font(self):
+        return self.glif.font
 
     def path(self):
         return get_atomic_element_layer_path(self)

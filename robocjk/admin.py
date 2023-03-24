@@ -888,8 +888,10 @@ class AtomicElementLayerAdmin(GlifLayerAdmin):
 @admin.register(DeletedGlif)
 class DeletedGlifAdmin(admin.ModelAdmin):
     search_fields = (
+        "group_name",
         "name",
         "filename",
+        "filepath",
     )
     list_select_related = (
         "deleted_by",

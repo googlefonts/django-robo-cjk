@@ -233,7 +233,7 @@ class APIsTestCase(TestCase):
         self.assertFalse("deleted_glifs" in data)
 
     def test_0045_glif_list_with_updated_since(self):
-        # print('test_0045_glif_list')
+        # print('test_0045_glif_list_with_updated_since')
         payload = {
             "font_uid": self.get_font_uid(),
             "updated_since": "2023/03/25",

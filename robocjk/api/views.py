@@ -30,6 +30,7 @@ from robocjk.api.serializers import (
     ATOMIC_ELEMENT_ID_FIELDS,
     CHARACTER_GLYPH_ID_FIELDS,
     DEEP_COMPONENT_ID_FIELDS,
+    DELETED_GLIF_ID_FIELDS,
     FONT_FIELDS,
     PROJECT_FIELDS,
     USER_FIELDS,
@@ -317,6 +318,14 @@ def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
         "deep_components": deep_components_list,
         "character_glyphs": character_glyphs_list,
     }
+
+    if updated_since:
+        deleted_glifs_qs = font.deleted_glifs.filter(
+            deleted_at__gt=updated_since,
+        ).values(*DELETED_GLIF_ID_FIELDS)
+        deleted_glifs_list = list(deleted_glifs_qs)
+        data["deleted_glifs"] = deleted_glifs_list
+
     return ApiResponseSuccess(data)
 
 

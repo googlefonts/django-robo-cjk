@@ -366,11 +366,29 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         deep_components_path = get_deep_components_path(font)
         atomic_elements_path = get_atomic_elements_path(font)
 
+        # cleanup glifs dirs/files
+        updated_after = None
         if full_export:
             # remove existing glifs dirs
             fsutil.remove_dirs(
-                character_glyphs_path, deep_components_path, atomic_elements_path
+                character_glyphs_path,
+                deep_components_path,
+                atomic_elements_path,
             )
+        else:
+            # set updated_after only if not running a full export
+            if font.export_started_at and font.export_completed_at:
+                updated_after = min(font.export_started_at, font.export_completed_at)
+            # delete possible zombie files of glifs that have been deleted
+            if updated_after:
+                deleted_glifs_qs = DeletedGlif.objects.select_related(
+                    "font",
+                ).filter(deleted_at__gt=updated_after)
+                for deleted_glif_obj in deleted_glifs_qs:
+                    # TODO: delete file if exists deleted_glif_obj.remove
+                    deleted_glif_filepath = deleted_glif_obj.filepath
+                    if fsutil.is_file(deleted_glif_filepath):
+                        fsutil.remove_file(deleted_glif_filepath)
 
         # create empty dirs to avoid errors in fonts that have not all entities
         fsutil.make_dirs(character_glyphs_path)
@@ -382,10 +400,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
         glifs_filters = {}
-        if not full_export:
-            if font.export_started_at and font.export_completed_at:
-                updated_after = min(font.export_started_at, font.export_completed_at)
-                glifs_filters["updated_at__gt"] = updated_after
+        if not full_export and updated_after:
+            glifs_filters["updated_at__gt"] = updated_after
 
         character_glyphs_qs = CharacterGlyph.objects.select_related(
             "font", "font__project"

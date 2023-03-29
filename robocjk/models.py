@@ -385,7 +385,6 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     "font",
                 ).filter(deleted_at__gt=updated_after)
                 for deleted_glif_obj in deleted_glifs_qs:
-                    # TODO: delete file if exists deleted_glif_obj.remove
                     deleted_glif_filepath = deleted_glif_obj.filepath
                     if fsutil.is_file(deleted_glif_filepath):
                         fsutil.remove_file(deleted_glif_filepath)

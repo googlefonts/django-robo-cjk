@@ -1356,11 +1356,24 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
             "updated_at__max"
         ]
+        layers_deleted_at_max = DeletedGlif.objects.filter(
+            glif_type=DeletedGlif.GLIF_TYPE_CHARACTER_GLYPH_LAYER,
+            glif_id=self.id,
+        ).aggregate(Max("deleted_at"))["deleted_at__max"]
+
+        # compute max layers_updated_at value
+        layers_updated_at = None
+        if layers_updated_at_max and layers_deleted_at_max:
+            layers_updated_at = max(layers_updated_at_max, layers_deleted_at_max)
+        else:
+            layers_updated_at = layers_updated_at_max or layers_deleted_at_max
+
         # update in-memory value
-        self.layers_updated_at = layers_updated_at_max
+        self.layers_updated_at = layers_updated_at
+
         # update database value
         cls = self.__class__
-        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at)
 
     def __str__(self):
         return force_str(f"{self.name}")
@@ -1490,11 +1503,24 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
             "updated_at__max"
         ]
+        layers_deleted_at_max = DeletedGlif.objects.filter(
+            glif_type=DeletedGlif.GLIF_TYPE_ATOMIC_ELEMENT_LAYER,
+            glif_id=self.id,
+        ).aggregate(Max("deleted_at"))["deleted_at__max"]
+
+        # compute max layers_updated_at value
+        layers_updated_at = None
+        if layers_updated_at_max and layers_deleted_at_max:
+            layers_updated_at = max(layers_updated_at_max, layers_deleted_at_max)
+        else:
+            layers_updated_at = layers_updated_at_max or layers_deleted_at_max
+
         # update in-memory value
-        self.layers_updated_at = layers_updated_at_max
+        self.layers_updated_at = layers_updated_at
+
         # update database value
         cls = self.__class__
-        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at)
 
     def __str__(self):
         return force_str(f"{self.name}")

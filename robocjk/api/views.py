@@ -636,7 +636,9 @@ def atomic_element_layer_update(
 def atomic_element_layer_delete(
     request, params, user, atomic_element_layer, *args, **kwargs
 ):
+    atomic_element = atomic_element_layer.glif
     atomic_element_layer_deleted_data = glif_delete(request, user, atomic_element_layer)
+    atomic_element.update_layers_updated_at()
     return ApiResponseSuccess(atomic_element_layer_deleted_data)
 
 
@@ -870,7 +872,9 @@ def character_glyph_layer_update(
 def character_glyph_layer_delete(
     request, params, user, character_glyph_layer, *args, **kwargs
 ):
+    character_glyph = character_glyph_layer.glif
     character_glyph_layer_deleted_data = glif_delete(
         request, user, character_glyph_layer
     )
+    character_glyph.update_layers_updated_at()
     return ApiResponseSuccess(character_glyph_layer_deleted_data)

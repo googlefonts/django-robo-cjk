@@ -81,18 +81,24 @@ ALLOWED_HOSTS = [
 SITE_ID = 1
 
 ADMINS = [
-    (
-        "Fabio Caccamo",
-        "fabio.caccamo@black-foundry.com",
-    )
+    ("Fabio Caccamo", "fabio.caccamo@gmail.com"),
 ]
 
 MANAGERS = [
-    (
-        "Fabio Caccamo",
-        "fabio.caccamo@black-foundry.com",
-    )
+    ("Fabio Caccamo", "fabio.caccamo@gmail.com"),
 ]
+
+
+# Email server
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_SUBJECT_PREFIX = "[development] " if DEBUG else "[production] "
+
+DEFAULT_FROM_EMAIL = f"Black Foundry / RoboCJK <{EMAIL_HOST_USER}>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 # Application definition
@@ -309,6 +315,11 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": ENV_DIR + "/cache/",
     },
+    "logging": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": ENV_DIR + "/cache/logging/",
+        "TIMEOUT": 3600,
+    },
     "extra_settings": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": ENV_DIR + "/cache/settings/",
@@ -334,7 +345,13 @@ CACHES = {
 
 
 def get_app_logger(level_debug, level, propagate=False):
-    handlers = ["debug_file", "info_file", "warning_file", "error_file", "mail_admins"]
+    handlers = [
+        "debug_file",
+        "info_file",
+        "warning_file",
+        "error_file",
+        "error_mail_admins",
+    ]
     # handlers = ['console', 'debug_file', 'info_file', 'warning_file', 'error_file', 'mail_admins']
     logger_options = {
         "handlers": handlers,
@@ -348,6 +365,12 @@ def get_app_logger(level_debug, level, propagate=False):
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "throttle": {
+            "()": "robocjk.logging.ThrottleFilter",
+            "timeout": 3600,
+        },
+    },
     "formatters": {
         "simple": {"format": "%(asctime)s %(name)s [%(levelname)s]: %(message)s"},
         "verbose": {
@@ -405,10 +428,10 @@ LOGGING = {
             "backupCount": 1,
             "formatter": "verbose",
         },
-        "mail_admins": {
+        "error_mail_admins": {
             "level": "ERROR",
-            "filters": [],
             "class": "django.utils.log.AdminEmailHandler",
+            "filters": ["throttle"],
             "include_html": True,
         },
         "null": {

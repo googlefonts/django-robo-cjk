@@ -366,11 +366,28 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         deep_components_path = get_deep_components_path(font)
         atomic_elements_path = get_atomic_elements_path(font)
 
+        # cleanup glifs dirs/files
+        updated_after = None
         if full_export:
             # remove existing glifs dirs
             fsutil.remove_dirs(
-                character_glyphs_path, deep_components_path, atomic_elements_path
+                character_glyphs_path,
+                deep_components_path,
+                atomic_elements_path,
             )
+        else:
+            # set updated_after only if not running a full export
+            if font.export_started_at and font.export_completed_at:
+                updated_after = min(font.export_started_at, font.export_completed_at)
+            # delete possible zombie files of glifs that have been deleted
+            if updated_after:
+                deleted_glifs_qs = DeletedGlif.objects.select_related(
+                    "font",
+                ).filter(deleted_at__gt=updated_after)
+                for deleted_glif_obj in deleted_glifs_qs:
+                    deleted_glif_filepath = deleted_glif_obj.filepath
+                    if fsutil.is_file(deleted_glif_filepath):
+                        fsutil.remove_file(deleted_glif_filepath)
 
         # create empty dirs to avoid errors in fonts that have not all entities
         fsutil.make_dirs(character_glyphs_path)
@@ -382,10 +399,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         per_page = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
 
         glifs_filters = {}
-        if not full_export:
-            if font.export_started_at and font.export_completed_at:
-                updated_after = min(font.export_started_at, font.export_completed_at)
-                glifs_filters["updated_at__gt"] = updated_after
+        if not full_export and updated_after:
+            glifs_filters["updated_at__gt"] = updated_after
 
         character_glyphs_qs = CharacterGlyph.objects.select_related(
             "font", "font__project"
@@ -1181,6 +1196,103 @@ class GlifDataModel(models.Model):
         # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
 
+class DeletedGlif(models.Model):
+    GLIF_TYPE_ATOMIC_ELEMENT = "atomic_element"
+    GLIF_TYPE_ATOMIC_ELEMENT_LAYER = "atomic_element_layer"
+    GLIF_TYPE_DEEP_COMPONENT = "deep_component"
+    GLIF_TYPE_CHARACTER_GLYPH = "character_glyph"
+    GLIF_TYPE_CHARACTER_GLYPH_LAYER = "character_glyph_layer"
+
+    GLIF_TYPE_CHOICES = (
+        (GLIF_TYPE_ATOMIC_ELEMENT, _("Atomic Element")),
+        (GLIF_TYPE_ATOMIC_ELEMENT_LAYER, _("Atomic Element Layer")),
+        (GLIF_TYPE_DEEP_COMPONENT, _("Deep Component")),
+        (GLIF_TYPE_CHARACTER_GLYPH, _("Character Glyph")),
+        (GLIF_TYPE_CHARACTER_GLYPH_LAYER, _("Character Glyph Layer")),
+    )
+
+    GLIF_TYPES = (
+        GLIF_TYPE_ATOMIC_ELEMENT,
+        GLIF_TYPE_ATOMIC_ELEMENT_LAYER,
+        GLIF_TYPE_DEEP_COMPONENT,
+        GLIF_TYPE_CHARACTER_GLYPH,
+        GLIF_TYPE_CHARACTER_GLYPH_LAYER,
+    )
+
+    @classmethod
+    def get_glif_type_by_glif(cls, glif):
+        if isinstance(glif, AtomicElement):
+            return cls.GLIF_TYPE_ATOMIC_ELEMENT
+        elif isinstance(glif, AtomicElementLayer):
+            return cls.GLIF_TYPE_ATOMIC_ELEMENT_LAYER
+        elif isinstance(glif, DeepComponent):
+            return cls.GLIF_TYPE_DEEP_COMPONENT
+        elif isinstance(glif, CharacterGlyph):
+            return cls.GLIF_TYPE_CHARACTER_GLYPH
+        elif isinstance(glif, CharacterGlyphLayer):
+            return cls.GLIF_TYPE_CHARACTER_GLYPH_LAYER
+        else:
+            raise ValueError(f"Invalid glif: {glif}")
+
+    class Meta:
+        app_label = "robocjk"
+        verbose_name = _("Deleted Glif")
+        verbose_name_plural = _("Deleted Glifs")
+
+    deleted_at = models.DateTimeField(
+        verbose_name=_("Deleted at"),
+    )
+    deleted_by = models.ForeignKey(
+        get_user_model(),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("Deleted by"),
+    )
+    font = models.ForeignKey(
+        "robocjk.Font",
+        on_delete=models.CASCADE,
+        related_name="deleted_glifs",
+        verbose_name=_("Font"),
+    )
+    glif_type = models.CharField(
+        db_index=True,
+        max_length=50,
+        choices=GLIF_TYPE_CHOICES,
+        verbose_name=_("Glif Type"),
+    )
+    glif_id = models.PositiveIntegerField(
+        db_index=True,
+        verbose_name=_("Glif ID"),
+    )
+    group_name = models.CharField(
+        db_index=True,
+        blank=True,
+        max_length=50,
+        verbose_name=_("Group Name"),
+    )
+    name = models.CharField(
+        db_index=True,
+        blank=True,
+        max_length=50,
+        verbose_name=_("Name"),
+    )
+    filename = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name=_("Filename"),
+    )
+    filepath = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Filepath"),
+    )
+
+    def __str__(self):
+        return force_str(f"[{self.glif_type}] {self.glif_id}")
+
+
 class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
     class Meta:
         app_label = "robocjk"
@@ -1244,11 +1356,24 @@ class CharacterGlyph(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
             "updated_at__max"
         ]
+        layers_deleted_at_max = DeletedGlif.objects.filter(
+            glif_type=DeletedGlif.GLIF_TYPE_CHARACTER_GLYPH_LAYER,
+            glif_id=self.id,
+        ).aggregate(Max("deleted_at"))["deleted_at__max"]
+
+        # compute max layers_updated_at value
+        layers_updated_at = None
+        if layers_updated_at_max and layers_deleted_at_max:
+            layers_updated_at = max(layers_updated_at_max, layers_deleted_at_max)
+        else:
+            layers_updated_at = layers_updated_at_max or layers_deleted_at_max
+
         # update in-memory value
-        self.layers_updated_at = layers_updated_at_max
+        self.layers_updated_at = layers_updated_at
+
         # update database value
         cls = self.__class__
-        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at)
 
     def __str__(self):
         return force_str(f"{self.name}")
@@ -1278,6 +1403,10 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
     )
 
     objects = CharacterGlyphLayerManager()
+
+    @property
+    def font(self):
+        return self.glif.font
 
     def path(self):
         return get_character_glyph_layer_path(self)
@@ -1374,11 +1503,24 @@ class AtomicElement(GlifDataModel, StatusModel, LockableModel, TimestampModel):
         layers_updated_at_max = self.layers.aggregate(Max("updated_at"))[
             "updated_at__max"
         ]
+        layers_deleted_at_max = DeletedGlif.objects.filter(
+            glif_type=DeletedGlif.GLIF_TYPE_ATOMIC_ELEMENT_LAYER,
+            glif_id=self.id,
+        ).aggregate(Max("deleted_at"))["deleted_at__max"]
+
+        # compute max layers_updated_at value
+        layers_updated_at = None
+        if layers_updated_at_max and layers_deleted_at_max:
+            layers_updated_at = max(layers_updated_at_max, layers_deleted_at_max)
+        else:
+            layers_updated_at = layers_updated_at_max or layers_deleted_at_max
+
         # update in-memory value
-        self.layers_updated_at = layers_updated_at_max
+        self.layers_updated_at = layers_updated_at
+
         # update database value
         cls = self.__class__
-        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at_max)
+        cls.objects.filter(pk=self.pk).update(layers_updated_at=layers_updated_at)
 
     def __str__(self):
         return force_str(f"{self.name}")
@@ -1408,6 +1550,10 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
     )
 
     objects = AtomicElementLayerManager()
+
+    @property
+    def font(self):
+        return self.glif.font
 
     def path(self):
         return get_atomic_element_layer_path(self)

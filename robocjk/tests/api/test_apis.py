@@ -230,6 +230,20 @@ class APIsTestCase(TestCase):
         self.assertTrue(isinstance(data["atomic_elements"], list))
         self.assertTrue(isinstance(data["deep_components"], list))
         self.assertTrue(isinstance(data["character_glyphs"], list))
+        self.assertFalse("deleted_glifs" in data)
+
+    def test_0045_glif_list_with_updated_since(self):
+        # print('test_0045_glif_list_with_updated_since')
+        payload = {
+            "font_uid": self.get_font_uid(),
+            "updated_since": "2023/03/25",
+        }
+        response, data = self.get_response("/api/glif/list/", payload=payload)
+        self.assert_response_ok(response)
+        self.assertTrue(isinstance(data["atomic_elements"], list))
+        self.assertTrue(isinstance(data["deep_components"], list))
+        self.assertTrue(isinstance(data["character_glyphs"], list))
+        self.assertTrue(isinstance(data["deleted_glifs"], list))
 
     def test_0046_glif_lock(self):
         # print('test_0046_glif_lock')

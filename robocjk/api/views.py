@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Q
 
 from robocjk.api.auth import get_auth_token
@@ -27,6 +30,7 @@ from robocjk.api.serializers import (
     ATOMIC_ELEMENT_ID_FIELDS,
     CHARACTER_GLYPH_ID_FIELDS,
     DEEP_COMPONENT_ID_FIELDS,
+    DELETED_GLIF_ID_FIELDS,
     FONT_FIELDS,
     PROJECT_FIELDS,
     USER_FIELDS,
@@ -34,8 +38,11 @@ from robocjk.api.serializers import (
 )
 from robocjk.models import (
     AtomicElement,
+    AtomicElementLayer,
     CharacterGlyph,
+    CharacterGlyphLayer,
     DeepComponent,
+    DeletedGlif,
     Font,
     GlyphsComposition,
     Project,
@@ -311,6 +318,14 @@ def glif_list(request, params, user, font, glif_filters, *args, **kwargs):
         "deep_components": deep_components_list,
         "character_glyphs": character_glyphs_list,
     }
+
+    if updated_since:
+        deleted_glifs_qs = font.deleted_glifs.filter(
+            deleted_at__gt=updated_since,
+        ).values(*DELETED_GLIF_ID_FIELDS)
+        deleted_glifs_list = list(deleted_glifs_qs)
+        data["deleted_glifs"] = deleted_glifs_list
+
     return ApiResponseSuccess(data)
 
 
@@ -444,6 +459,33 @@ def glif_unlock(request, params, user, font, *args, **kwargs):
     return ApiResponseSuccess(data)
 
 
+@transaction.atomic
+def glif_delete(request, user, glif):
+    glif_type = DeletedGlif.get_glif_type_by_glif(glif)
+    glif_id = glif.id
+    glif_group_name = (
+        glif.group_name
+        if isinstance(glif, (AtomicElementLayer, CharacterGlyphLayer))
+        else ""
+    )
+    glif_name = glif.name
+    glif_filename = glif.filename
+    glif_filepath = glif.path()
+    glif_deleted_data = glif.delete()
+    DeletedGlif.objects.create(
+        deleted_at=datetime.now(),
+        deleted_by=user,
+        font=glif.font,
+        glif_type=glif_type,
+        glif_id=glif_id,
+        group_name=glif_group_name,
+        name=glif_name,
+        filename=glif_filename,
+        filepath=glif_filepath,
+    )
+    return glif_deleted_data
+
+
 @api_view
 @require_user
 @require_font
@@ -498,7 +540,8 @@ def atomic_element_update(
 @require_user
 @require_atomic_element(check_locked=True)
 def atomic_element_delete(request, params, user, atomic_element, *args, **kwargs):
-    return ApiResponseSuccess(atomic_element.delete())
+    atomic_element_deleted_data = glif_delete(request, user, atomic_element)
+    return ApiResponseSuccess(atomic_element_deleted_data)
 
 
 @api_view
@@ -593,7 +636,10 @@ def atomic_element_layer_update(
 def atomic_element_layer_delete(
     request, params, user, atomic_element_layer, *args, **kwargs
 ):
-    return ApiResponseSuccess(atomic_element_layer.delete())
+    atomic_element = atomic_element_layer.glif
+    atomic_element_layer_deleted_data = glif_delete(request, user, atomic_element_layer)
+    atomic_element.update_layers_updated_at()
+    return ApiResponseSuccess(atomic_element_layer_deleted_data)
 
 
 @api_view
@@ -650,7 +696,8 @@ def deep_component_update(
 @require_user
 @require_deep_component(check_locked=True)
 def deep_component_delete(request, params, user, deep_component, *args, **kwargs):
-    return ApiResponseSuccess(deep_component.delete())
+    deep_component_deleted_data = glif_delete(request, user, deep_component)
+    return ApiResponseSuccess(deep_component_deleted_data)
 
 
 @api_view
@@ -729,7 +776,8 @@ def character_glyph_update(
 @require_user
 @require_character_glyph(check_locked=True)
 def character_glyph_delete(request, params, user, character_glyph, *args, **kwargs):
-    return ApiResponseSuccess(character_glyph.delete())
+    character_glyph_deleted_data = glif_delete(request, user, character_glyph)
+    return ApiResponseSuccess(character_glyph_deleted_data)
 
 
 @api_view
@@ -824,4 +872,9 @@ def character_glyph_layer_update(
 def character_glyph_layer_delete(
     request, params, user, character_glyph_layer, *args, **kwargs
 ):
-    return ApiResponseSuccess(character_glyph_layer.delete())
+    character_glyph = character_glyph_layer.glif
+    character_glyph_layer_deleted_data = glif_delete(
+        request, user, character_glyph_layer
+    )
+    character_glyph.update_layers_updated_at()
+    return ApiResponseSuccess(character_glyph_layer_deleted_data)

@@ -16,6 +16,7 @@ from robocjk.models import (  # Proof,
     CharacterGlyph,
     CharacterGlyphLayer,
     DeepComponent,
+    DeletedGlif,
     Font,
     FontImport,
     GlyphsComposition,
@@ -882,6 +883,80 @@ class AtomicElementAdmin(GlifAdmin):
 @admin.register(AtomicElementLayer)
 class AtomicElementLayerAdmin(GlifLayerAdmin):
     pass
+
+
+@admin.register(DeletedGlif)
+class DeletedGlifAdmin(admin.ModelAdmin):
+    search_fields = (
+        "group_name",
+        "name",
+        "filename",
+        "filepath",
+    )
+    list_select_related = (
+        "deleted_by",
+        "font",
+    )
+    list_display = (
+        "deleted_at",
+        "deleted_by",
+        "font",
+        "glif_type",
+        "glif_id",
+        "group_name",
+        "name",
+        "filename",
+        "filepath",
+    )
+    list_filter = (
+        "deleted_by",
+        "font",
+        "glif_type",
+    )
+    readonly_fields = (
+        "deleted_at",
+        "deleted_by",
+        "font",
+        "glif_type",
+        "glif_id",
+        "group_name",
+        "name",
+        "filename",
+        "filepath",
+    )
+    fieldsets = (
+        (
+            "Metadata",
+            {
+                "fields": (
+                    "deleted_at",
+                    "deleted_by",
+                ),
+            },
+        ),
+        (
+            "Glif info",
+            {
+                "fields": (
+                    "glif_type",
+                    "glif_id",
+                    "group_name",
+                    "name",
+                ),
+            },
+        ),
+        (
+            "Glif file",
+            {
+                "fields": (
+                    "filename",
+                    "filepath",
+                ),
+            },
+        ),
+    )
+    save_on_top = True
+    show_full_result_count = False
 
 
 # @admin.register(Proof)

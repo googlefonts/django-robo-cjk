@@ -116,6 +116,16 @@ CHARACTER_GLYPH_LAYER_ID_FIELDS = [
     "updated_at",
 ]
 
+DELETED_GLIF_ID_FIELDS = [
+    "id",
+    "glif_type",
+    "glif_id",
+    "group_name",
+    "name",
+    "filename",
+    "deleted_at",
+]
+
 
 def _get_serialization_options(options):
     options = options or {}

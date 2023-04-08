@@ -368,7 +368,7 @@ LOGGING = {
     "filters": {
         "throttle": {
             "()": "robocjk.logging.ThrottleFilter",
-            "timeout": 3600,
+            "timeout": 60 * 60 * 24,  # 1 day
         },
     },
     "formatters": {

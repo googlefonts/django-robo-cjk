@@ -8,7 +8,7 @@ django-cleanup==7.0.0
 django-compat==1.0.15
 django-cors-headers==3.14.0
 django-csp==3.7
-django-debug-toolbar==3.8.1
+django-debug-toolbar==4.0.0
 django-environ==0.10.0
 django-extra-settings==0.9.1
 django-json-widget==1.1.1

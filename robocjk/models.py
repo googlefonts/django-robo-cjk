@@ -507,6 +507,15 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         )
 
         glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
+        glifs_files_found_count = len(glifs_files_found)
+
+        if glifs_files_found_count != glifs_count:
+            logger.error(
+                f"Verifying font '{font_name}' - "
+                f"glifs files on file system count ({glifs_files_found_count}) "
+                f"doesn't match glifs objects in the database count ({glifs_count})"
+            )
+
         missing_glifs_files = glifs_files_expected - glifs_files_found
         zombie_glifs_files = glifs_files_found - glifs_files_expected
 

@@ -235,7 +235,7 @@ def save_glif_to_file_system(glif_data):
     # file_exists = fsutil.exists(filepath)
     # assert file_exists
     # return file_exists
-    return True
+    return filepath
 
 
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -464,6 +464,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info(f" - {atomic_elements_count} atomic elements")
         logger.info(f" - {atomic_elements_layers_count} atomic elements layers")
 
+        glifs_files_expected = set()
+
         with multiprocessing.Pool(processes=num_processes) as pool:
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
@@ -478,6 +480,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     glifs_files_written_on_disk = pool.map(
                         save_glif_to_file_system, glifs_data
                     )
+                    glifs_files_expected.update(glifs_files_written_on_disk)
                     if not all(glifs_files_written_on_disk):
                         logger.exception("Some files were not written to disk.")
 
@@ -494,6 +497,29 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info(
             f"Verifying font '{font_name}' - expected {glifs_count} glifs exists on file system."
         )
+
+        glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
+        missing_glifs_files = glifs_files_expected - glifs_files_found
+        zombie_glifs_files = glifs_files_found - glifs_files_expected
+
+        if missing_glifs_files:
+            missing_glifs_files_count = len(missing_glifs_files)
+            missing_glifs_files_str = "\n ".join(missing_glifs_files)
+            logger.error(
+                f"Verifying font '{font_name}' - "
+                f"missing {missing_glifs_files_count} expected glifs files on file system: "
+                f"\n {missing_glifs_files_str}"
+            )
+
+        if zombie_glifs_files:
+            zombie_glifs_files_count = len(zombie_glifs_files)
+            zombie_glifs_files_str = "\n ".join(zombie_glifs_files)
+            logger.info(
+                f"Verifying font '{font_name}' - "
+                f"removing {zombie_glifs_files_count} zombie glifs files on file system: "
+                f"\n {zombie_glifs_files_str}"
+            )
+            fsutil.remove_files(*zombie_glifs_files)
 
         glif_files_pattern = "*.glif"
 

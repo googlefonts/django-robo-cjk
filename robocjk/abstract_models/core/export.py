@@ -82,23 +82,19 @@ class ExportModel(models.Model):
             return False
 
         if not self.export_enabled:
-            logger.info(f'Skipped export for "{self}" because it is disabled.')
+            logger.info(f"Skipped export for '{self}' because it is disabled.")
             return False
 
         if self.export_running:
             if self.export_cancelable:
                 logger.warning(
-                    'Canceled unfinished export for "{}" to allow a new export to start.'.format(
-                        self
-                    )
+                    f"Canceled unfinished export for '{self}' to allow a new export to start."
                 )
                 self.export_running = False
                 self.save()
             else:
                 logger.info(
-                    'Skipped export for "{}" because there is an export process that is still running.'.format(
-                        self
-                    )
+                    f"Skipped export for '{self}' because there is an export process that is still running."
                 )
                 return False
 
@@ -115,10 +111,9 @@ class ExportModel(models.Model):
         try:
             self.save_to_file_system(full_export)
         except Exception as export_error:
+            error_type_name = type(export_error).__name__
             logger.exception(
-                'Canceled export for "{}" due to an unexpected "{}": {}'.format(
-                    self, type(export_error).__name__, export_error
-                )
+                f"Canceled export for '{self}' due to an unexpected '{error_type_name}': {export_error}"
             )
             close_old_connections()
             self.export_running = False
@@ -133,7 +128,7 @@ class ExportModel(models.Model):
             self.last_full_export_at = dt.datetime.now()
 
         self.save()
-        logger.info(f'Completed export for "{self}".')
+        logger.info(f"Completed export for '{self}'.")
         return True
 
     def save_to_file_system(self, full_export):

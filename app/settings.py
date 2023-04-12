@@ -346,6 +346,7 @@ CACHES = {
 
 def get_app_logger(level_debug, level, propagate=False):
     handlers = [
+        "console",
         "debug_file",
         "info_file",
         "warning_file",

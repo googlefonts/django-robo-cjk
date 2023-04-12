@@ -501,21 +501,58 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                         f"{glifs_progress} of {glifs_count} total glifs - {glifs_progress_perc}%"
                     )
 
-        logger.info(
-            f"Verifying font '{font_name}' - "
-            f"expected {glifs_count} glifs exists on file system."
+        logger.info(f"Verifying font '{font_name}'.")
+
+        glifs_files_expected = set()
+
+        character_glyphs_qs = (
+            CharacterGlyph.objects.select_related("font", "font__project")
+            .defer("data")
+            .filter(font=font)
+        )
+        character_glyphs_layers_qs = (
+            CharacterGlyphLayer.objects.select_related(
+                "glif", "glif__font", "glif__font__project"
+            )
+            .defer("data")
+            .filter(glif__font=font)
+        )
+        deep_components_qs = (
+            DeepComponent.objects.select_related("font", "font__project")
+            .defer("data")
+            .filter(font=font)
+        )
+        atomic_elements_qs = (
+            AtomicElement.objects.select_related("font", "font__project")
+            .defer("data")
+            .filter(font=font)
+        )
+        atomic_elements_layers_qs = (
+            AtomicElementLayer.objects.select_related(
+                "glif", "glif__font", "glif__font__project"
+            )
+            .defer("data")
+            .filter(glif__font=font)
         )
 
+        glifs_querysets = [
+            character_glyphs_qs,
+            character_glyphs_layers_qs,
+            deep_components_qs,
+            atomic_elements_qs,
+            atomic_elements_layers_qs,
+        ]
+
+        glifs_paginators = [
+            Paginator(glifs_queryset, per_page) for glifs_queryset in glifs_querysets
+        ]
+
+        for glifs_paginator in glifs_paginators:
+            for glifs_page in glifs_paginator:
+                glifs_list = glifs_page.object_list
+                glifs_files_expected.update([glif.path() for glif in glifs_list])
+
         glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
-        glifs_files_found_count = len(glifs_files_found)
-
-        if glifs_files_found_count != glifs_count:
-            logger.error(
-                f"Verifying font '{font_name}' - "
-                f"glifs files on file system count ({glifs_files_found_count}) "
-                f"doesn't match glifs objects in the database count ({glifs_count})"
-            )
-
         missing_glifs_files = glifs_files_expected - glifs_files_found
         zombie_glifs_files = glifs_files_found - glifs_files_expected
 

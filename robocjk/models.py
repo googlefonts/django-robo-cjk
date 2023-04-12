@@ -328,20 +328,20 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             )
             return
         logger.info(f"Saving font '{font_name}' to file system...")
-        path = font.path()
-        fsutil.make_dirs(path)
+        font_path = font.path()
+        fsutil.make_dirs(font_path)
         # write fontLib.json file
         logger.info(f"Saving font '{font_name}' 'fontLib.json' to file system...")
-        fontlib_path = fsutil.join_path(path, "fontLib.json")
+        fontlib_path = fsutil.join_path(font_path, "fontLib.json")
         fontlib_str = benedict(font.fontlib, keypath_separator=None).dump()
         fsutil.write_file(fontlib_path, fontlib_str)
         # write features.fea file
         logger.info(f"Saving font '{font_name}' 'features.fea' to file system...")
-        features_path = fsutil.join_path(path, "features.fea")
+        features_path = fsutil.join_path(font_path, "features.fea")
         fsutil.write_file(features_path, font.features)
         # write designspace.json file
         logger.info(f"Saving font '{font_name}' 'designspace.json' to file system...")
-        designspace_path = fsutil.join_path(path, "designspace.json")
+        designspace_path = fsutil.join_path(font_path, "designspace.json")
         designspace_str = benedict(font.designspace, keypath_separator=None).dump()
         fsutil.write_file(designspace_path, designspace_str)
         # write glyphsComposition.json file
@@ -351,7 +351,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         glyphs_composition_obj, _ = GlyphsComposition.objects.get_or_create(
             font_id=font.id
         )
-        glyphs_composition_path = fsutil.join_path(path, "glyphsComposition.json")
+        glyphs_composition_path = fsutil.join_path(font_path, "glyphsComposition.json")
         glyphs_composition_str = benedict(
             glyphs_composition_obj.serialize(), keypath_separator=None
         ).dump()
@@ -480,6 +480,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                     )
                     if not all(glifs_files_written_on_disk):
                         logger.exception("Some files were not written to disk.")
+
                     glifs_progress += len(glifs_list)
                     glifs_progress_perc = (
                         int(round((glifs_progress / glifs_count) * 100))

@@ -90,7 +90,8 @@ def run_commands(*args):
         else:
             if error.returncode == 128:
                 logger.error(
-                    "Command returned non-zero exit status 128, check if git repo and branch are correct."
+                    "Command returned non-zero exit status 128, "
+                    "check if git repo and branch are correct."
                 )
             cmd_output = error.output
             cmd_output_str = cmd_output.decode("UTF-8")
@@ -187,14 +188,16 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
         fonts_rcjk_dirs = {font.path() for font in fonts_list}
         fonts_rcjk_deleted_dirs = list(fonts_rcjk_pulled_dirs - fonts_rcjk_dirs)
         logger.info(
-            f'Deleting project "{self.name}" old fonts from file system...\n{fonts_rcjk_deleted_dirs}'
+            f"Deleting project '{self.name}' old fonts "
+            f"from file system... \n{fonts_rcjk_deleted_dirs}"
         )
         fsutil.remove_dirs(*fonts_rcjk_deleted_dirs)
         # save all project fonts to the file system
         export_strategy_name = "full" if full_export else "incremental"
         font_names = [font.name for font in fonts_list]
         logger.info(
-            f'Saving project "{self.name}" fonts ({export_strategy_name} export) to file system...\n{font_names}'
+            f"Saving project '{self.name}' fonts ({export_strategy_name} export) "
+            f"to file system... \n{font_names}"
         )
 
         for font in fonts_list:
@@ -324,7 +327,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         font_name = font.full_name
         if not font.available:
             logger.info(
-                f"Skipped font '{font_name}' saving because it is not available (maybe there is an import running)."
+                f"Skipped font '{font_name}' saving because "
+                f"it is not available (maybe there is an import running)."
             )
             return
         logger.info(f"Saving font '{font_name}' to file system...")
@@ -359,7 +363,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         # delete existing character-glyphs, deep-components and atomic-elements directories
         logger.info(
-            f"Deleting font '{font_name}' character-glyphs, deep-components and atomic-elements folders..."
+            f"Deleting font '{font_name}' character-glyphs, "
+            "deep-components and atomic-elements folders..."
         )
 
         character_glyphs_path = get_character_glyphs_path(font)
@@ -456,7 +461,8 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         num_processes = max(1, (multiprocessing.cpu_count() - 1))
 
         logger.info(
-            f"Saving font '{font_name}' - {glifs_count} glifs to file system using {num_processes} process(es)."
+            f"Saving font '{font_name}' - "
+            f"{glifs_count} glifs to file system using {num_processes} process(es)."
         )
         logger.info(f" - {character_glyphs_count} character glyphs")
         logger.info(f" - {character_glyphs_layers_count} character glyphs layers")
@@ -491,11 +497,13 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                         else 0
                     )
                     logger.info(
-                        f"Saving font '{font_name}' - {glifs_progress} of {glifs_count} total glifs - {glifs_progress_perc}%"
+                        f"Saving font '{font_name}' - "
+                        f"{glifs_progress} of {glifs_count} total glifs - {glifs_progress_perc}%"
                     )
 
         logger.info(
-            f"Verifying font '{font_name}' - expected {glifs_count} glifs exists on file system."
+            f"Verifying font '{font_name}' - "
+            f"expected {glifs_count} glifs exists on file system."
         )
 
         glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
@@ -537,7 +545,10 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             )
 
         def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
-            message = f"Verifying font '{font_name}' - expected {glifs_expected_count}, found {glifs_count} {glifs_type_name} .glif files on file-system."
+            message = (
+                f"Verifying font '{font_name}' - expected {glifs_expected_count}, "
+                f"found {glifs_count} {glifs_type_name} .glif files on file-system."
+            )
             if glifs_count < glifs_expected_count:
                 logger.error(message)
             elif glifs_count == glifs_expected_count:

@@ -613,7 +613,7 @@ def atomic_element_layer_rename(
                 font.uid, atomic_element.id, atomic_element.name, new_group_name
             )
         )
-    atomic_element_layer.group_name = new_group_name
+    atomic_element_layer.rename(new_group_name)
     atomic_element_layer.save_by(user)
     return ApiResponseSuccess(atomic_element.serialize(options=params))
 
@@ -849,7 +849,7 @@ def character_glyph_layer_rename(
                 font.uid, character_glyph.id, character_glyph.name, new_group_name
             )
         )
-    character_glyph_layer.group_name = new_group_name
+    character_glyph_layer.rename(new_group_name)
     character_glyph_layer.save_by(user)
     return ApiResponseSuccess(character_glyph.serialize(options=params))
 

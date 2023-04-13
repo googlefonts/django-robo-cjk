@@ -8,6 +8,7 @@ import fsutil
 from benedict import benedict
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -1281,6 +1282,19 @@ class GlifDataModel(models.Model):
         fsutil.write_file(filepath, self.data_formatted)
         # logger.debug('save_to_file_system glif filepath: {} - exists: {}'.format(filepath, fsutil.exists(filepath)))
 
+    def delete_from_file_system(self):
+        try:
+            filepath = self.path()
+        except ObjectDoesNotExist:
+            # this happens is rare circumstances when
+            # this method is called on an in-memory zombie glif.
+            # eg. glif deleted via api after it has been loaded
+            # from the database during the export process
+            pass
+        else:
+            if fsutil.is_file(filepath):
+                fsutil.remove_file(filepath)
+
 
 class DeletedGlif(models.Model):
     GLIF_TYPE_ATOMIC_ELEMENT = "atomic_element"
@@ -1497,6 +1511,12 @@ class CharacterGlyphLayer(GlifDataModel, TimestampModel):
     def path(self):
         return get_character_glyph_layer_path(self)
 
+    def rename(self, new_group_name):
+        if self.group_name == new_group_name:
+            return
+        self.delete_from_file_system()
+        self.group_name = new_group_name
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.glif.update_layers_updated_at()
@@ -1643,6 +1663,12 @@ class AtomicElementLayer(GlifDataModel, TimestampModel):
 
     def path(self):
         return get_atomic_element_layer_path(self)
+
+    def rename(self, new_group_name):
+        if self.group_name == new_group_name:
+            return
+        self.delete_from_file_system()
+        self.group_name = new_group_name
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

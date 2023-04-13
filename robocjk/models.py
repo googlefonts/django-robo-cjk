@@ -1159,6 +1159,11 @@ class GlifDataModel(models.Model):
 
         self._update_init_data()
 
+        if data.filename != self.filename and self.filename:
+            # the file name will change, so delete the existing glif file.
+            # the renamed file will be created during the next export process.
+            self.delete_from_file_system()
+
         self.data = data.xml_string
         self.name = data.name
         self.filename = data.filename
@@ -1179,14 +1184,7 @@ class GlifDataModel(models.Model):
             # invalid glif data
             return
 
-        if not isinstance(
-            self,
-            (
-                CharacterGlyph,
-                DeepComponent,
-                AtomicElement,
-            ),
-        ):
+        if not isinstance(self, (CharacterGlyph, DeepComponent, AtomicElement)):
             # glif layers have not status
             return
 

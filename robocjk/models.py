@@ -238,7 +238,7 @@ def save_glif_to_file_system(glif_data):
     # file_exists = fsutil.exists(filepath)
     # assert file_exists
     # return file_exists
-    return filepath
+    return True
 
 
 class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
@@ -470,23 +470,16 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         logger.info(f" - {atomic_elements_count} atomic elements")
         logger.info(f" - {atomic_elements_layers_count} atomic elements layers")
 
-        glifs_files_expected = set()
-
         with multiprocessing.Pool(processes=num_processes) as pool:
             for glifs_paginator in glifs_paginators:
                 for glifs_page in glifs_paginator:
                     glifs_list = glifs_page.object_list
                     glifs_data = (
-                        (
-                            glif.path(),
-                            glif.data_formatted,
-                        )
-                        for glif in glifs_list
+                        (glif.path(), glif.data_formatted) for glif in glifs_list
                     )
                     glifs_files_written_on_disk = pool.map(
                         save_glif_to_file_system, glifs_data
                     )
-                    glifs_files_expected.update(glifs_files_written_on_disk)
                     if not all(glifs_files_written_on_disk):
                         logger.exception("Some files were not written to disk.")
 
@@ -503,7 +496,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
 
         logger.info(f"Verifying font '{font_name}'.")
 
-        glifs_files_expected = set()
+        # verify existing files with database records
 
         character_glyphs_qs = (
             CharacterGlyph.objects.select_related("font", "font__project")
@@ -547,10 +540,19 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             Paginator(glifs_queryset, per_page) for glifs_queryset in glifs_querysets
         ]
 
+        glifs_files_expected = set()
+
         for glifs_paginator in glifs_paginators:
             for glifs_page in glifs_paginator:
                 glifs_list = glifs_page.object_list
-                glifs_files_expected.update([glif.path() for glif in glifs_list])
+                glifs_data = (glif.path() for glif in glifs_list)
+                glifs_files_expected.update(glifs_data)
+
+        logger.info(
+            f"Verifying font '{font_name}' - "
+            "comparing .glif objects in database with .glif files on file-system "
+            "for checking potential missing and/or zombie files."
+        )
 
         glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
         missing_glifs_files = glifs_files_expected - glifs_files_found

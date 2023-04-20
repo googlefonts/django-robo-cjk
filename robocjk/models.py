@@ -571,7 +571,7 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
         if zombie_glifs_files:
             zombie_glifs_files_count = len(zombie_glifs_files)
             zombie_glifs_files_str = "\n ".join(zombie_glifs_files)
-            logger.info(
+            logger.error(
                 f"Verifying font '{font_name}' - "
                 f"removing {zombie_glifs_files_count} zombie glifs files on file system: "
                 f"\n {zombie_glifs_files_str}"

@@ -35,6 +35,7 @@ from robocjk.api.serializers import (
 )
 from robocjk.core import GlifData
 from robocjk.debug import logger
+from robocjk.exceptions import VerificationError
 from robocjk.io.paths import (
     get_atomic_element_layer_path,
     get_atomic_element_path,
@@ -228,6 +229,14 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
             'git commit -m "{}"'.format("Updated project."),
             f"git push origin {repo_branch}",
         )
+
+    def cleanup_file_system(self):
+        for font_obj in self.fonts.all():
+            font_obj.cleanup_file_system()
+
+    def verify_file_system(self):
+        for font_obj in self.fonts.all():
+            font_obj.verify_file_system()
 
     def serialize(self, options=None):
         return serialize_project(self, options)
@@ -504,36 +513,73 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                         f"{glifs_progress} of {glifs_count} total glifs - {glifs_progress_perc}%"
                     )
 
-        logger.info(f"Verifying font '{font_name}'.")
+        try:
+            self.verify_file_system()
+        except VerificationError as verification_error:
+            # try to cleanup file-system, may be there is only some zombie file
+            cleaned = self.cleanup_file_system()
+            if cleaned:
+                # some zombie file has been deleted, retry to verify
+                try:
+                    self.verify_file_system()
+                except VerificationError as verification_error_despite_cleanup:
+                    # there are still some verification errors.
+                    # if this is already a full export let's raise the exception,
+                    # otherwise let's run a full export to fix the problem
+                    if full_export:
+                        raise verification_error_despite_cleanup
+                    self.save_to_file_system(full_export=True)
+            else:
+                # nothing has been cleaned up.
+                # if this is already a full export let's raise the exception,
+                # otherwise let's run a full export to fix the problem
+                if full_export:
+                    raise verification_error
+                self.save_to_file_system(full_export=True)
 
-        # verify existing files with database records
+    def cleanup_file_system(self):
+        font = self
+        font_name = font.full_name
+        font_path = font.path()
+
+        logger.info(
+            f"Cleanup font {font_name!r} - "
+            "comparing .glif objects in database with .glif files on file-system "
+            "for checking potential missing and/or zombie files."
+        )
+
+        glif_related = [
+            "font",
+            "font__project",
+        ]
+        glif_layer_related = [
+            "glif",
+            "glif__font",
+            "glif__font__project",
+        ]
 
         character_glyphs_qs = (
-            CharacterGlyph.objects.select_related("font", "font__project")
+            CharacterGlyph.objects.select_related(*glif_related)
             .defer("data")
             .filter(font=font)
         )
         character_glyphs_layers_qs = (
-            CharacterGlyphLayer.objects.select_related(
-                "glif", "glif__font", "glif__font__project"
-            )
+            CharacterGlyphLayer.objects.select_related(*glif_layer_related)
             .defer("data")
             .filter(glif__font=font)
         )
         deep_components_qs = (
-            DeepComponent.objects.select_related("font", "font__project")
+            DeepComponent.objects.select_related(*glif_related)
             .defer("data")
             .filter(font=font)
         )
         atomic_elements_qs = (
-            AtomicElement.objects.select_related("font", "font__project")
+            AtomicElement.objects.select_related(*glif_related)
             .defer("data")
             .filter(font=font)
         )
         atomic_elements_layers_qs = (
-            AtomicElementLayer.objects.select_related(
-                "glif", "glif__font", "glif__font__project"
-            )
+            AtomicElementLayer.objects.select_related(*glif_layer_related)
             .defer("data")
             .filter(glif__font=font)
         )
@@ -546,10 +592,13 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
             atomic_elements_layers_qs,
         ]
 
+        glifs_pagination_limit = settings.ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT
         glifs_paginators = [
-            Paginator(glifs_queryset, per_page) for glifs_queryset in glifs_querysets
+            Paginator(glifs_queryset, glifs_pagination_limit)
+            for glifs_queryset in glifs_querysets
         ]
 
+        glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
         glifs_files_expected = set()
 
         for glifs_paginator in glifs_paginators:
@@ -558,105 +607,166 @@ class Font(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel):
                 glifs_data = (glif.path() for glif in glifs_list)
                 glifs_files_expected.update(glifs_data)
 
-        logger.info(
-            f"Verifying font '{font_name}' - "
-            "comparing .glif objects in database with .glif files on file-system "
-            "for checking potential missing and/or zombie files."
-        )
-
-        glifs_files_found = set(fsutil.search_files(font_path, "**/*.glif"))
-        missing_glifs_files = glifs_files_expected - glifs_files_found
-        zombie_glifs_files = glifs_files_found - glifs_files_expected
-
-        if missing_glifs_files:
-            missing_glifs_files_count = len(missing_glifs_files)
-            missing_glifs_files_str = "\n ".join(missing_glifs_files)
-            logger.error(
-                f"Verifying font '{font_name}' - "
-                f"missing {missing_glifs_files_count} expected glifs files on file system: "
-                f"\n {missing_glifs_files_str}"
+        if not glifs_files_expected:
+            logger.warning(
+                f"Cleanup font {font_name!r} - " "expected glifs files set is empty."
             )
+            return False
 
+        zombie_glifs_files = glifs_files_found - glifs_files_expected
         if zombie_glifs_files:
             zombie_glifs_files_count = len(zombie_glifs_files)
-            zombie_glifs_files_str = "\n ".join(zombie_glifs_files)
-            logger.error(
-                f"Verifying font '{font_name}' - "
-                f"removing {zombie_glifs_files_count} zombie glifs files on file system: "
-                f"\n {zombie_glifs_files_str}"
-            )
             fsutil.remove_files(*zombie_glifs_files)
+            logger.error(
+                f"Cleanup font {font_name!r} - "
+                f"removed {zombie_glifs_files_count} zombie glifs files from file system."
+            )
+            return True
 
-        glif_files_pattern = "*.glif"
+        return False
+
+    def verify_file_system(self):
+        font = self
+        font_name = font.full_name
+
+        logger.info(f"Verifying font {font_name!r}.")
+
+        glif_related = [
+            "font",
+            "font__project",
+        ]
+        glif_layer_related = [
+            "glif",
+            "glif__font",
+            "glif__font__project",
+        ]
+
+        character_glyphs_qs = (
+            CharacterGlyph.objects.select_related(*glif_related)
+            .defer("data")
+            .filter(font=font)
+        )
+        character_glyphs_layers_qs = (
+            CharacterGlyphLayer.objects.select_related(*glif_layer_related)
+            .defer("data")
+            .filter(glif__font=font)
+        )
+        deep_components_qs = (
+            DeepComponent.objects.select_related(*glif_related)
+            .defer("data")
+            .filter(font=font)
+        )
+        atomic_elements_qs = (
+            AtomicElement.objects.select_related(*glif_related)
+            .defer("data")
+            .filter(font=font)
+        )
+        atomic_elements_layers_qs = (
+            AtomicElementLayer.objects.select_related(*glif_layer_related)
+            .defer("data")
+            .filter(glif__font=font)
+        )
+
+        character_glyphs_count = character_glyphs_qs.count()
+        character_glyphs_layers_count = character_glyphs_layers_qs.count()
+        deep_components_count = deep_components_qs.count()
+        atomic_elements_count = atomic_elements_qs.count()
+        atomic_elements_layers_count = atomic_elements_layers_qs.count()
 
         def count_glif_files(dirpath):
-            return len(fsutil.search_files(dirpath, glif_files_pattern))
+            return (
+                len(fsutil.search_files(dirpath, "*.glif"))
+                if fsutil.is_dir(dirpath)
+                else 0
+            )
 
         def count_glif_layers_files(dirpath):
-            layers_dirs = fsutil.list_dirs(dirpath)
-            layers_dirs_glif_files = [
-                fsutil.search_files(layer_dir, glif_files_pattern)
-                for layer_dir in layers_dirs
-            ]
-            return sum(
-                [len(layer_dir_files) for layer_dir_files in layers_dirs_glif_files]
-            )
+            layers_dirs = fsutil.list_dirs(dirpath) if fsutil.is_dir(dirpath) else []
+            return sum(count_glif_files(layer_dir) for layer_dir in layers_dirs)
 
-        def verify_glifs_count(glifs_count, glifs_expected_count, glifs_type_name):
+        character_glyphs_path = get_character_glyphs_path(font)
+        deep_components_path = get_deep_components_path(font)
+        atomic_elements_path = get_atomic_elements_path(font)
+
+        character_glyphs_files_count = count_glif_files(character_glyphs_path)
+        character_glyphs_layers_files_count = count_glif_layers_files(
+            character_glyphs_path
+        )
+        deep_components_files_count = count_glif_files(deep_components_path)
+        atomic_elements_files_count = count_glif_files(atomic_elements_path)
+        atomic_elements_layers_files_count = count_glif_layers_files(
+            atomic_elements_path
+        )
+
+        def verify_glifs_count(
+            glifs_type_name, glifs_files_count, glifs_expected_count
+        ):
+            success = False
             message = (
-                f"Verifying font '{font_name}' - expected {glifs_expected_count}, "
-                f"found {glifs_count} {glifs_type_name} .glif files on file-system."
+                f"Verifying font {font_name!r} - expected {glifs_expected_count}, "
+                f"found {glifs_files_count} {glifs_type_name} .glif files on file-system."
             )
-            if glifs_count < glifs_expected_count:
-                logger.error(message)
-            elif glifs_count == glifs_expected_count:
-                logger.info(message)
-            elif glifs_count > glifs_expected_count:
-                if abs(glifs_expected_count - glifs_count) < 50:
+            if glifs_files_count == glifs_expected_count:
+                success = True
+            else:
+                # some files have been created/deleted in the mean time or zombie files?!
+                glifs_files_delta_tolerance = 50
+                glifs_files_delta = abs(glifs_expected_count - glifs_files_count)
+                if (
+                    glifs_files_delta < glifs_files_delta_tolerance
+                    or not glifs_expected_count
+                ):
+                    success = True
                     message = (
-                        f"{message} (some files have been created in the meanwhile)"
+                        f"{message} "
+                        "Probably some files have been created/deleted in the meanwhile, "
+                        "don't treat it as an error."
                     )
-                    logger.info(message)
-                elif glifs_expected_count > 0:
-                    logger.error(message)
+            return {
+                "success": success,
+                "message": message,
+            }
 
-        character_glyphs_count = CharacterGlyph.objects.filter(font=font).count()
-        character_glyphs_layers_count = CharacterGlyphLayer.objects.filter(
-            glif__font=font
-        ).count()
-        deep_components_count = DeepComponent.objects.filter(font=font).count()
-        atomic_elements_count = AtomicElement.objects.filter(font=font).count()
-        atomic_elements_layers_count = AtomicElementLayer.objects.filter(
-            glif__font=font
-        ).count()
+        results = [
+            verify_glifs_count(
+                "character glyphs",
+                character_glyphs_files_count,
+                character_glyphs_count,
+            ),
+            verify_glifs_count(
+                "character glyphs layers",
+                character_glyphs_layers_files_count,
+                character_glyphs_layers_count,
+            ),
+            verify_glifs_count(
+                "deep components",
+                deep_components_files_count,
+                deep_components_count,
+            ),
+            verify_glifs_count(
+                "atomic elements",
+                atomic_elements_files_count,
+                atomic_elements_count,
+            ),
+            verify_glifs_count(
+                "atomic elements layers",
+                atomic_elements_layers_files_count,
+                atomic_elements_layers_count,
+            ),
+        ]
 
-        verify_glifs_count(
-            count_glif_files(character_glyphs_path),
-            character_glyphs_count,
-            "character glyphs",
-        )
-        verify_glifs_count(
-            count_glif_layers_files(character_glyphs_path),
-            character_glyphs_layers_count,
-            "character glyphs layers",
-        )
-        verify_glifs_count(
-            count_glif_files(deep_components_path),
-            deep_components_count,
-            "deep components",
-        )
-        verify_glifs_count(
-            count_glif_files(atomic_elements_path),
-            atomic_elements_count,
-            "atomic elements",
-        )
-        verify_glifs_count(
-            count_glif_layers_files(atomic_elements_path),
-            atomic_elements_layers_count,
-            "atomic elements layers",
-        )
+        info_messages = [result["message"] for result in results if result["success"]]
+        if info_messages:
+            info_message = "\n".join(info_messages)
+            logger.info(info_message)
 
-        logger.info(f"Saved font '{font_name}' to file system.")
+        error_messages = [
+            result["message"] for result in results if not result["success"]
+        ]
+        if error_messages:
+            error_message = "\n".join(error_messages)
+            logger.error(error_message)
+            raise VerificationError(error_message)
 
     def updated_by_users(self, since=None, minutes=None, hours=None, days=None):
         """

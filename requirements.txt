@@ -1,7 +1,7 @@
 attrs==22.2.0
 chardet==5.1.0
 Django==4.1.8
-django-admin-interface==0.24.2
+django-admin-interface==0.25.0
 django-admin-rangefilter==0.10.0
 django-ckeditor==6.5.1
 django-cleanup==7.0.0

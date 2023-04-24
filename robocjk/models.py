@@ -213,6 +213,15 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                     f'git commit -m "{font_commit_message}"',
                     f"git push origin {repo_branch}",
                 )
+            else:
+                # reset all changed files
+                run_commands(
+                    f"cd {path}",
+                    "git reset --hard",
+                    f"git checkout {repo_branch}",
+                    f"git pull origin {repo_branch}",
+                    "git clean -df",
+                )
         run_commands(
             f"cd {path}",
             "git add --all",

@@ -196,6 +196,9 @@ DATABASES = {
         "PASSWORD": env("DATABASE_PASSWORD"),
         "HOST": "",
         "PORT": "",
+        "OPTIONS": {
+            "charset": "utf8mb4",
+        },
         #         'CONN_MAX_AGE': 0,
         #         'OPTIONS': {
         #             'connect_timeout': 60,

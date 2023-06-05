@@ -22,7 +22,7 @@ pip==23.1.2
 pre-commit==3.3.2
 PyJWT==2.6.0
 PyMySQL==1.0.3
-pyOpenSSL==23.1.1
+pyOpenSSL==23.2.0
 pyparsing==3.0.9
 python-benedict==0.30.0
 python-fsutil==0.10.0

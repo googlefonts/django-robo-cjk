@@ -368,6 +368,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Lock lists of Atomic Elements / Deep Components / Character Glyphs
@@ -384,6 +386,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("glif_lock", params)
 
@@ -396,6 +400,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Unlock lists of Atomic Elements / Deep Components / Character Glyphs
@@ -412,6 +418,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("glif_unlock", params)
 
@@ -455,7 +463,9 @@ class Client:
         atomic_element_id,
         return_data=True,
         return_layers=True,
-        return_related=True,
+        return_related=False,
+        return_made_of=True,
+        return_used_by=True,
     ):
         """
         Get the data of an Atomic Element.
@@ -467,6 +477,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_get", params)
 
@@ -477,6 +489,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Create a new Atomic Element with the specified glif data.
@@ -487,6 +501,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_create", params)
 
@@ -499,6 +515,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the glif data of an Atomic Element.
@@ -512,6 +530,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_update", params)
 
@@ -524,6 +544,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the status of an Atomic Element.
@@ -539,6 +561,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_update_status", params)
 
@@ -561,6 +585,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Lock an Atomic Element by the current user.
@@ -572,6 +598,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_lock", params)
 
@@ -582,6 +610,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Unlock an Atomic Element by the current user.
@@ -593,6 +623,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_unlock", params)
 
@@ -606,6 +638,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Create a new Atomic Element Layer with the provided layer glif data.
@@ -620,6 +654,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_layer_create", params)
 
@@ -633,6 +669,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Rename an Atomic Element Layer with a new name.
@@ -648,6 +686,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_layer_rename", params)
 
@@ -661,6 +701,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update an Atomic Element Layer glif data.
@@ -676,6 +718,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("atomic_element_layer_update", params)
 
@@ -735,7 +779,9 @@ class Client:
         deep_component_id,
         return_data=True,
         return_layers=True,
-        return_related=True,
+        return_related=False,
+        return_made_of=True,
+        return_used_by=True,
     ):
         """
         Get the data of a Deep Component.
@@ -747,6 +793,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_get", params)
 
@@ -757,6 +805,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Create a new Deep Component with the specified glif data.
@@ -767,6 +817,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_create", params)
 
@@ -779,6 +831,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the data of a Deep Component.
@@ -792,6 +846,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_update", params)
 
@@ -804,6 +860,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the status of a Deep Component.
@@ -819,6 +877,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_update_status", params)
 
@@ -841,6 +901,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Lock a Deep Component by the current user.
@@ -852,6 +914,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_lock", params)
 
@@ -862,6 +926,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Unlock a Deep Component by the current user.
@@ -873,6 +939,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("deep_component_unlock", params)
 
@@ -916,7 +984,9 @@ class Client:
         character_glyph_id,
         return_data=True,
         return_layers=True,
-        return_related=True,
+        return_related=False,
+        return_made_of=True,
+        return_used_by=True,
     ):
         """
         Get the data of a Character Glyph.
@@ -928,6 +998,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_get", params)
 
@@ -938,6 +1010,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Create a new Character Glyph with the specified glif data.
@@ -948,6 +1022,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_create", params)
 
@@ -960,6 +1036,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the data of a Character Glyph.
@@ -973,6 +1051,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_update", params)
 
@@ -985,6 +1065,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update the status of a Character Glyph.
@@ -1000,6 +1082,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_update_status", params)
 
@@ -1022,6 +1106,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Lock a Character Glyph by the current user.
@@ -1033,6 +1119,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_lock", params)
 
@@ -1043,6 +1131,8 @@ class Client:
         return_data=True,
         return_layers=False,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Unlock a Character Glyph by the current user.
@@ -1054,6 +1144,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_unlock", params)
 
@@ -1067,6 +1159,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Create a new Character Glyph Layer with the provided layer glif data.
@@ -1081,6 +1175,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_layer_create", params)
 
@@ -1094,6 +1190,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Rename a Character Glyph Layer with a new name.
@@ -1109,6 +1207,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_layer_rename", params)
 
@@ -1122,6 +1222,8 @@ class Client:
         return_data=True,
         return_layers=True,
         return_related=False,
+        return_made_of=False,
+        return_used_by=False,
     ):
         """
         Update a Character Glyph Layer glif data.
@@ -1137,6 +1239,8 @@ class Client:
             "return_data": return_data,
             "return_layers": return_layers,
             "return_related": return_related,
+            "return_made_of": return_made_of,
+            "return_used_by": return_used_by,
         }
         return self._api_call("character_glyph_layer_update", params)
 

@@ -21,7 +21,7 @@ html5lib==1.1
 pip==23.1.2
 pre-commit==3.3.2
 PyJWT==2.7.0
-PyMySQL==1.0.3
+PyMySQL==1.1.0
 pyOpenSSL==23.2.0
 pyparsing==3.0.9
 python-benedict[all]==0.31.0

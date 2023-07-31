@@ -23,7 +23,7 @@ pre-commit==3.3.2
 PyJWT==2.7.0
 PyMySQL==1.0.3
 pyOpenSSL==23.2.0
-pyparsing==3.0.9
+pyparsing==3.1.1
 python-benedict[all]==0.31.0
 python-fsutil==0.10.0
 requests==2.31.0

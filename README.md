@@ -40,42 +40,68 @@ mkdir conf && touch conf/env_settings
 Add the following environment settings to `conf/env_settings` file and configure them:
 
 ```bash
+# django admin properties used for sending error emails
 ADMIN_NAME=""
 ADMIN_EMAIL=""
+
+# django allowed hosts (separated by comma)
+ALLOWED_HOSTS=""
+
+# django database
 DATABASE_ENGINE=""
 DATABASE_NAME=""
 DATABASE_USER=""
 DATABASE_PASSWORD=""
+
+# django debug
 DEBUG=True
 DEBUG_TOOLBAR_SHOW=True
+
+# django email
 EMAIL_HOST="smtp.gmail.com"
 EMAIL_HOST_USER=""
 EMAIL_HOST_PASSWORD=""
+
+# git settings
 GIT_REPOSITORIES_PATH="/your-path/.rcjks"
 GIT_USER_EMAIL=""
 GIT_USER_NAME=""
+
+# hashids settings - https://pypi.org/project/hashids/
 HASHIDS_SALT=""
+
+# jwt settings - https://pypi.org/project/jwt/
 JWT_SECRET=""
+
+# django media and static files
 MEDIA_ROOT="/your-path/robocjk/public/media/"
+STATIC_ROOT="/your-path/robocjk/public/static/"
+
+# export options
 ROBOCJK_EXPORT_CANCEL_TIMEOUT=120
 ROBOCJK_EXPORT_QUERIES_PAGINATION_LIMIT=500
+
+# django secret key
 SECRET_KEY=""
+
+# sentry
 SENTRY_DSN=""
 SENTRY_ENVIRONMENT=""
-STATIC_ROOT="/your-path/robocjk/public/static/"
+
+# api testing
 TEST_API_HOST=""
 TEST_API_USERNAME=""
 TEST_API_PASSWORD=""
 ```
 
 ### Check
-- Run `python manage.py check` 
+- Run `python manage.py check`
 - Run `python manage.py runserver`
 
 
 ## API
 
-- [Globals](https://github.com/googlefonts/django-robo-cjk/edit/master/API.md#globals) 
+- [Globals](https://github.com/googlefonts/django-robo-cjk/edit/master/API.md#globals)
 - [Endpoints](https://github.com/googlefonts/django-robo-cjk/edit/master/API.md#endpoints)
 - [Client](https://github.com/googlefonts/django-robo-cjk/edit/master/API.md#client)
 

@@ -1677,3 +1677,25 @@ See [Character Glyph Get](#character-glyph-get) response.
     "status": 200
 }
 ```
+
+---
+
+### Client
+
+There is client that is possible to use to interact with APIs easily.
+
+**Using the client all the API endpoints are available as methods and the authentication token will be managed/renewed automatically.**
+
+Usage:
+```python
+from robocjk.api.client import Client
+
+c = Client(
+    host='https://...',
+    username='<username>',
+    password='<password>')
+
+response = c.user_me()
+print(response)
+```
+

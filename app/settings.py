@@ -71,21 +71,16 @@ TEST_API_PASSWORD = env("TEST_API_PASSWORD")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = [
-    "164.90.229.235",
-    ".robocjk-development.black-foundry.com",
-    "161.35.31.249",
-    ".robocjk.black-foundry.com",
-]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 SITE_ID = 1
 
 ADMINS = [
-    ("Fabio Caccamo", "fabio.caccamo@gmail.com"),
+    (env("ADMIN_NAME"), env("ADMIN_EMAIL")),
 ]
 
 MANAGERS = [
-    ("Fabio Caccamo", "fabio.caccamo@gmail.com"),
+    (env("ADMIN_NAME"), env("ADMIN_EMAIL")),
 ]
 
 
@@ -190,7 +185,7 @@ APPEND_SLASH = True
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": env("DATABASE_ENGINE"),
         "NAME": env("DATABASE_NAME"),
         "USER": env("DATABASE_USER"),
         "PASSWORD": env("DATABASE_PASSWORD"),

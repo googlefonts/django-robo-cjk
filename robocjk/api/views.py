@@ -575,22 +575,25 @@ def atomic_element_layer_create(
     request, params, user, font, atomic_element, data, glif, *args, **kwargs
 ):
     group_name = params.get("group_name")
-    options = {
-        "glif_id": atomic_element.id,
-        "group_name": group_name,
-        "defaults": {
-            "data": data,
-            "updated_by": user,
-        },
-    }
-    layer, layer_created = atomic_element.layers.get_or_create(**options)
-    if not layer_created:
+
+    layer_exists = atomic_element.layers.filter(
+        group_name__exact=group_name,
+    ).exists()
+
+    if layer_exists:
         return ApiResponseBadRequest(
             "Atomic Element Layer with font_uid='{}', glif_id='{}', "
             "glif__name='{}' group_name='{}' already exists.".format(
                 font.uid, atomic_element.id, atomic_element.name, group_name
             )
         )
+
+    AtomicElementLayer.objects.create(
+        glif_id=atomic_element.id,
+        group_name=group_name,
+        data=data,
+        updated_by=user,
+    )
     return ApiResponseSuccess(atomic_element.serialize(options=params))
 
 
@@ -603,7 +606,7 @@ def atomic_element_layer_rename(
 ):
     new_group_name = params.get("new_group_name")
     if (
-        atomic_element.layers.filter(group_name__iexact=new_group_name)
+        atomic_element.layers.filter(group_name__exact=new_group_name)
         .exclude(id=atomic_element_layer.id)
         .exists()
     ):
@@ -665,7 +668,7 @@ def deep_component_get(request, params, user, deep_component, *args, **kwargs):
 @require_font
 @require_data
 def deep_component_create(request, params, user, font, data, glif, *args, **kwargs):
-    if font.deep_components.filter(name=glif.name).exists():
+    if font.deep_components.filter(name__exact=glif.name).exists():
         return ApiResponseBadRequest(
             "Deep Component with font_uid='{}' and name='{}' already exists.".format(
                 font.uid, glif.name
@@ -745,7 +748,7 @@ def character_glyph_get(request, params, user, character_glyph, *args, **kwargs)
 @require_font
 @require_data
 def character_glyph_create(request, params, user, font, data, glif, *args, **kwargs):
-    if font.character_glyphs.filter(name=glif.name).exists():
+    if font.character_glyphs.filter(name__exact=glif.name).exists():
         return ApiResponseBadRequest(
             "Character Glyph with font_uid='{}' and name='{}' already exists.".format(
                 font.uid, glif.name
@@ -811,22 +814,25 @@ def character_glyph_layer_create(
     request, params, user, font, character_glyph, data, glif, *args, **kwargs
 ):
     group_name = params.get("group_name")
-    options = {
-        "glif_id": character_glyph.id,
-        "group_name": group_name,
-        "defaults": {
-            "data": data,
-            "updated_by": user,
-        },
-    }
-    layer, layer_created = character_glyph.layers.get_or_create(**options)
-    if not layer_created:
+
+    layer_exists = character_glyph.layers.filter(
+        group_name__exact=group_name,
+    ).exists()
+
+    if layer_exists:
         return ApiResponseBadRequest(
             "Character Glyph Layer with font_uid='{}', glif_id='{}', glif__name='{}', "
             "group_name='{}' already exists.".format(
                 font.uid, character_glyph.id, character_glyph.name, group_name
             )
         )
+
+    CharacterGlyphLayer.objects.create(
+        glif_id=character_glyph.id,
+        group_name=group_name,
+        data=data,
+        updated_by=user,
+    )
     return ApiResponseSuccess(character_glyph.serialize(options=params))
 
 
@@ -839,7 +845,7 @@ def character_glyph_layer_rename(
 ):
     new_group_name = params.get("new_group_name")
     if (
-        character_glyph.layers.filter(group_name__iexact=new_group_name)
+        character_glyph.layers.filter(group_name__exact=new_group_name)
         .exclude(id=character_glyph_layer.id)
         .exists()
     ):

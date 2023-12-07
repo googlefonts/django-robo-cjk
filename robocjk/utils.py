@@ -27,7 +27,10 @@ def unicodes_str_to_list(unicodes_str, to_int=False):
 
 
 def unicode_to_char(s):
-    return chr(int("0x{}".format(s.lstrip("0")).lower(), 16))
+    s = s.lstrip("0").lower()
+    if not s:
+        return ""
+    return chr(int(f"0x{s}", 16))
 
 
 illegal_characters = '" * + / : < > ? [ \\ ] | \0'.split(" ")

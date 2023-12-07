@@ -139,6 +139,20 @@ class ClientTestCase(TestCase):
         self.assertEqual(data.get("features"), "features-test-ok")
         self.assertEqual(data.get("designspace").get("designspace-test"), "ok")
 
+    def test_font_update_with_empty_values(self):
+        response = self._client.font_update(
+            font_uid=self._font_uid,
+            fontlib={},
+            features="",
+            designspace={},
+        )
+        # print(response)
+        self.assert_response_ok(response)
+        data = response["data"]
+        self.assertEqual(data.get("fontlib"), {})
+        self.assertEqual(data.get("features"), "")
+        self.assertEqual(data.get("designspace"), {})
+
     def test_glyphs_composition_get(self):
         response = self._client.glyphs_composition_get(font_uid=self._font_uid)
         # print(response)

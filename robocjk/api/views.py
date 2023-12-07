@@ -223,22 +223,30 @@ def font_create(request, params, user, *args, **kwargs):
 @require_font
 def font_update(request, params, user, font, *args, **kwargs):
     font_changed = False
-    # look for fontlib data
-    fontlib = params.get_dict("fontlib")
-    if fontlib:
-        font.fontlib = fontlib
-        font_changed = True
-    features = params.get_str("features")
-    if features:
+
+    fontlib_str = params.get("fontlib")
+    if fontlib_str:
+        fontlib = params.get_dict("fontlib")
+        if isinstance(fontlib, dict):
+            font.fontlib = fontlib
+            font_changed = True
+
+    features = params.get("features")
+    if isinstance(features, str):
         font.features = features
         font_changed = True
-    designspace = params.get_dict("designspace")
-    if designspace:
-        font.designspace = designspace
-        font_changed = True
+
+    designspace_str = params.get("designspace")
+    if designspace_str:
+        designspace = params.get_dict("designspace")
+        if isinstance(designspace, dict):
+            font.designspace = designspace
+            font_changed = True
+
     # font is changed, save it
     if font_changed:
         font.save_by(user)
+
     return ApiResponseSuccess(font.serialize())
 
 

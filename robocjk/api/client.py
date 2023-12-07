@@ -122,7 +122,7 @@ class Client:
         keys = list(data.keys())
         for key in keys:
             val = data.get(key, None)
-            if val is None or val == "" or val == [] or val == {}:
+            if val is None:
                 del data[key]
         # build request headers
         headers = {}

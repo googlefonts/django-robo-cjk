@@ -213,7 +213,9 @@ class Command(BaseCommand):
         # parse status during import
         status = StatusModel.get_status_from_data(data)
         obj, created = cls.objects.update_or_create(
-            font=font, name=data.name, defaults={"status": status, "data": content}
+            font=font,
+            name__exact=data.name,
+            defaults={"status": status, "data": content},
         )
         # self.stdout.write('Imported {}: {}'.format(cls, data.name))
 
@@ -228,7 +230,7 @@ class Command(BaseCommand):
             self.stderr.write(f"Import Error {cls} [{layer_name}]: {data.name}")
             return
         obj, created = cls.objects.update_or_create(
-            glif=glif_obj, group_name=layer_name, defaults={"data": content}
+            glif=glif_obj, group_name__exact=layer_name, defaults={"data": content}
         )
         # self.stdout.write('Imported {} [{}]: {}'.format(cls, layer_name, data.name))
 

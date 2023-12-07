@@ -303,7 +303,7 @@ def require_atomic_element(**kwargs):
             filters = benedict(
                 {
                     "id": params.get_int(f"{prefix}id", None),
-                    "name": params.get_str(f"{prefix}name", None),
+                    "name__exact": params.get_str(f"{prefix}name", None),
                 }
             )
             filters.clean()
@@ -365,7 +365,7 @@ def require_atomic_element_layer(**kwargs):
             filters = benedict(
                 {
                     "id": params.get_int(f"{prefix}id", None),
-                    "group_name": params.get_str(f"{prefix}group_name", None),
+                    "group_name__exact": params.get_str(f"{prefix}group_name", None),
                 }
             )
             filters.clean()
@@ -419,7 +419,7 @@ def require_deep_component(**kwargs):
             filters = benedict(
                 {
                     "id": params.get_int(f"{prefix}id", None),
-                    "name": params.get_str(f"{prefix}name", None),
+                    "name__exact": params.get_str(f"{prefix}name", None),
                 }
             )
             filters.clean()
@@ -486,7 +486,7 @@ def require_character_glyph(**kwargs):
             filters = benedict(
                 {
                     "id": params.get_int(f"{prefix}id", None),
-                    "name": params.get_str(f"{prefix}name", None),
+                    "name__exact": params.get_str(f"{prefix}name", None),
                     "unicode_hex": params.get_str(f"{prefix}unicode_hex", None),
                 }
             )
@@ -551,7 +551,7 @@ def require_character_glyph_layer(**kwargs):
             filters = benedict(
                 {
                     "id": params.get_int(f"{prefix}id", None),
-                    "group_name": params.get_str(f"{prefix}group_name", None),
+                    "group_name__exact": params.get_str(f"{prefix}group_name", None),
                 }
             )
             filters.clean()

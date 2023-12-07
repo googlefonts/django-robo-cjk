@@ -8,7 +8,7 @@ FONT_PATTERN = r"((?P<font_name>[\w\-_\.]+)\.rcjk\/)"
 FONTLIB_PATTERN = rf"^{FONT_PATTERN}?fontLib\.json$"
 FEATURES_PATTERN = rf"^{FONT_PATTERN}?features\.fea$"
 DESIGNSPACE_PATTERN = rf"^{FONT_PATTERN}?designspace\.json$"
-NAME_PATTERN = r"[\w\-\_\.\+\=\(\)\[\]]+"
+NAME_PATTERN = r"[\w\-\_\.\,\+\=\#\~\(\)\[\]\{\}]+"
 ATOMIC_ELEMENT_PATTERN = r"^{}?atomicElement\/(?P<glif_name>{})\.glif$".format(
     FONT_PATTERN, NAME_PATTERN
 )

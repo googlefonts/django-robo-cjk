@@ -509,7 +509,7 @@ def atomic_element_get(request, params, user, atomic_element, *args, **kwargs):
 @require_font
 @require_data
 def atomic_element_create(request, params, user, font, data, glif, *args, **kwargs):
-    if font.atomic_elements.filter(name=glif.name).exists():
+    if font.atomic_elements.filter(name__exact=glif.name).exists():
         return ApiResponseBadRequest(
             "Atomic Element with font_uid='{}' and name='{}' already exists.".format(
                 font.uid, glif.name
@@ -576,11 +576,7 @@ def atomic_element_layer_create(
 ):
     group_name = params.get("group_name")
 
-    layer_exists = atomic_element.layers.filter(
-        group_name__exact=group_name,
-    ).exists()
-
-    if layer_exists:
+    if atomic_element.layers.filter(group_name__exact=group_name).exists():
         return ApiResponseBadRequest(
             "Atomic Element Layer with font_uid='{}', glif_id='{}', "
             "glif__name='{}' group_name='{}' already exists.".format(
@@ -815,11 +811,7 @@ def character_glyph_layer_create(
 ):
     group_name = params.get("group_name")
 
-    layer_exists = character_glyph.layers.filter(
-        group_name__exact=group_name,
-    ).exists()
-
-    if layer_exists:
+    if character_glyph.layers.filter(group_name__exact=group_name).exists():
         return ApiResponseBadRequest(
             "Character Glyph Layer with font_uid='{}', glif_id='{}', glif__name='{}', "
             "group_name='{}' already exists.".format(

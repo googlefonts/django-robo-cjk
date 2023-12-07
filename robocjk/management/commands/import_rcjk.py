@@ -212,11 +212,13 @@ class Command(BaseCommand):
         data.parse_string(content)
         # parse status during import
         status = StatusModel.get_status_from_data(data)
-        obj, created = cls.objects.update_or_create(
-            font=font,
-            name__exact=data.name,
-            defaults={"status": status, "data": content},
-        )
+        try:
+            obj = cls.objects.get(font=font, name__exact=data.name)
+        except cls.DoesNotExist:
+            obj = cls.objects.create(font=font, name=data.name)
+        obj.status = status
+        obj.data = content
+        obj.save()
         # self.stdout.write('Imported {}: {}'.format(cls, data.name))
 
     def _import_glif_layer(self, glif_cls, cls, font, content, match):
@@ -225,13 +227,16 @@ class Command(BaseCommand):
         layer_name = match.groupdict()["layer_name"]
         layer_name = unquote_filename(layer_name)
         try:
-            glif_obj = glif_cls.objects.get(font=font, name=data.name)
+            glif_obj = glif_cls.objects.get(font=font, name__exact=data.name)
         except glif_cls.DoesNotExist:
             self.stderr.write(f"Import Error {cls} [{layer_name}]: {data.name}")
             return
-        obj, created = cls.objects.update_or_create(
-            glif=glif_obj, group_name__exact=layer_name, defaults={"data": content}
-        )
+        try:
+            obj = cls.objects.get(glif=glif_obj, group_name__exact=layer_name)
+        except cls.DoesNotExist:
+            obj = cls.objects.create(glif=glif_obj, group_name=layer_name)
+        obj.data = content
+        obj.save()
         # self.stdout.write('Imported {} [{}]: {}'.format(cls, layer_name, data.name))
 
     def _import_atomic_element(self, font, content, match):

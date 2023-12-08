@@ -744,6 +744,61 @@ class APIsTestCase(TestCase):
         )
         self.assert_response_ok(response)
 
+    def test_0271_character_glyph_create_case_sensitive(self):
+        # print('test_0271_character_glyph_create_case_sensitive')
+
+        endpoint = "/api/character-glyph/create/"
+
+        # create E
+        payload = {
+            "font_uid": self.get_font_uid(),
+            "data": self.get_glif_data("character_glyph_create/E_.glif"),
+        }
+        response, data = self.get_response(endpoint, payload=payload)
+        self.assert_response_ok(response)
+
+        # create E -> already exists, expect failure
+        response, data = self.get_response(endpoint, payload=payload)
+        self.assert_response_bad_request(response)
+
+        # create e
+        payload = {
+            "font_uid": self.get_font_uid(),
+            "data": self.get_glif_data("character_glyph_create/e.glif"),
+        }
+        response, data = self.get_response(endpoint, payload=payload)
+        self.assert_response_ok(response)
+
+        # create e -> already exists, expect failure
+        response, data = self.get_response(endpoint, payload=payload)
+        self.assert_response_bad_request(response)
+
+        # delete E
+        payload = {
+            "font_uid": self.get_font_uid(),
+            "name": "E",
+        }
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
+        response, data = self.get_response(
+            "/api/character-glyph/delete/", payload=payload
+        )
+        self.assert_response_ok(response)
+
+        # delete e
+        payload = {
+            "font_uid": self.get_font_uid(),
+            "name": "e",
+        }
+        response, data = self.get_response(
+            "/api/character-glyph/lock/", payload=payload
+        )
+        response, data = self.get_response(
+            "/api/character-glyph/delete/", payload=payload
+        )
+        self.assert_response_ok(response)
+
     def test_0275_character_glyph_lock(self):
         # print('test_0275_character_glyph_lock')
         payload = {

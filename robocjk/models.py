@@ -924,7 +924,7 @@ class GlyphsComposition(TimestampModel):
         return self.data or {}
 
     def __str__(self):
-        return force_str("{self.font.name} / {Glyphs Composition}")
+        return force_str(f"{self.font.name} / Glyphs Composition")
 
 
 class LockableModel(models.Model):

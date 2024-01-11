@@ -35,6 +35,8 @@ from robocjk.api.serializers import (
     PROJECT_FIELDS,
     USER_FIELDS,
     serialize_user,
+    serialize_user_group,
+    serialize_user_permission,
 )
 from robocjk.models import (
     AtomicElement,
@@ -101,7 +103,21 @@ def user_list(request, params, user, *args, **kwargs):
 @api_view
 @require_user
 def user_me(request, params, user, *args, **kwargs):
+    user = UserClass.objects.prefetch_related(
+        "user_permissions",
+        "groups__permissions",
+    ).get(pk=user.pk)
+    user_permissions = user.user_permissions.all()
+    user_groups = user.groups.all()
+    group_permissions = [
+        permission for group in user_groups for permission in group.permissions.all()
+    ]
+    all_permissions = list(set(user_permissions) | set(group_permissions))
     data = serialize_user(user)
+    data["groups"] = [serialize_user_group(group) for group in user_groups]
+    data["permissions"] = [
+        serialize_user_permission(permission) for permission in all_permissions
+    ]
     return ApiResponseSuccess(data)
 
 

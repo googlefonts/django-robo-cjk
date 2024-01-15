@@ -48,7 +48,18 @@ class CustomizedUserAdmin(UserAdmin):
         user = request.user
         return (
             user.is_superuser
-            or user.groups.filter(name__iexact="administrators").exists()
+            or user.groups.filter(
+                name__in=[
+                    "Administrators",
+                    "Administrator",
+                    "Admins",
+                    "Admin",
+                    "administrators",
+                    "administrator",
+                    "admins",
+                    "admin",
+                ]
+            ).exists()
         )
 
     def get_queryset(self, request):

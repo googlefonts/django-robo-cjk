@@ -8,6 +8,17 @@ USER_FIELDS = [
     "email",
 ]
 
+USER_GROUP_FIELDS = [
+    "id",
+    "name",
+]
+
+USER_PERMISSION_FIELDS = [
+    "id",
+    "name",
+    "codename",
+]
+
 PROJECT_FIELDS = [
     "uid",
     "name",
@@ -173,6 +184,18 @@ def _serialize_glif_layer(obj, fields, options):
 def serialize_user(obj, options=None):
     options = _get_serialization_options(options)
     data = _serialize_object(obj, USER_FIELDS, options)
+    return data
+
+
+def serialize_user_group(obj, options=None):
+    options = _get_serialization_options(options)
+    data = _serialize_object(obj, USER_GROUP_FIELDS, options)
+    return data
+
+
+def serialize_user_permission(obj, options=None):
+    options = _get_serialization_options(options)
+    data = _serialize_object(obj, USER_PERMISSION_FIELDS, options)
     return data
 
 

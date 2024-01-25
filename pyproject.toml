@@ -15,3 +15,14 @@ exclude = '''
   | venv
 )/
 '''
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+ignore = ["C901", "E501", "E731", "W503", "W504"]
+line-length = 88
+select = ["B", "B9", "C", "E", "F", "W"]
+
+[tool.ruff.mccabe]
+max-complexity = 10

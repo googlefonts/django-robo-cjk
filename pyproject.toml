@@ -20,7 +20,7 @@ exclude = '''
 profile = "black"
 
 [tool.ruff]
-ignore = ["C901", "E501", "E731", "W504"]
+ignore = ["C901", "E501", "E731"]
 line-length = 88
 select = ["B", "B9", "C", "E", "F", "W"]
 

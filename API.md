@@ -1698,4 +1698,3 @@ c = Client(
 response = c.user_me()
 print(response)
 ```
-

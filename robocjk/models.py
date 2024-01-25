@@ -995,13 +995,13 @@ class LockableModel(models.Model):
 
     def unlock_by(self, user, save=False, force=False):
         if not self._is_valid_user(user):
-            if user is None and force:
+            if force:
                 # allow cronjob to unlock "stale-locked" glyphs
                 pass
             else:
                 return False
         if self.is_locked:
-            if self.locked_by_id == user.id or force:
+            if force or self.locked_by_id == user.id:
                 # do unlock
                 self.is_locked = False
                 self.locked_by = None

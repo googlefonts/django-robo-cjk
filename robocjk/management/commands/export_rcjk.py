@@ -43,10 +43,10 @@ class Command(BaseCommand):
             # export specific project
             try:
                 project_obj = Project.objects.get(uid=project_uid)
-            except Project.DoesNotExist:
+            except Project.DoesNotExist as project_error:
                 message = f"Invalid project_uid, project with uid '{project_uid}' doesn't exist."
                 self.stderr.write(message)
-                raise CommandError(message)
+                raise CommandError(message) from project_error
             else:
                 project_obj.export(full=projects_full_export)
         else:

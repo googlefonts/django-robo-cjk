@@ -35,10 +35,10 @@ class Command(BaseCommand):
             try:
                 project_obj = Project.objects.get(uid=project_uid)
                 project_obj.verify_file_system()
-            except Project.DoesNotExist:
+            except Project.DoesNotExist as project_error:
                 message = f"Invalid project_uid, project with uid {project_uid!r} doesn't exist."
                 self.stderr.write(message)
-                raise CommandError(message)
+                raise CommandError(message) from project_error
         elif all_projects:
             # export all projects
             projects_qs = Project.objects.prefetch_related("fonts")

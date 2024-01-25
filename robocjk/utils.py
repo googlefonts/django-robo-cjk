@@ -41,7 +41,7 @@ reserved_filenames += "LPT1 LPT2 LPT3 COM2 COM3 COM4".lower().split(" ")
 filename_max_length = 255
 
 
-def username_to_filename(username, existing=[], prefix="", suffix=""):
+def username_to_filename(username, existing=None, prefix="", suffix=""):
     """
     existing should be a case-insensitive list
     of all existing file names.
@@ -91,6 +91,7 @@ def username_to_filename(username, existing=[], prefix="", suffix=""):
     >>> username_to_filename(u"alt.con")
     u'alt._con'
     """
+    existing = existing or []
     # the incoming name must be a unicode string
     # assert isinstance(username, unicode,
     #     "The value for username must be a unicode string.")
@@ -130,7 +131,7 @@ def username_to_filename(username, existing=[], prefix="", suffix=""):
     return fullname
 
 
-def _handle_clash1(username, existing=[], prefix="", suffix=""):
+def _handle_clash1(username, existing=None, prefix="", suffix=""):
     """
     existing should be a case-insensitive list
     of all existing file names.
@@ -156,6 +157,7 @@ def _handle_clash1(username, existing=[], prefix="", suffix=""):
     ...     prefix=prefix, suffix=suffix)
     '00000.AAAAA000000000000001.0000000000'
     """
+    existing = existing or []
     # if the prefix length + user name length + suffix length + 15 is at
     # or past the maximum length, silce 15 characters off of the user name
     prefix_length = len(prefix)
@@ -184,7 +186,7 @@ def _handle_clash1(username, existing=[], prefix="", suffix=""):
     return final_name
 
 
-def _handle_clash2(existing=[], prefix="", suffix=""):
+def _handle_clash2(existing=None, prefix="", suffix=""):
     """
     existing should be a case-insensitive list
     of all existing file names.
@@ -207,6 +209,7 @@ def _handle_clash2(existing=[], prefix="", suffix=""):
     >>> _handle_clash2(existing=e, prefix=prefix, suffix=suffix)
     '00000.2.0000000000'
     """
+    existing = existing or []
     # calculate the longest possible string
     max_length = filename_max_length - len(prefix) - len(suffix)
     max_value = int("9" * max_length)

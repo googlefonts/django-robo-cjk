@@ -587,9 +587,7 @@ class GlifAdmin(admin.ModelAdmin):
             border-radius: 3px;
             line-height: 1.0;
             white-space: nowrap;
-            """.format(
-            obj.status_color
-        )
+            """.format(obj.status_color)
         html = f'<span style="{css}">{obj.get_status_display()}</span>'
         return mark_safe(html)
 

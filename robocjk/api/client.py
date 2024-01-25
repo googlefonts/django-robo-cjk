@@ -43,7 +43,7 @@ class Client:
         no need to do anything.
         """
         if not host or not any(
-            [host.startswith(protocol) for protocol in ["http://", "https://"]]
+            host.startswith(protocol) for protocol in ["http://", "https://"]
         ):
             raise ValueError(f"Invalid host: {host}")
         if not username:
@@ -78,7 +78,7 @@ class Client:
                 "Unable to call RoboCJK APIs at host: {} - Exception: {}".format(
                     self._host, e
                 )
-            )
+            ) from e
 
         # obtain the auth token to prevent 401 error on first call
         self.auth_token()

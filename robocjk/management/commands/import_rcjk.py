@@ -122,10 +122,10 @@ class Command(BaseCommand):
         font_uid = options.get("font_uid")
         try:
             font_obj = Font.objects.select_related("project").get(uid=font_uid)
-        except Font.DoesNotExist:
+        except Font.DoesNotExist as font_error:
             message = f"Invalid font_uid, font with uid '{font_uid}' doesn't exist."
             self.stderr.write(message)
-            raise CommandError(message)
+            raise CommandError(message) from font_error
 
         self.stdout.write(f"Importing '{font_obj.name}' ...")
 

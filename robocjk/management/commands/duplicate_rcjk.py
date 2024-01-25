@@ -40,31 +40,38 @@ class Command(BaseCommand):
         source_project_uid = options.get("source_project_uid")
         try:
             source_project_obj = Project.objects.get(uid=source_project_uid)
-        except Project.DoesNotExist:
+        except Project.DoesNotExist as project_error:
             message = f"Invalid source_project_uid, project with uid '{source_project_uid}' doesn't exist."
             self.stderr.write(message)
-            raise CommandError(message)
+            raise CommandError(message) from project_error
 
         target_project_uid = options.get("target_project_uid")
         try:
             target_project_obj = Project.objects.get(uid=target_project_uid)
-        except Project.DoesNotExist:
+        except Project.DoesNotExist as project_error:
             message = f"Invalid target_project_uid, project with uid '{target_project_uid}' doesn't exist."
             self.stderr.write(message)
+            raise CommandError(message) from project_error
+
+        target_project_clear = options.get("target_project_clear")
+        if target_project_clear:
+            message = (
+                "Unsupported option target_project_clear (not implemented yet, TODO)"
+            )
             raise CommandError(message)
 
         if source_project_obj.export_running:
-            message = "Unable to duplicate project, there is an export running for '{source_project_obj.name}'."
+            message = f"Unable to duplicate project, there is an export running for '{source_project_obj.name}'."
             self.stderr.write(message)
             raise CommandError(message)
 
         if target_project_obj.export_running:
-            message = "Unable to duplicate project, there is an export running for '{target_project_obj.name}'."
+            message = f"Unable to duplicate project, there is an export running for '{target_project_obj.name}'."
             self.stderr.write(message)
             raise CommandError(message)
 
         self.stdout.write(
-            f"Duplicating '{source_project_obj.name}' -> '{target_project_obj.name}'"
+            f"Duplicating project '{source_project_obj.name}' -> '{target_project_obj.name}'"
         )
 
         # duplicate fonts
@@ -128,13 +135,13 @@ class Command(BaseCommand):
                     )
 
             self.stdout.write("Updating atomic elements many to many relations ...")
-            for ae_obj in font_obj.atomic_elements.all():
+            for ae_obj in font_clone_obj.atomic_elements.all():
                 ae_obj.update_components()
 
             self.stdout.write("Updating deep components many to many relations ...")
-            for dc_obj in font_obj.deep_components.all():
+            for dc_obj in font_clone_obj.deep_components.all():
                 dc_obj.update_components()
 
             self.stdout.write("Updating character glyphs many to many relations ...")
-            for cg_obj in font_obj.character_glyphs.all():
+            for cg_obj in font_clone_obj.character_glyphs.all():
                 cg_obj.update_components()

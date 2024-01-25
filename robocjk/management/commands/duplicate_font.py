@@ -77,7 +77,10 @@ class Command(BaseCommand):
         # duplicate font
         font_obj = source_font_obj
         font_clone_obj = target_font_obj
-        self.stdout.write(f"Duplicating font '{font_obj.name}' ...")
+        font_clone_obj.fontlib = font_obj.fontlib
+        font_clone_obj.features = font_obj.features
+        font_clone_obj.designspace = font_obj.designspace
+        font_clone_obj.save()
 
         self.stdout.write("Duplicating atomic elements and atomic elements layers ...")
         for ae_obj in font_obj.atomic_elements.all():

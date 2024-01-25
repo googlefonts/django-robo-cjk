@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db import models
@@ -576,6 +576,22 @@ class GlyphsCompositionAdmin(admin.ModelAdmin):
 
 
 class GlifAdmin(admin.ModelAdmin):
+    @admin.action(description=_("Unlock selected glyphs"))
+    def unlock_glyphs(self, request, queryset):
+        glyphs_unlocked_count = 0
+        for glyph_obj in queryset:
+            glyph_unlocked = glyph_obj.unlock_by(
+                user=request.user,
+                save=True,
+                force=True,
+            )
+            if glyph_unlocked:
+                glyphs_unlocked_count += 1
+        messages.success(
+            request,
+            _(f"{glyphs_unlocked_count} glyphs have been unlocked."),
+        )
+
     @admin.display(description=_("Status"))
     def status_display(self, obj):
         css = """
@@ -591,7 +607,10 @@ class GlifAdmin(admin.ModelAdmin):
         html = f'<span style="{css}">{obj.get_status_display()}</span>'
         return mark_safe(html)
 
-    actions = [export_as_csv("Export as CSV", fields=["name"])]
+    actions = [
+        unlock_glyphs,
+        export_as_csv("Export as CSV", fields=["name"]),
+    ]
 
     list_select_related = (
         "locked_by",

@@ -40,18 +40,18 @@ class Command(BaseCommand):
         source_project_uid = options.get("source_project_uid")
         try:
             source_project_obj = Project.objects.get(uid=source_project_uid)
-        except Project.DoesNotExist:
+        except Project.DoesNotExist as project_error:
             message = f"Invalid source_project_uid, project with uid '{source_project_uid}' doesn't exist."
             self.stderr.write(message)
-            raise CommandError(message)
+            raise CommandError(message) from project_error
 
         target_project_uid = options.get("target_project_uid")
         try:
             target_project_obj = Project.objects.get(uid=target_project_uid)
-        except Project.DoesNotExist:
+        except Project.DoesNotExist as project_error:
             message = f"Invalid target_project_uid, project with uid '{target_project_uid}' doesn't exist."
             self.stderr.write(message)
-            raise CommandError(message)
+            raise CommandError(message) from project_error
 
         if source_project_obj.export_running:
             message = "Unable to duplicate project, there is an export running for '{source_project_obj.name}'."

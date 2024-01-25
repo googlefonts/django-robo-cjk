@@ -4,14 +4,7 @@ import fsutil
 import requests
 import urllib3
 from django.conf import settings
-from django.test import (
-    Client,
-    RequestFactory,
-    SimpleTestCase,
-    TestCase,
-    override_settings,
-)
-from django.urls import reverse
+from django.test import TestCase
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

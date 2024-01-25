@@ -65,7 +65,7 @@ def export_as_csv(  # noqa: C901
         csv = unicodecsv.writer(response, encoding="utf-8")
 
         if header:
-            row = [n for n in field_names_display]
+            row = field_names_display
             csv.writerow(row)
 
         for obj in queryset:

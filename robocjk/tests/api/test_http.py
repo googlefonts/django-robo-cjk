@@ -5,7 +5,6 @@ from django.test import TestCase
 
 from robocjk.api.http import (
     ApiResponseBadRequest,
-    ApiResponseError,
     ApiResponseForbidden,
     ApiResponseInternalServerError,
     ApiResponseMethodNotAllowed,

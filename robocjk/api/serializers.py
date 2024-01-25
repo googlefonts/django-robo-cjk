@@ -260,12 +260,11 @@ def serialize_deep_component(obj, options=None):
     if return_layers:
         data["layers"] = []
     if return_made_of:
-        data["made_of"] = list(
-            [
-                serialize_atomic_element(glif_obj, options)
-                for glif_obj in obj.atomic_elements.all()
-            ]
-        )
+        data["made_of"] = [
+            serialize_atomic_element(glif_obj, options)
+            for glif_obj in obj.atomic_elements.all()
+        ]
+
     if return_used_by:
         data["used_by"] = list(obj.character_glyphs.values(*CHARACTER_GLYPH_ID_FIELDS))
     return data
@@ -297,18 +296,16 @@ def serialize_character_glyph(obj, options=None):
         if obj.id not in made_of_character_glyphs_refs:
             made_of_character_glyphs_refs.add(obj.id)
             options["made_of_character_glyphs_refs"] = made_of_character_glyphs_refs
-            made_of_character_glyphs = list(
-                [
-                    serialize_character_glyph(glif_obj, options)
-                    for glif_obj in obj.character_glyphs.all()
-                ]
-            )
-        made_of_deep_components = list(
-            [
-                serialize_deep_component(glif_obj, options)
-                for glif_obj in obj.deep_components.all()
+            made_of_character_glyphs = [
+                serialize_character_glyph(glif_obj, options)
+                for glif_obj in obj.character_glyphs.all()
             ]
-        )
+
+        made_of_deep_components = [
+            serialize_deep_component(glif_obj, options)
+            for glif_obj in obj.deep_components.all()
+        ]
+
         data["made_of"] = made_of_character_glyphs + made_of_deep_components
     if return_used_by:
         used_by_character_glyphs = list(

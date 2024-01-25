@@ -75,7 +75,7 @@ class ClientTestCase(TestCase):
 
     def test_client_with_invalid_host(self):
         with self.assertRaises(ValueError):
-            client = Client(
+            _client = Client(
                 host="http://invalid-robocjk.black-foundry.com/",
                 username="admin",
                 password="admin",
@@ -83,7 +83,7 @@ class ClientTestCase(TestCase):
 
     def test_client_with_valid_host_without_api_installed(self):
         with self.assertRaises(ValueError):
-            client = Client(
+            _client = Client(
                 host="https://www.google.com/", username="admin", password="admin"
             )
 

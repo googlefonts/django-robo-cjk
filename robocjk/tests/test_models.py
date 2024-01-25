@@ -9,7 +9,6 @@ from robocjk.models import (
     DeepComponent,
     Font,
     Project,
-    Proof,
     StatusModel,
 )
 

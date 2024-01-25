@@ -21,9 +21,9 @@ class Command(BaseCommand):
         font_uid = options.get("font_uid")
         try:
             font_obj = Font.objects.select_related("project").get(uid=font_uid)
-        except Font.DoesNotExist:
+        except Font.DoesNotExist as font_error:
             raise CommandError(
                 f'Invalid font_uid, font with uid "{font_uid}" doesn\'t exist.'
-            )
+            ) from font_error
         commit_message = font_obj.get_commit_message()
         self.stdout.write(commit_message)

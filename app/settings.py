@@ -462,20 +462,55 @@ CORS_ORIGIN_WHITELIST = ("http://localhost:8000",)
 
 
 # django-csp - https://django-csp.readthedocs.io/
-CSP_DEFAULT_SRC = (
+# CSP_DEFAULT_SRC = (
+#     "'self'",
+#     "'unsafe-inline'",
+#     "'unsafe-eval'",
+#     "data:",
+#     "blob:",
+#     # 'cdn.jsdelivr.net', 'use.fontawesome.com',
+#     "*.black-foundry.com",
+#     # '*.kxcdn.com',
+#     # '*.google.com', '*.googleapis.com', '*.gstatic.com',
+#     # '*.google-analytics.com', '*.doubleclick.net', '*.googletagmanager.com', '*.hotjar.com',
+#     # '*.youtube.com', '*.vimeo.com',
+# )
+
+CSP_WHITE_LISTED_DOMAINS = ("*.black-foundry.com",)
+CSP_BASE_URI = ("'self'",)
+CSP_BLOCK_ALL_MIXED_CONTENT = True
+CSP_CHILD_SRC = ("'self'",) + CSP_WHITE_LISTED_DOMAINS
+CSP_CONNECT_SRC = ("'self'",) + CSP_WHITE_LISTED_DOMAINS
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_FONT_SRC = (
+    "'self'",
+    "data:",
+) + CSP_WHITE_LISTED_DOMAINS
+CSP_FORM_ACTION = ("'self'",) + CSP_WHITE_LISTED_DOMAINS
+CSP_FRAME_ANCESTORS = ("'self'",)
+CSP_FRAME_SRC = ("'self'",) + CSP_WHITE_LISTED_DOMAINS
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+) + CSP_WHITE_LISTED_DOMAINS
+CSP_MANIFEST_SRC = ("'self'",)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
+# CSP_PREFETCH_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
     "data:",
-    "blob:",
-    # 'cdn.jsdelivr.net', 'use.fontawesome.com',
-    "*.black-foundry.com",
-    # '*.kxcdn.com',
-    # '*.google.com', '*.googleapis.com', '*.gstatic.com',
-    # '*.google-analytics.com', '*.doubleclick.net', '*.googletagmanager.com', '*.hotjar.com',
-    # '*.youtube.com', '*.vimeo.com',
-)
-
+) + CSP_WHITE_LISTED_DOMAINS
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+) + CSP_WHITE_LISTED_DOMAINS
+# CSP_WORKER_SRC = (
+#     "'self'",
+#     "blob:",
+# )
 
 # django-debug-toolbar - https://pypi.python.org/pypi/django-debug-toolbar/
 DEBUG_TOOLBAR_SHOW = env("DEBUG_TOOLBAR_SHOW")

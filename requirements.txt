@@ -10,7 +10,7 @@ django-cors-headers==3.14.0
 django-csp==3.7
 django-debug-toolbar==4.0.0
 django-environ==0.10.0
-django-extra-settings==0.9.1
+django-extra-settings==0.11.0
 django-json-widget==1.1.1
 fonttools==4.47.2
 fs==2.4.16

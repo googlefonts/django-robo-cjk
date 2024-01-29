@@ -193,11 +193,10 @@ DATABASES = {
         "PORT": "",
         "OPTIONS": {
             "charset": "utf8mb4",
+            "connect_timeout": 30,
         },
-        #         'CONN_MAX_AGE': 0,
-        #         'OPTIONS': {
-        #             'connect_timeout': 60,
-        #         }
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     },
 }
 

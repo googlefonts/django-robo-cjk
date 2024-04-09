@@ -223,12 +223,15 @@ class Project(UIDModel, HashidModel, NameSlugModel, TimestampModel, ExportModel)
                     f"git pull origin {repo_branch}",
                     "git clean -df",
                 )
-        run_commands(
-            f"cd {path}",
-            "git add --all",
-            'git commit -m "{}"'.format("Updated project."),
-            f"git push origin {repo_branch}",
-        )
+
+        # # This is not needed for exporting .rcjk data and could commit
+        # # unwanted changes when font export failed (font_export_success=False).
+        # run_commands(
+        #     f"cd {path}",
+        #     "git add --all",
+        #     'git commit -m "{}"'.format("Updated project."),
+        #     f"git push origin {repo_branch}",
+        # )
 
     def cleanup_file_system(self):
         for font_obj in self.fonts.all():

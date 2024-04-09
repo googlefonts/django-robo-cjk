@@ -831,6 +831,11 @@ class GlifLayerAdmin(admin.ModelAdmin):
     save_on_top = True
     show_full_result_count = False
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.defer("data")
+        return qs
+
 
 class GlifLayerInline(admin.TabularInline):
     fields = (

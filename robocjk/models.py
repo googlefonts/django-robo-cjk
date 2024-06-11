@@ -1095,7 +1095,7 @@ class StatusModel(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
+        # choices=STATUS_CHOICES,
         default=STATUS_WIP,
         db_index=True,
         verbose_name=_("Status"),
@@ -1130,7 +1130,7 @@ class StatusModel(models.Model):
 
     @property
     def status_color(self):
-        return StatusModel.STATUS_COLORS.get(self.status, "#CCCCCC")
+        return StatusModel.STATUS_COLORS.get(self.status, "#000000")
 
     @staticmethod
     def get_status_from_data(data):
@@ -1138,7 +1138,9 @@ class StatusModel(models.Model):
         # new status format 2021/09: public.markColor -> robocjk.status
         status_index = data.status
         if status_index is not None:
-            status = StatusModel.STATUS_CHOICES[status_index][0]
+            # # this is obsolete and raise an IndexError with Fontra
+            # status = StatusModel.STATUS_CHOICES[status_index][0]
+            status = f"{status_index}"
         # old status format fallback
         if status is None:
             status_color = data.status_color

@@ -24,7 +24,6 @@ from robocjk.models import (
     DeepComponent,
     Font,
     Project,
-    StatusModel,
 )
 
 
@@ -261,27 +260,6 @@ def require_data(view_func):
 #         return view_func(request, *args, **kwargs)
 #     wrapper.__dict__['require_data'] = True
 #     return wrapper
-
-
-def require_status(view_func):
-    @wraps(view_func)
-    @require_params(status="str")
-    def wrapper(request, *args, **kwargs):
-        params = kwargs["params"]
-        status_choices = StatusModel.STATUS_CHOICES_VALUES_LIST
-        status = params.get_str("status", choices=status_choices, default="")
-        if not status:
-            return ApiResponseBadRequest(
-                'Invalid parameter "status", status value must be "{}".'.format(
-                    '" or "'.join(status_choices)
-                )
-            )
-        # success
-        kwargs["status"] = status
-        return view_func(request, *args, **kwargs)
-
-    wrapper.__dict__["require_status"] = True
-    return wrapper
 
 
 def require_atomic_element(**kwargs):

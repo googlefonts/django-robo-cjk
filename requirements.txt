@@ -1,4 +1,4 @@
-attrs==23.1.0
+attrs==24.3.0
 chardet==5.2.0
 Django==5.0.1
 django-admin-interface==0.28.4

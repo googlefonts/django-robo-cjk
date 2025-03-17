@@ -348,7 +348,7 @@ def get_app_logger(level_debug, level, propagate=False):
         "info_file",
         "warning_file",
         "error_file",
-        "error_mail_admins",
+        # "error_mail_admins",
     ]
     # handlers = ['console', 'debug_file', 'info_file', 'warning_file', 'error_file', 'mail_admins']
     logger_options = {
